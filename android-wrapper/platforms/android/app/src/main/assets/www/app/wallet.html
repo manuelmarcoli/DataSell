@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <title>Wallet - DataSell</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+    --primary-color: #6c63ff;
+    --secondary-color: #ff6584;
+    --light-bg: #f8f9fa;
+    --card-radius: 12px;
+    --transition: all 0.3s ease;
+}
+
+body {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    padding-bottom: 80px;
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.app-header {
+    background: white;
+    border-bottom: 1px solid #e9ecef;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+.app-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.app-main {
+    padding: 1rem 0;
+}
+
+.wallet-card {
+    background: linear-gradient(135deg, var(--primary-color), #5a52d5);
+    color: white;
+    border-radius: var(--card-radius);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 8px 25px rgba(108, 99, 255, 0.3);
+}
+
+.wallet-label {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin-bottom: 0.5rem;
+}
+
+.wallet-amount {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.wallet-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.wallet-action-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: var(--transition);
+    text-align: center;
+    cursor: pointer;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.wallet-action-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.fund-amounts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.amount-option {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 600;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.amount-option:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.amount-option.selected {
+    border-color: var(--primary-color);
+    background: rgba(108, 99, 255, 0.1);
+    color: var(--primary-color);
+}
+
+.custom-amount-input {
+    margin-bottom: 1.5rem;
+}
+
+.transaction-item {
+    background: white;
+    border-radius: 8px;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.transaction-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+.transaction-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.transaction-details h6 {
+    margin: 0;
+    color: #333;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.transaction-details p {
+    margin: 0.15rem 0 0 0;
+    color: #6c757d;
+    font-size: 0.7rem;
+}
+
+.transaction-amount {
+    font-weight: 700;
+    text-align: right;
+    font-size: 0.9rem;
+}
+
+.amount-positive {
+    color: #4caf50;
+}
+
+.amount-negative {
+    color: #f44336;
+}
+
+.transaction-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 0.25rem;
+}
+
+.status-success {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+}
+
+.status-pending {
+    background: rgba(255, 152, 0, 0.1);
+    color: #ff9800;
+}
+
+.status-failed {
+    background: rgba(244, 67, 54, 0.1);
+    color: #f44336;
+}
+
+/* Bottom navigation and nav-item styling moved to `/css/responsive.css` */
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.fund-btn {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: var(--transition);
+    width: 100%;
+    color: white;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.fund-btn:hover:not(:disabled) {
+    background-color: #5a52d5;
+    border-color: #5a52d5;
+    transform: translateY(-2px);
+}
+
+.fund-btn:disabled {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    transform: none;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Mobile Styles */
+@media (max-width: 576px) {
+    .container {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    
+    .app-title {
+        font-size: 1.3rem;
+    }
+    
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 0.8rem;
+    }
+    
+    .wallet-card {
+        padding: 1.5rem;
+    }
+    
+    .wallet-amount {
+        font-size: 2rem;
+    }
+    
+    .wallet-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+    
+    .wallet-action-btn {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        min-height: 44px;
+    }
+    
+    .fund-amounts {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .amount-option {
+        padding: 0.75rem;
+        min-height: 50px;
+        font-size: 0.9rem;
+    }
+    
+    .transaction-item {
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .transaction-info {
+        flex-direction: column;
+        gap: 0.3rem;
+        align-items: flex-start;
+    }
+    
+    .transaction-details h6 {
+        font-size: 0.8rem;
+        margin: 0;
+    }
+    
+    .transaction-details p {
+        font-size: 0.65rem;
+        margin: 0.1rem 0 0 0;
+    }
+    
+    .transaction-amount {
+        text-align: left;
+        font-size: 0.85rem;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .transaction-status {
+        padding: 0.2rem 0.5rem;
+        font-size: 0.65rem;
+        margin-top: 0.15rem;
+    }
+    
+    #transactionsList {
+        max-height: 220px;
+    }
+    
+    .fund-btn {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        min-height: 44px;
+    }
+    
+    .form-control {
+        padding: 0.75rem;
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+    
+    .input-group-text {
+        padding: 0.75rem;
+    }
+}
+
+/* Small Mobile Devices - 375px and below */
+@media (max-width: 375px) {
+    .container {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    
+    .wallet-card {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .wallet-amount {
+        font-size: 1.8rem;
+    }
+    
+    .section-title {
+        font-size: 0.9rem;
+    }
+    
+    .transaction-history {
+        padding: 0.5rem;
+        margin-top: 0.75rem;
+    }
+    
+    .transaction-history .section-title {
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .transaction-item {
+        padding: 0.4rem;
+        margin-bottom: 0.4rem;
+        border-radius: 6px;
+    }
+    
+    .transaction-details h6 {
+        font-size: 0.75rem;
+    }
+    
+    .transaction-details p {
+        font-size: 0.6rem;
+    }
+    
+    .transaction-amount {
+        font-size: 0.8rem;
+    }
+    
+    .transaction-status {
+        padding: 0.15rem 0.4rem;
+        font-size: 0.6rem;
+    }
+    
+    #transactionsList {
+        max-height: 200px;
+    }
+    
+    .fund-amounts {
+        grid-template-columns: 1fr;
+    }
+    
+    .amount-option {
+        min-height: 45px;
+        padding: 0.5rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* Extra small devices - 320px and below */
+@media (max-width: 320px) {
+    .container {
+        padding-left: 0.35rem;
+        padding-right: 0.35rem;
+    }
+    
+    .wallet-card {
+        padding: 0.75rem;
+    }
+    
+    .wallet-amount {
+        font-size: 1.5rem;
+    }
+    
+    .transaction-item {
+        padding: 0.35rem;
+        margin-bottom: 0.35rem;
+    }
+    
+    .transaction-details h6 {
+        font-size: 0.7rem;
+    }
+    
+    .transaction-details p {
+        font-size: 0.55rem;
+    }
+    
+    .transaction-amount {
+        font-size: 0.75rem;
+    }
+    
+    #transactionsList {
+        max-height: 180px;
+    }
+}
+
+/* Tablet Styles */
+@media (min-width: 577px) and (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .wallet-card {
+        padding: 2rem;
+    }
+    
+    .fund-amounts {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.transaction-history {
+    margin-top: 1rem;
+    background: white;
+    border-radius: 8px;
+    padding: 0.75rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.transaction-history .section-title {
+    margin-bottom: 0.75rem;
+    padding: 0;
+    font-size: 0.95rem;
+}
+
+#transactionsList {
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+
+#transactionsList::-webkit-scrollbar {
+    width: 4px;
+}
+
+#transactionsList::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#transactionsList::-webkit-scrollbar-thumb {
+    background: #d0d0d0;
+    border-radius: 3px;
+}
+
+#transactionsList::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+/* Safe Area Support */
+@supports(padding: max(0px)) {
+    .bottom-nav {
+        padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    }
+    
+    .container {
+        padding-left: max(15px, env(safe-area-inset-left));
+        padding-right: max(15px, env(safe-area-inset-right));
+    }
+}
+
+/* Focus Styles for Accessibility */
+.wallet-action-btn:focus,
+.amount-option:focus,
+.fund-btn:focus,
+.form-control:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --transition: none;
+    }
+    
+    .wallet-card,
+    .wallet-action-btn,
+    .amount-option,
+    .transaction-item,
+    .fund-btn {
+        transition: none;
+    }
+    
+    .loading-spinner {
+        animation: none;
+        border: 2px solid #f3f3f3;
+        border-top-color: var(--primary-color);
+    }
+}
+
+/* Loading State Improvements */
+.fund-btn:disabled .loading-spinner {
+    display: inline-block !important;
+}
+
+/* Form Elements */
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.input-group-text {
+    background-color: #f8f9fa;
+    border-color: #e9ecef;
+    color: #6c757d;
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    transition: var(--transition);
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(108, 99, 255, 0.25);
+}
+
+/* Print Styles */
+@media print {
+    .bottom-nav,
+    .wallet-actions,
+    .quick-fund-section {
+        display: none !important;
+    }
+    
+    .wallet-card {
+        background: #f8f9fa !important;
+        color: #333 !important;
+        box-shadow: none !important;
+    }
+}
+
+/* Empty State Styling */
+.text-center.py-4 {
+    padding: 2rem 1rem;
+}
+
+.text-muted {
+    color: #6c757d !important;
+    font-size: 0.9rem;
+}
+
+/* Button Group Responsiveness */
+@media (max-width: 576px) {
+    .btn-sm {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+    </style>
+</head>
+<body class="mobile-layout">
+    <!-- Header -->
+    <header class="app-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center py-3">
+                <a href="/" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="app-title">My Wallet</h1>
+                <div class="user-avatar" id="userAvatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <div class="container">
+            <!-- Wallet Balance Card -->
+            <div class="wallet-card">
+                <div class="wallet-label">Available Balance</div>
+                <div class="wallet-amount" id="walletAmount">
+                    <span class="loading-spinner" id="balanceLoading"></span>
+                    <span id="balanceText" style="display: none;">₵0.00</span>
+                </div>
+                <div class="wallet-actions">
+                    <button class="wallet-action-btn" onclick="openFundModal()">
+                        <i class="fas fa-plus-circle me-1"></i>Fund Wallet
+                    </button>
+                    <button class="wallet-action-btn" onclick="showWithdrawModal()">
+                        <i class="fas fa-money-bill-wave me-1"></i>Withdraw
+                    </button>
+                </div>
+            </div>
+
+            <!-- Transaction History -->
+            <div class="transaction-history">
+                <h2 class="section-title">Recent Transactions</h2>
+                <div id="transactionsList">
+                    <div class="text-center py-4">
+                        <div class="loading-spinner"></div>
+                        <p class="mt-2 text-muted">Loading transactions...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Fund Wallet Modal -->
+    <div class="modal fade" id="fundWalletModal" tabindex="-1" aria-hidden="true" backdrop="static" keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.15);">
+                <div class="modal-header" style="border-bottom: none; padding: 2rem 2rem 1rem 2rem;">
+                    <h5 class="modal-title" style="font-weight: 700; font-size: 1.3rem; color: #333;">Fund Your Wallet</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="padding: 1rem 2rem;">
+                    <div class="mb-3">
+                        <label for="fundAmount" class="form-label" style="font-weight: 600; color: #495057; font-size: 0.95rem;">Enter Amount</label>
+                        <div class="input-group" style="border-radius: 8px; overflow: hidden;">
+                            <span class="input-group-text" style="background-color: #f8f9fa; border-color: #e9ecef; font-weight: 600; color: #333;">₵</span>
+                            <input type="number" class="form-control" id="fundAmount" placeholder="Enter amount" min="1" max="50000" step="0.01" style="border-color: #e0e0e0; font-size: 1rem;">
+                        </div>
+                        <small class="text-muted d-block mt-2" style="font-size: 0.85rem;">Minimum: ₵1 | Maximum: ₵50,000</small>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #e9ecef; padding: 1.5rem 2rem; gap: 0.75rem;">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-color: #e9ecef; color: #6c757d; padding: 0.6rem 1.5rem; border-radius: 8px; font-weight: 600;">Cancel</button>
+                    <button type="button" class="btn fund-btn" id="proceedFundBtn" onclick="proceedWithFunding()" style="padding: 0.6rem 1.5rem; min-height: auto; border-radius: 8px;">
+                        <i class="fas fa-credit-card me-2"></i>Proceed to Payment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="/" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="/wallet" class="nav-item active">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet</span>
+        </a>
+        <a href="/orders" class="nav-item">
+            <i class="fas fa-shopping-bag"></i>
+            <span>Orders</span>
+        </a>
+        <a href="/profile" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+<!-- Paystack Payment Script -->
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+<script>
+    // Initialize Notyf
+    const notyf = new Notyf({
+        duration: 4000,
+        position: { x: 'center', y: 'top' }
+    });
+
+    let currentUser = null;
+    let userBalance = 0;
+    let transactionPage = 1;
+    let isLoadingMore = false;
+
+    // Initialize app
+async function initializeApp() {
+    try {
+        // Check authentication
+        const userResponse = await fetch('/api/user');
+        const userResult = await userResponse.json();
+        
+        if (userResult.success && userResult.user) {
+            currentUser = userResult.user;
+            updateUserAvatar();
+            await loadWalletBalance();
+            await loadTransactions();
+            setupEventListeners();
+            
+            // ✅ ADD THIS: Check for Paystack callback
+            checkPaystackCallback();
+        } else {
+            window.location.href = '/login';
+        }
+    } catch (error) {
+        console.error('Initialization error:', error);
+        window.location.href = '/login';
+    }
+}
+
+    // Update user avatar
+    function updateUserAvatar() {
+        if (currentUser && currentUser.displayName) {
+            const names = currentUser.displayName.split(' ');
+            const initials = names.map(name => name[0]).join('').toUpperCase();
+            document.getElementById('userAvatar').textContent = initials;
+        }
+    }
+
+    // Load wallet balance
+    async function loadWalletBalance() {
+        try {
+            const response = await fetch('/api/wallet/balance');
+            const result = await response.json();
+            
+            if (result.success) {
+                userBalance = result.balance;
+                document.getElementById('balanceText').textContent = `₵${userBalance.toFixed(2)}`;
+                document.getElementById('balanceLoading').style.display = 'none';
+                document.getElementById('balanceText').style.display = 'inline';
+            }
+        } catch (error) {
+            console.error('Failed to load wallet balance:', error);
+            document.getElementById('balanceText').textContent = '₵0.00';
+            document.getElementById('balanceLoading').style.display = 'none';
+            document.getElementById('balanceText').style.display = 'inline';
+        }
+    }
+
+    // Load transactions
+    async function loadTransactions(page = 1) {
+        try {
+            const response = await fetch(`/api/wallet/transactions?page=${page}&limit=3`);
+            const result = await response.json();
+            
+            if (result.success) {
+                if (page === 1) {
+                    displayTransactions(result.transactions);
+                } else {
+                    appendTransactions(result.transactions);
+                }
+            } else {
+                throw new Error('Failed to load transactions');
+            }
+        } catch (error) {
+            console.error('Transaction loading error:', error);
+            if (page === 1) {
+                document.getElementById('transactionsList').innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                        <p class="text-muted">Failed to load transactions.</p>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    // Display transactions
+    function displayTransactions(transactions) {
+        const transactionsList = document.getElementById('transactionsList');
+        
+        if (!transactions || transactions.length === 0) {
+            transactionsList.innerHTML = `
+                <div class="text-center py-3">
+                    <i class="fas fa-receipt fa-2x text-muted mb-2" style="opacity: 0.6;"></i>
+                    <p class="text-muted" style="margin: 0; font-size: 0.9rem;">No transactions yet</p>
+                </div>
+            `;
+            return;
+        }
+
+        transactionsList.innerHTML = transactions.map(transaction => `
+            <div class="transaction-item">
+                <div class="transaction-info">
+                    <div class="transaction-details">
+                        <h6>${getTransactionDescription(transaction)}</h6>
+                        <p>${formatDate(transaction.timestamp)} • ${transaction.reference || ''}</p>
+                    </div>
+                    <div class="text-end">
+                        <div class="transaction-amount ${transaction.amount > 0 ? 'amount-positive' : 'amount-negative'}">
+                            ${transaction.amount > 0 ? '+' : ''}₵${Math.abs(transaction.amount).toFixed(2)}
+                        </div>
+                        <span class="transaction-status status-${transaction.status || 'success'}">
+                            ${(transaction.status || 'success').toUpperCase()}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        // Setup infinite scroll
+        setupInfiniteScroll();
+    }
+
+    // Append transactions for infinite scroll
+    function appendTransactions(transactions) {
+        const transactionsList = document.getElementById('transactionsList');
+        
+        if (!transactions || transactions.length === 0) {
+            isLoadingMore = false;
+            return;
+        }
+
+        const html = transactions.map(transaction => `
+            <div class="transaction-item">
+                <div class="transaction-info">
+                    <div class="transaction-details">
+                        <h6>${getTransactionDescription(transaction)}</h6>
+                        <p>${formatDate(transaction.timestamp)} • ${transaction.reference || ''}</p>
+                    </div>
+                    <div class="text-end">
+                        <div class="transaction-amount ${transaction.amount > 0 ? 'amount-positive' : 'amount-negative'}">
+                            ${transaction.amount > 0 ? '+' : ''}₵${Math.abs(transaction.amount).toFixed(2)}
+                        </div>
+                        <span class="transaction-status status-${transaction.status || 'success'}">
+                            ${(transaction.status || 'success').toUpperCase()}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        transactionsList.innerHTML += html;
+        isLoadingMore = false;
+    }
+
+    // Setup infinite scroll
+    function setupInfiniteScroll() {
+        const transactionsList = document.getElementById('transactionsList');
+        
+        transactionsList.addEventListener('scroll', function() {
+            if (isLoadingMore) return;
+            
+            if (transactionsList.scrollTop + transactionsList.clientHeight >= transactionsList.scrollHeight - 100) {
+                isLoadingMore = true;
+                transactionPage++;
+                loadTransactions(transactionPage);
+            }
+        });
+    }
+
+    // Get transaction description
+    function getTransactionDescription(transaction) {
+        if (transaction.purpose === 'wallet_funding') {
+            return 'Wallet Funding';
+        } else if (transaction.packageName) {
+            return `${transaction.packageName} - ${transaction.network?.toUpperCase()}`;
+        } else {
+            return 'Transaction';
+        }
+    }
+
+    // Format date
+    function formatDate(timestamp) {
+        const date = new Date(timestamp);
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+        // Fund amount input
+        document.getElementById('fundAmount').addEventListener('input', function() {
+            const amount = parseFloat(this.value) || 0;
+            const btn = document.getElementById('proceedFundBtn');
+            
+            if (amount >= 1 && amount <= 50000) {
+                btn.disabled = false;
+            } else {
+                btn.disabled = true;
+            }
+        });
+    }
+
+    // Open fund wallet modal
+    function openFundModal() {
+        document.getElementById('fundAmount').value = '';
+        const modal = new bootstrap.Modal(document.getElementById('fundWalletModal'));
+        modal.show();
+    }
+
+    // Proceed with funding
+    async function proceedWithFunding() {
+        const amount = parseFloat(document.getElementById('fundAmount').value) || 0;
+
+        // Validate amount
+        if (amount < 1) {
+            notyf.error('Minimum funding amount is ₵1');
+            return;
+        }
+
+        if (amount > 50000) {
+            notyf.error('Maximum funding amount is ₵50,000');
+            return;
+        }
+
+        try {
+            const btn = document.getElementById('proceedFundBtn');
+            const originalText = btn.innerHTML;
+            
+            // Show loading
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner me-2"></span> Initializing...';
+
+            notyf.success('Initializing payment...');
+
+            console.log('💰 Sending payment request for amount:', amount);
+
+            // Call your backend to initialize payment
+            const response = await fetch('/api/initialize-payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    amount: amount
+                })
+            });
+
+            const result = await response.json();
+            console.log('📡 Paystack initialization response:', result);
+
+            // ✅ FIXED: Check the correct response structure
+            if (result.status === true && result.data) {
+                // Your server returns: {status: true, data: {authorization_url: '...', access_code: '...', reference: '...'}}
+                const paymentData = result.data;
+                
+                if (paymentData.authorization_url) {
+                    // ✅ SIMPLE FIX: Just redirect to the authorization URL
+                    console.log('🔗 Redirecting to:', paymentData.authorization_url);
+                    window.location.href = paymentData.authorization_url;
+                } else {
+                    throw new Error('Authorization URL not received from payment gateway');
+                }
+            } 
+            // ✅ ALTERNATIVE: If your server returns different structure
+            else if (result.data && result.data.authorization_url) {
+                // Some servers return: {data: {authorization_url: '...'}}
+                console.log('🔗 Redirecting to (alternative):', result.data.authorization_url);
+                window.location.href = result.data.authorization_url;
+            }
+            else {
+                console.error('❌ Invalid response structure:', result);
+                throw new Error(result.message || result.error || 'Failed to initialize payment. Please try again.');
+            }
+
+        } catch (error) {
+            console.error('Payment initialization error:', error);
+            notyf.error('Payment failed: ' + error.message);
+            
+            // Reset button
+            const btn = document.getElementById('proceedFundBtn');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-credit-card me-2"></i>Proceed to Payment';
+        }
+    }
+
+    // Verify payment
+    async function verifyPayment(reference) {
+        try {
+            notyf.success('Verifying payment...');
+
+            const response = await fetch(`/api/verify-payment/${reference}`);
+            const result = await response.json();
+
+            if (result.success) {
+                notyf.success(`Payment successful! ₵${result.amount} added to your wallet.`);
+                
+                // Update balance
+                userBalance = result.newBalance;
+                document.getElementById('balanceText').textContent = `₵${userBalance.toFixed(2)}`;
+                
+                // Reload transactions
+                transactionPage = 1;
+                await loadTransactions();
+            } else {
+                throw new Error(result.error || 'Payment verification failed. Please contact support.');
+            }
+        } catch (error) {
+            console.error('Payment verification error:', error);
+            notyf.error('Payment verification failed: ' + error.message);
+        }
+    }
+
+// Check for Paystack callback when page loads
+function checkPaystackCallback() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const reference = urlParams.get('trxref') || urlParams.get('reference');
+    const success = urlParams.get('success');
+    
+    console.log('🔄 Checking Paystack callback:', { reference, success });
+    
+    if (reference && success === 'true') {
+        console.log('✅ Paystack callback detected, verifying payment...');
+        verifyPayment(reference);
+        
+        // Clean URL to remove Paystack parameters
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+    }
+}
+
+    // Show withdraw modal (placeholder)
+    function showWithdrawModal() {
+        notyf.info('Withdrawal feature coming soon!');
+    }
+
+    // Initialize app when page loads
+    document.addEventListener('DOMContentLoaded', initializeApp);
+</script>
+</body>
+</html>

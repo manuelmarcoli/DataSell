@@ -1,0 +1,1923 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - DataSell</title>
+    <link rel="stylesheet" href="/css/responsive.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #ffffff;
+            --sidebar-bg: #f8fafc;
+            --text-color: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --card-bg: #ffffff;
+            --hover-bg: #f3f4f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --bg-color: #111827;
+            --sidebar-bg: #1f2937;
+            --text-color: #f9fafb;
+            --text-muted: #d1d5db;
+            --border-color: #374151;
+            --card-bg: #1f2937;
+            --hover-bg: #374151;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 1.5rem 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+            transition: transform 0.28s ease, box-shadow 0.28s ease;
+            transform: translateX(-100%); /* hidden by default */
+            box-shadow: none;
+        }
+
+        .sidebar-header {
+            padding: 0 1.5rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0 1rem;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-color);
+            text-decoration: none;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+            padding: 1.5rem;
+            transition: margin-left 0.3s ease;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .theme-toggle, .logout-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            color: var(--text-color);
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover, .logout-btn:hover {
+            background: var(--hover-bg);
+        }
+
+        .hamburger {
+            display: block;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+
+        /* When active, sidebar slides in as an overlay */
+        .sidebar.active {
+            transform: translateX(0);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Ensure main content uses full width by default */
+        .main-content {
+            flex: 1;
+            margin-left: 0;
+            padding: 1.5rem;
+            transition: margin-left 0.3s ease;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--hover-bg);
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        tr:hover {
+            background: var(--hover-bg);
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+        }
+
+        /* Status Badges */
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .hamburger {
+                display: block;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        /* Overlay for mobile */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        /* System Status */
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .status-online {
+            background: var(--success-color);
+        }
+
+        .status-offline {
+            background: var(--danger-color);
+        }
+
+        /* Pricing Groups */
+        .pricing-group {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .pricing-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .discount-badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h1><i class="fas fa-database"></i> DataSell Admin</h1>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" data-tab="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="users">
+                        <i class="fas fa-users"></i>
+                        <span>User Management</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="packages">
+                        <i class="fas fa-box"></i>
+                        <span>Package Management</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="transactions">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>Order Management</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="pricing">
+                        <i class="fas fa-tags"></i>
+                        <span>Pricing Control</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="system">
+                        <i class="fas fa-server"></i>
+                        <span>System Monitoring</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-tab="security">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Security Logs</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Overlay for mobile -->
+        <div class="overlay" id="overlay"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <button class="hamburger" id="hamburger">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h2 id="page-title">Dashboard</h2>
+                <div class="header-actions">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="logout-btn" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard Tab -->
+            <div class="tab-content active" id="dashboard-tab">
+                <!-- Stats Overview -->
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalUsers">0</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalTransactions">0</div>
+                        <div class="stat-label">Total Transactions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">₵<span id="totalRevenue">0</span></div>
+                        <div class="stat-label">Total Revenue</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="successRate">0%</div>
+                        <div class="stat-label">Success Rate</div>
+                    </div>
+                </div>
+
+                <!-- Charts and Additional Stats -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent Activity</h3>
+                    </div>
+                    <div id="recentActivity">
+                        <p>Loading recent activity...</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Top Packages -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Top Packages</h3>
+                        </div>
+                        <div id="topPackages">
+                            <p>Loading top packages...</p>
+                        </div>
+                    </div>
+
+                    <!-- Network Performance -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Network Performance</h3>
+                        </div>
+                        <div id="networkStats">
+                            <p>Loading network stats...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Management Tab -->
+            <div class="tab-content" id="users-tab">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">User Management</h3>
+                        <div class="flex gap-2">
+                            <input type="text" id="userSearch" placeholder="Search users..." class="form-control">
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table id="usersTable">
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Balance</th>
+                                    <th>Status</th>
+                                    <th>Role</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <tr>
+                                    <td colspan="8" class="text-center">Loading users...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Package Management Tab -->
+            <div class="tab-content" id="packages-tab">
+                <div class="tabs">
+                    <button class="tab active" data-network="mtn">MTN Packages</button>
+                    <button class="tab" data-network="at">AirtelTigo Packages</button>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title" id="packagesTitle">MTN Packages</h3>
+                        <button class="btn btn-primary" id="addPackageBtn">
+                            <i class="fas fa-plus"></i> Add Package
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table id="packagesTable">
+                            <thead>
+                                <tr>
+                                    <th>Package ID</th>
+                                    <th>Name</th>
+                                    <th>Price (₵)</th>
+                                    <th>Validity</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="packagesTableBody">
+                                <tr>
+                                    <td colspan="6" class="text-center">Loading packages...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Management Tab -->
+            <div class="tab-content" id="transactions-tab">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Order Management</h3>
+                        <div class="flex gap-2">
+                            <select id="statusFilter" class="form-control">
+                                <option value="all">All Status</option>
+                                <option value="success">Success</option>
+                                <option value="failed">Failed</option>
+                                <option value="processing">Processing</option>
+                                <option value="refunded">Refunded</option>
+                            </select>
+                            <input type="text" id="transactionSearch" placeholder="Search..." class="form-control">
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table id="transactionsTable">
+                            <thead>
+                                <tr>
+                                    <th>Reference</th>
+                                    <th>User</th>
+                                    <th>Package</th>
+                                    <th>Network</th>
+                                    <th>Phone</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionsTableBody">
+                                <tr>
+                                    <td colspan="9" class="text-center">Loading transactions...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pricing Control Tab -->
+            <div class="tab-content" id="pricing-tab">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Pricing Groups</h3>
+                    </div>
+                    <div id="pricingGroups">
+                        <div class="pricing-group">
+                            <div class="pricing-group-header">
+                                <h4>Regular Users</h4>
+                                <span class="discount-badge">0% Discount</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Discount Percentage</label>
+                                <input type="number" id="regularDiscount" min="0" max="50" value="0" class="form-control">
+                            </div>
+                            <button class="btn btn-primary" onclick="updatePricingGroup('regular')">
+                                Update Pricing
+                            </button>
+                        </div>
+                        
+                        <div class="pricing-group">
+                            <div class="pricing-group-header">
+                                <h4>VIP Users</h4>
+                                <span class="discount-badge">10% Discount</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Discount Percentage</label>
+                                <input type="number" id="vipDiscount" min="0" max="50" value="10" class="form-control">
+                            </div>
+                            <button class="btn btn-primary" onclick="updatePricingGroup('vip')">
+                                Update Pricing
+                            </button>
+                        </div>
+                        
+                        <div class="pricing-group">
+                            <div class="pricing-group-header">
+                                <h4>Premium Users</h4>
+                                <span class="discount-badge">15% Discount</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Discount Percentage</label>
+                                <input type="number" id="premiumDiscount" min="0" max="50" value="15" class="form-control">
+                            </div>
+                            <button class="btn btn-primary" onclick="updatePricingGroup('premium')">
+                                Update Pricing
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Monitoring Tab -->
+            <div class="tab-content" id="system-tab">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="hubnetStatus">Checking...</div>
+                        <div class="stat-label">Hubnet Status</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="paystackStatus">Checking...</div>
+                        <div class="stat-label">Paystack Status</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="firebaseStatus">Online</div>
+                        <div class="stat-label">Firebase Status</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="serverStatus">Healthy</div>
+                        <div class="stat-label">Server Status</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">System Metrics</h3>
+                        <button class="btn btn-primary" onclick="refreshSystemStatus()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    <div id="systemMetrics">
+                        <p>Loading system metrics...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Logs Tab -->
+            <div class="tab-content" id="security-tab">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Security & Admin Logs</h3>
+                    </div>
+                    <div class="table-container">
+                        <table id="securityLogsTable">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Admin</th>
+                                    <th>Action</th>
+                                    <th>Details</th>
+                                    <th>IP Address</th>
+                                </tr>
+                            </thead>
+                            <tbody id="securityLogsBody">
+                                <tr>
+                                    <td colspan="5" class="text-center">Loading security logs...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentUser = null;
+        let currentNetwork = 'mtn';
+
+        // Initialize admin panel
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAdminAuth();
+            initializeEventListeners();
+            loadDashboardData();
+        });
+
+        // Check if user is authenticated as admin
+        async function checkAdminAuth() {
+            try {
+                const response = await fetch('/api/user', { credentials: 'include' });
+                const data = await response.json();
+                
+                if (!data.success || !data.user || !data.user.isAdmin) {
+                    window.location.href = '/admin-login';
+                    return;
+                }
+                
+                currentUser = data.user;
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                window.location.href = '/admin-login';
+            }
+        }
+
+        // Initialize event listeners
+        function initializeEventListeners() {
+            // Theme toggle
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+            
+            // Hamburger menu
+            document.getElementById('hamburger').addEventListener('click', toggleSidebar);
+            document.getElementById('overlay').addEventListener('click', toggleSidebar);
+            
+            // Navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    switchTab(this.dataset.tab);
+
+                    // If sidebar is open (overlay), close it after selecting a page
+                    const sidebar = document.getElementById('sidebar');
+                    const overlay = document.getElementById('overlay');
+                    if (sidebar.classList.contains('active')) {
+                        sidebar.classList.remove('active');
+                        overlay.classList.remove('active');
+                    }
+                });
+            });
+            
+            // Package tabs
+            document.querySelectorAll('.tab[data-network]').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    currentNetwork = this.dataset.network;
+                    document.getElementById('packagesTitle').textContent = 
+                        `${this.dataset.network.toUpperCase()} Packages`;
+                    loadPackages();
+                });
+            });
+            
+            // Add package button
+            document.getElementById('addPackageBtn').addEventListener('click', showAddPackageModal);
+            
+            // Search and filter events
+            document.getElementById('userSearch').addEventListener('input', debounce(searchUsers, 300));
+            document.getElementById('transactionSearch').addEventListener('input', debounce(searchTransactions, 300));
+            document.getElementById('statusFilter').addEventListener('change', filterTransactions);
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Update navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // Update page title
+            const titleMap = {
+                dashboard: 'Dashboard',
+                users: 'User Management',
+                packages: 'Package Management',
+                transactions: 'Order Management',
+                pricing: 'Pricing Control',
+                system: 'System Monitoring',
+                security: 'Security Logs'
+            };
+            document.getElementById('page-title').textContent = titleMap[tabName];
+            
+            // Load tab-specific data
+            switch(tabName) {
+                case 'dashboard':
+                    loadDashboardData();
+                    break;
+                case 'users':
+                    loadUsers();
+                    break;
+                case 'packages':
+                    loadPackages();
+                    break;
+                case 'transactions':
+                    loadTransactions();
+                    break;
+                case 'pricing':
+                    loadPricingGroups();
+                    break;
+                case 'system':
+                    loadSystemStatus();
+                    break;
+                case 'security':
+                    loadSecurityLogs();
+                    break;
+            }
+            
+            // Close sidebar on mobile
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
+        }
+
+        // Theme management
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('admin-theme', newTheme);
+            
+            const icon = document.querySelector('#themeToggle i');
+            icon.className = newTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+        }
+
+        // Load saved theme
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('admin-theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            const icon = document.querySelector('#themeToggle i');
+            icon.className = savedTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+        }
+
+        // Sidebar toggle: open/close overlay on all sizes (hamburger opens menu)
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        // Logout function
+        async function logout() {
+            try {
+                const response = await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+                window.location.href = '/admin-login';
+            } catch (error) {
+                console.error('Logout error:', error);
+                window.location.href = '/admin-login';
+            }
+        }
+
+        // Dashboard data loading
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/api/admin/dashboard/stats', { credentials: 'include' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateDashboardStats(data.stats);
+                } else {
+                    showError('Failed to load dashboard data');
+                }
+            } catch (error) {
+                console.error('Dashboard load error:', error);
+                showError('Failed to load dashboard data');
+            }
+        }
+
+        function updateDashboardStats(stats) {
+            document.getElementById('totalUsers').textContent = stats.totalUsers.toLocaleString();
+            document.getElementById('totalTransactions').textContent = stats.totalTransactions.toLocaleString();
+            document.getElementById('totalRevenue').textContent = stats.totalRevenue.toFixed(2);
+            document.getElementById('successRate').textContent = `${stats.successRate}%`;
+            
+            // Update top packages
+            const topPackagesContainer = document.getElementById('topPackages');
+            if (stats.topPackages && stats.topPackages.length > 0) {
+                topPackagesContainer.innerHTML = stats.topPackages.map(pkg => `
+                    <div class="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
+                        <span>${pkg.name}</span>
+                        <span class="badge badge-info">${pkg.count} sales</span>
+                    </div>
+                `).join('');
+            }
+            
+            // Update network stats
+            const networkStatsContainer = document.getElementById('networkStats');
+            networkStatsContainer.innerHTML = `
+                <div class="flex justify-between items-center py-2">
+                    <span>MTN</span>
+                    <span class="badge badge-success">${stats.networkStats.mtn} transactions</span>
+                </div>
+                <div class="flex justify-between items-center py-2">
+                    <span>AirtelTigo</span>
+                    <span class="badge badge-info">${stats.networkStats.at} transactions</span>
+                </div>
+            `;
+        }
+
+        // User management
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/admin/users', { credentials: 'include' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayUsers(data.users);
+                } else {
+                    showError('Failed to load users');
+                }
+            } catch (error) {
+                console.error('Users load error:', error);
+                showError('Failed to load users');
+            }
+        }
+
+        function displayUsers(users) {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = users.map(user => `
+                <tr>
+                    <td class="font-mono text-sm">${user.uid.substring(0, 8)}...</td>
+                    <td>${user.firstName} ${user.lastName}</td>
+                    <td>${user.email}</td>
+                    <td>${user.phone || 'N/A'}</td>
+                    <td>₵${user.walletBalance || 0}</td>
+                    <td>
+                        <span class="badge ${user.suspended ? 'badge-danger' : 'badge-success'}">
+                            ${user.suspended ? 'Suspended' : 'Active'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge badge-info">${user.pricingGroup || 'regular'}</span>
+                    </td>
+                    <td>
+                        <div class="flex gap-1">
+                            <button class="btn btn-sm btn-primary" onclick="editUser('${user.uid}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm ${user.suspended ? 'btn-success' : 'btn-warning'}" 
+                                    onclick="toggleUserSuspension('${user.uid}', ${!user.suspended})">
+                                <i class="fas ${user.suspended ? 'fa-check' : 'fa-ban'}"></i>
+                            </button>
+                            <button class="btn btn-sm btn-info" onclick="manageUserFunds('${user.uid}')">
+                                <i class="fas fa-wallet"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Package management
+        async function loadPackages() {
+            try {
+                const response = await fetch('/api/admin/packages', { credentials: 'include' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayPackages(data.packages[currentNetwork]);
+                } else {
+                    showError('Failed to load packages');
+                }
+            } catch (error) {
+                console.error('Packages load error:', error);
+                showError('Failed to load packages');
+            }
+        }
+
+        function displayPackages(packages) {
+            const tbody = document.getElementById('packagesTableBody');
+            if (!packages || packages.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No packages found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = packages.map(pkg => `
+                <tr>
+                    <td class="font-mono">${pkg.id}</td>
+                    <td>${pkg.name}</td>
+                    <td>₵${pkg.price}</td>
+                    <td>${pkg.validity || 'N/A'}</td>
+                    <td>
+                        <span class="badge ${pkg.active !== false ? 'badge-success' : 'badge-danger'}">
+                            ${pkg.active !== false ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="flex gap-1">
+                            <button class="btn btn-sm btn-primary" onclick="editPackage('${currentNetwork}', '${pkg.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm ${pkg.active !== false ? 'btn-warning' : 'btn-success'}" 
+                                    onclick="togglePackageActive('${currentNetwork}', '${pkg.id}', ${pkg.active !== false})">
+                                <i class="fas ${pkg.active !== false ? 'fa-eye-slash' : 'fa-eye'}"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deletePackage('${currentNetwork}', '${pkg.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Transaction management
+        async function loadTransactions() {
+            try {
+                const response = await fetch('/api/admin/transactions', { credentials: 'include' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayTransactions(data.transactions);
+                } else {
+                    showError('Failed to load transactions');
+                }
+            } catch (error) {
+                console.error('Transactions load error:', error);
+                showError('Failed to load transactions');
+            }
+        }
+
+        function displayTransactions(transactions) {
+            const tbody = document.getElementById('transactionsTableBody');
+            tbody.innerHTML = transactions.map(tx => `
+                <tr>
+                    <td class="font-mono text-sm">${tx.reference}</td>
+                    <td>${tx.userName}</td>
+                    <td>${tx.packageName}</td>
+                    <td>
+                        <span class="badge ${tx.network === 'mtn' ? 'badge-warning' : 'badge-info'}">
+                            ${tx.network?.toUpperCase() || 'Unknown'}
+                        </span>
+                    </td>
+                    <td>${tx.phoneNumber}</td>
+                    <td>₵${tx.amount}</td>
+                    <td>
+                        <span class="badge ${getStatusBadgeClass(tx.status)}">
+                            ${tx.status}
+                        </span>
+                    </td>
+                    <td>${new Date(tx.timestamp).toLocaleDateString()}</td>
+                    <td>
+                        <div class="flex gap-1">
+                            ${tx.status === 'success' ? `
+                                <button class="btn btn-sm btn-warning" onclick="refundTransaction('${tx.id}')">
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                            ` : ''}
+                            <button class="btn btn-sm btn-info" onclick="viewTransactionDetails('${tx.id}')">
+                                <i class="fas fa-info"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getStatusBadgeClass(status) {
+            const statusClasses = {
+                'success': 'badge-success',
+                'failed': 'badge-danger',
+                'processing': 'badge-warning',
+                'refunded': 'badge-info'
+            };
+            return statusClasses[status] || 'badge-info';
+        }
+
+        // System status
+        async function loadSystemStatus() {
+            try {
+                const response = await fetch('/api/admin/system/status', { credentials: 'include' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateSystemStatus(data.systemStatus);
+                } else {
+                    showError('Failed to load system status');
+                }
+            } catch (error) {
+                console.error('System status load error:', error);
+                showError('Failed to load system status');
+            }
+        }
+
+        function updateSystemStatus(status) {
+            document.getElementById('hubnetStatus').innerHTML = `
+                <span class="status-indicator ${status.hubnet.status === 'online' ? 'status-online' : 'status-offline'}"></span>
+                ${status.hubnet.status}
+            `;
+            document.getElementById('paystackStatus').innerHTML = `
+                <span class="status-indicator ${status.paystack.status === 'online' ? 'status-online' : 'status-offline'}"></span>
+                ${status.paystack.status}
+            `;
+            
+            // Update system metrics
+            const metricsContainer = document.getElementById('systemMetrics');
+            metricsContainer.innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <strong>Success Rate:</strong> ${status.successRate}%
+                    </div>
+                    <div>
+                        <strong>Recent Transactions (24h):</strong> ${status.recentTransactions}
+                    </div>
+                    <div>
+                        <strong>MTN Packages:</strong> ${status.packageCache.mtnCount}
+                    </div>
+                    <div>
+                        <strong>AirtelTigo Packages:</strong> ${status.packageCache.atCount}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Security logs
+        async function loadSecurityLogs() {
+            try {
+                const response = await fetch('/api/admin/security/logs', { credentials: 'include' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    displaySecurityLogs(data.logs);
+                } else {
+                    showError('Failed to load security logs');
+                }
+            } catch (error) {
+                console.error('Security logs load error:', error);
+                showError('Failed to load security logs');
+            }
+        }
+
+        function displaySecurityLogs(logs) {
+            const tbody = document.getElementById('securityLogsBody');
+            tbody.innerHTML = logs.map(log => `
+                <tr>
+                    <td>${new Date(log.timestamp).toLocaleString()}</td>
+                    <td class="font-mono text-sm">${log.adminId.substring(0, 8)}...</td>
+                    <td>
+                        <span class="badge badge-info">${log.action}</span>
+                    </td>
+                    <td>${log.details}</td>
+                    <td class="font-mono text-sm">${log.ip}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Pricing groups
+        async function loadPricingGroups() {
+            try {
+                const response = await fetch('/api/admin/pricing/groups', { credentials: 'include' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    updatePricingGroupsUI(data.pricingGroups);
+                } else {
+                    showError('Failed to load pricing groups');
+                }
+            } catch (error) {
+                console.error('Pricing groups load error:', error);
+                showError('Failed to load pricing groups');
+            }
+        }
+
+        function updatePricingGroupsUI(groups) {
+            if (groups.regular) {
+                document.getElementById('regularDiscount').value = groups.regular.discount;
+                document.querySelector('#pricingGroups .pricing-group:nth-child(1) .discount-badge').textContent = 
+                    `${groups.regular.discount}% Discount`;
+            }
+            if (groups.vip) {
+                document.getElementById('vipDiscount').value = groups.vip.discount;
+                document.querySelector('#pricingGroups .pricing-group:nth-child(2) .discount-badge').textContent = 
+                    `${groups.vip.discount}% Discount`;
+            }
+            if (groups.premium) {
+                document.getElementById('premiumDiscount').value = groups.premium.discount;
+                document.querySelector('#pricingGroups .pricing-group:nth-child(3) .discount-badge').textContent = 
+                    `${groups.premium.discount}% Discount`;
+            }
+        }
+
+        // Utility functions
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function showSuccess(message) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: message,
+                timer: 3000,
+                showConfirmButton: false
+            });
+        }
+
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: message,
+                timer: 5000
+            });
+        }
+
+        function showLoading() {
+            return Swal.fire({
+                title: 'Processing...',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        }
+
+        // Placeholder functions for various actions
+        async function editUser(userId) {
+            try {
+                showLoading();
+                const resp = await fetch('/api/admin/users', { credentials: 'include' });
+                const data = await resp.json();
+                Swal.close();
+
+                if (!data.success) {
+                    return showError('Could not load user data');
+                }
+
+                const user = (data.users || []).find(u => u.uid === userId);
+                if (!user) return showError('User not found');
+
+                const { value: formValues } = await Swal.fire({
+                    title: `Edit user ${user.firstName || ''} ${user.lastName || ''}`,
+                    html: `
+                        <div style="text-align:left">
+                            <label>Pricing Group</label>
+                            <select id="swalRole" class="swal2-input">
+                                <option value="regular">Regular</option>
+                                <option value="vip">VIP</option>
+                                <option value="premium">Premium</option>
+                            </select>
+                            <p style="margin-top:8px">Wallet balance: <strong>₵${user.walletBalance || 0}</strong></p>
+                        </div>
+                    `,
+                    focusConfirm: false,
+                    preConfirm: () => {
+                        return {
+                            role: document.getElementById('swalRole').value
+                        };
+                    }
+                });
+
+                if (!formValues) return;
+
+                // Only update if changed
+                if (formValues.role && formValues.role !== (user.pricingGroup || 'regular')) {
+                    showLoading();
+                    const updateResp = await fetch(`/api/admin/users/${userId}/update-role`, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ role: formValues.role })
+                    });
+                    const updateData = await updateResp.json();
+                    Swal.close();
+                    if (updateData.success) {
+                        showSuccess(updateData.message || 'User updated');
+                        loadUsers();
+                    } else {
+                        showError(updateData.error || 'Failed to update user');
+                    }
+                } else {
+                    showSuccess('No changes made');
+                }
+
+                // Offer quick actions
+                const { isConfirmed } = await Swal.fire({
+                    title: 'Quick actions',
+                    text: 'Would you like to manage funds or toggle suspension for this user now?',
+                    showCancelButton: true,
+                    showDenyButton: true,
+                    confirmButtonText: 'Manage Funds',
+                    denyButtonText: user.suspended ? 'Activate User' : 'Suspend User'
+                });
+
+                if (isConfirmed) {
+                    manageUserFunds(userId);
+                } else {
+                    // detect deny via result (Swal returns different shapes across versions); query DOM fallback
+                    const lastResult = Swal.getConfirmButton();
+                }
+            } catch (err) {
+                console.error('Edit user error:', err);
+                Swal.close();
+                showError('Failed to edit user');
+            }
+        }
+
+        async function toggleUserSuspension(userId, suspend) {
+            try {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: `This will ${suspend ? 'suspend' : 'activate'} the user account`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, proceed'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        const response = await fetch(`/api/admin/users/${userId}/toggle-suspend`, {
+                            method: 'POST',
+                            credentials: 'include'
+                        });
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            showSuccess(data.message);
+                            loadUsers();
+                        } else {
+                            showError(data.error);
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Toggle suspension error:', error);
+                showError('Failed to update user status');
+            }
+        }
+
+        async function manageUserFunds(userId) {
+            const { value: formValues } = await Swal.fire({
+                title: 'Manage User Funds',
+                html: `
+                    <input id="amount" type="number" placeholder="Amount" class="swal2-input" min="0" step="0.01">
+                    <select id="action" class="swal2-input">
+                        <option value="add">Add Funds</option>
+                        <option value="deduct">Deduct Funds</option>
+                    </select>
+                    <input id="note" type="text" placeholder="Note (optional)" class="swal2-input">
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                preConfirm: () => {
+                    return {
+                        amount: document.getElementById('amount').value,
+                        action: document.getElementById('action').value,
+                        note: document.getElementById('note').value
+                    };
+                }
+            });
+
+            if (formValues) {
+                try {
+                    const endpoint = formValues.action === 'add' ? 'add-funds' : 'deduct-funds';
+                    const response = await fetch(`/api/admin/users/${userId}/${endpoint}`, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            amount: parseFloat(formValues.amount),
+                            note: formValues.note
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showSuccess(data.message);
+                        loadUsers();
+                    } else {
+                        showError(data.error);
+                    }
+                } catch (error) {
+                    console.error('Manage funds error:', error);
+                    showError('Failed to update user funds');
+                }
+            }
+        }
+
+        async function editPackage(network, packageId) {
+            try {
+                showLoading();
+                const resp = await fetch('/api/admin/packages', { credentials: 'include' });
+                const data = await resp.json();
+                Swal.close();
+
+                if (!data.success) return showError('Could not load packages');
+
+                const pkg = (data.packages[network] || []).find(p => (p.id === packageId) || (p.id === packageId.replace(/^(mtn-|at-)/, '')));
+                if (!pkg) return showError('Package not found');
+
+                const { value: values } = await Swal.fire({
+                    title: `Edit package: ${pkg.name}`,
+                    html: `
+                        <input id="pkgName" class="swal2-input" placeholder="Name" value="${escapeHtml(pkg.name)}">
+                        <input id="pkgPrice" type="number" step="0.01" class="swal2-input" placeholder="Price" value="${pkg.price}">
+                        <input id="pkgValidity" class="swal2-input" placeholder="Validity" value="${pkg.validity || ''}">
+                        <div style="text-align:left;margin-top:8px">
+                            <label><input id="pkgActive" type="checkbox" ${pkg.active !== false ? 'checked' : ''}> Active</label>
+                        </div>
+                    `,
+                    focusConfirm: false,
+                    preConfirm: () => ({
+                        name: document.getElementById('pkgName').value.trim(),
+                        price: parseFloat(document.getElementById('pkgPrice').value),
+                        validity: document.getElementById('pkgValidity').value.trim(),
+                        active: !!document.getElementById('pkgActive').checked
+                    })
+                });
+
+                if (!values) return;
+
+                // Update price if changed
+                if (!isNaN(values.price) && values.price !== pkg.price) {
+                    showLoading();
+                    const upd = await fetch('/api/admin/packages/update-price', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ network, packageId: pkg.id, newPrice: values.price })
+                    });
+                    const updData = await upd.json();
+                    Swal.close();
+                    if (updData.success) showSuccess(updData.message || 'Price updated');
+                    else showError(updData.error || 'Failed to update price');
+                }
+
+                // Toggle active if changed
+                if ((pkg.active !== false) !== values.active) {
+                    showLoading();
+                    const t = await fetch('/api/admin/packages/toggle-active', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ network, packageId: pkg.id })
+                    });
+                    const tData = await t.json();
+                    Swal.close();
+                    if (tData.success) showSuccess(tData.message || 'Package status updated');
+                    else showError(tData.error || 'Failed to update package status');
+                }
+
+                // Note: name/validity fields aren't persisted by backend in current endpoints
+                loadPackages();
+            } catch (err) {
+                console.error('Edit package error:', err);
+                Swal.close();
+                showError('Failed to edit package');
+            }
+        }
+
+        async function togglePackageActive(network, packageId, currentlyActive) {
+            try {
+                const response = await fetch('/api/admin/packages/toggle-active', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        network: network,
+                        packageId: packageId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess(data.message);
+                    loadPackages();
+                } else {
+                    showError(data.error);
+                }
+            } catch (error) {
+                console.error('Toggle package error:', error);
+                showError('Failed to update package status');
+            }
+        }
+
+        async function deletePackage(network, packageId) {
+            try {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'This action cannot be undone',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, delete it',
+                    confirmButtonColor: '#ef4444'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        const response = await fetch('/api/admin/packages/delete', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            network: network,
+                            packageId: packageId
+                        })
+                    });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            showSuccess(data.message);
+                            loadPackages();
+                        } else {
+                            showError(data.error);
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Delete package error:', error);
+                showError('Failed to delete package');
+            }
+        }
+
+        async function showAddPackageModal() {
+            try {
+                const { value: values } = await Swal.fire({
+                    title: 'Create new package',
+                    html: `
+                        <select id="newNetwork" class="swal2-input">
+                            <option value="mtn">MTN</option>
+                            <option value="at">AirtelTigo</option>
+                        </select>
+                        <input id="newId" class="swal2-input" placeholder="Package id (key)">
+                        <input id="newName" class="swal2-input" placeholder="Name">
+                        <input id="newPrice" type="number" step="0.01" class="swal2-input" placeholder="Price">
+                        <input id="newValidity" class="swal2-input" placeholder="Validity (optional)">
+                        <div style="text-align:left;margin-top:8px">
+                            <label><input id="newActive" type="checkbox" checked> Active</label>
+                        </div>
+                    `,
+                    focusConfirm: false,
+                    preConfirm: () => ({
+                        network: document.getElementById('newNetwork').value,
+                        id: document.getElementById('newId').value.trim(),
+                        name: document.getElementById('newName').value.trim(),
+                        price: parseFloat(document.getElementById('newPrice').value),
+                        validity: document.getElementById('newValidity').value.trim(),
+                        active: !!document.getElementById('newActive').checked
+                    })
+                });
+
+                if (!values) return;
+
+                if (!values.network || !values.id || !values.name || isNaN(values.price)) {
+                    return showError('Please provide network, id, name, and a valid price');
+                }
+
+                showLoading();
+                const resp = await fetch('/api/admin/packages/create', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(values)
+                });
+                const data = await resp.json();
+                Swal.close();
+
+                if (data.success) {
+                    showSuccess(data.message || 'Package created');
+                    loadPackages();
+                } else {
+                    showError(data.error || 'Failed to create package');
+                }
+            } catch (err) {
+                console.error('Create package error:', err);
+                Swal.close();
+                showError('Failed to create package');
+            }
+        }
+
+        async function refundTransaction(transactionId) {
+            const { value: reason } = await Swal.fire({
+                title: 'Refund Transaction',
+                input: 'text',
+                inputLabel: 'Refund Reason',
+                inputPlaceholder: 'Enter reason for refund...',
+                showCancelButton: true,
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'Please enter a refund reason';
+                    }
+                }
+            });
+
+            if (reason) {
+                try {
+                    const response = await fetch(`/api/admin/transactions/${transactionId}/refund`, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ reason })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showSuccess(data.message);
+                        loadTransactions();
+                    } else {
+                        showError(data.error);
+                    }
+                } catch (error) {
+                    console.error('Refund error:', error);
+                    showError('Failed to process refund');
+                }
+            }
+        }
+
+        async function viewTransactionDetails(transactionId) {
+            try {
+                showLoading();
+                const resp = await fetch(`/api/admin/transactions/${transactionId}`, { credentials: 'include' });
+                const data = await resp.json();
+                Swal.close();
+
+                if (!data.success) return showError(data.error || 'Transaction not found');
+
+                const tx = data.transaction;
+                const user = tx.user || {};
+
+                const html = `
+                    <div style="text-align:left">
+                        <p><strong>Reference:</strong> ${tx.reference || tx.id}</p>
+                        <p><strong>User:</strong> ${user.firstName ? user.firstName + ' ' + (user.lastName||'') : tx.userName || 'Unknown'}</p>
+                        <p><strong>Phone:</strong> ${tx.phoneNumber || 'N/A'}</p>
+                        <p><strong>Package:</strong> ${tx.packageName || 'N/A'}</p>
+                        <p><strong>Network:</strong> ${tx.network || 'N/A'}</p>
+                        <p><strong>Amount:</strong> ₵${tx.amount}</p>
+                        <p><strong>Status:</strong> ${tx.status}</p>
+                        <p><strong>Date:</strong> ${new Date(tx.timestamp).toLocaleString()}</p>
+                        <p><strong>Details:</strong> ${tx.details || tx.meta || 'N/A'}</p>
+                    </div>
+                `;
+
+                const opts = {
+                    title: 'Transaction details',
+                    html,
+                    showCancelButton: true,
+                    focusConfirm: false
+                };
+
+                // If transaction succeeded allow refund
+                if (tx.status === 'success') {
+                    opts.confirmButtonText = 'Refund';
+                    const { isConfirmed } = await Swal.fire(opts);
+                    if (isConfirmed) {
+                        refundTransaction(transactionId);
+                    }
+                } else {
+                    opts.confirmButtonText = 'Close';
+                    await Swal.fire(opts);
+                }
+            } catch (err) {
+                console.error('View transaction error:', err);
+                Swal.close();
+                showError('Failed to load transaction details');
+            }
+        }
+
+        // Utility: escape small HTML to prevent injection in Swal inputs
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>"']/g, function(s) {
+                return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[s];
+            });
+        }
+
+        async function updatePricingGroup(group) {
+            const discountInput = document.getElementById(`${group}Discount`);
+            const discount = parseFloat(discountInput.value);
+            
+            if (isNaN(discount) || discount < 0 || discount > 50) {
+                showError('Please enter a valid discount between 0 and 50');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/pricing/groups/update', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        group: group,
+                        discount: discount
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess(data.message);
+                    loadPricingGroups();
+                } else {
+                    showError(data.error);
+                }
+            } catch (error) {
+                console.error('Update pricing group error:', error);
+                showError('Failed to update pricing group');
+            }
+        }
+
+        function refreshSystemStatus() {
+            loadSystemStatus();
+            showSuccess('System status refreshed');
+        }
+
+        function searchUsers() {
+            // Implementation for user search
+            console.log('Searching users...');
+        }
+
+        function searchTransactions() {
+            // Implementation for transaction search
+            console.log('Searching transactions...');
+        }
+
+        function filterTransactions() {
+            // Implementation for transaction filtering
+            console.log('Filtering transactions...');
+        }
+
+        // Load theme on startup
+        loadTheme();
+    </script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+name: Android Build and Publish APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  build-apk:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    env:
+      ANDROID_SDK_ROOT: ${{ runner.temp }}/Android/Sdk
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Install Android SDK command-line tools and packages
+        run: |
+          set -e
+          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+          cd $HOME
+          echo "Downloading Android command-line tools..."
+          curl -sSL -o cmdline-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+          unzip -q cmdline-tools.zip -d "$ANDROID_SDK_ROOT/cmdline-tools"
+          if [ -d "$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools" ]; then
+            mv "$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools" "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+          fi
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+          export PATH="$PATH:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools"
+          yes | sdkmanager --sdk_root="$ANDROID_SDK_ROOT" --licenses >/dev/null || true
+          sdkmanager --sdk_root="$ANDROID_SDK_ROOT" "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+
+      - name: Build Release APK (Gradle assembleRelease)
+        run: |
+          set -e
+          cd android-wrapper/platforms/android
+          chmod +x gradlew || true
+          ./gradlew assembleRelease -x lint
+
+      - name: Prepare downloads directory
+        run: |
+          mkdir -p public/downloads
+
+      - name: Copy unsigned release APK to downloads
+        run: |
+          set -e
+          unsigned1=android-wrapper/platforms/android/app/build/outputs/apk/release/app-release-unsigned.apk
+          unsigned2=android-wrapper/platforms/android/app/build/outputs/apk/release/app-release.apk
+          if [ -f "$unsigned1" ]; then
+            cp "$unsigned1" public/downloads/datasell-app-release-unsigned.apk
+          elif [ -f "$unsigned2" ]; then
+            cp "$unsigned2" public/downloads/datasell-app-release-unsigned.apk
+          else
+            echo "No release APK found at expected locations" >&2
+            ls -la android-wrapper/platforms/android/app/build/outputs/apk || true
+            exit 2
+          fi
+          ls -l public/downloads
+
+      - name: Sign release APK (requires keystore secrets)
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 && secrets.ANDROID_KEYSTORE_PASSWORD && secrets.ANDROID_KEY_ALIAS && secrets.ANDROID_KEY_PASSWORD }}
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -e
+          echo "Decoding keystore and signing APK..."
+          echo "$KS_B64" | base64 --decode > android-keystore.jks
+          unsigned=public/downloads/datasell-app-release-unsigned.apk
+          signed=public/downloads/datasell-app-release.apk
+          cp "$unsigned" "$signed"
+          "$ANDROID_SDK_ROOT/build-tools/33.0.2/apksigner" sign --ks android-keystore.jks --ks-key-alias "$KEY_ALIAS" --ks-pass pass:"$KS_PASS" --key-pass pass:"$KEY_PASS" "$signed"
+          "$ANDROID_SDK_ROOT/build-tools/33.0.2/apksigner" verify "$signed"
+          echo "Signed APK created: $signed"
+
+      - name: Fail if signing secrets are missing
+        if: ${{ !secrets.ANDROID_KEYSTORE_BASE64 || !secrets.ANDROID_KEYSTORE_PASSWORD || !secrets.ANDROID_KEY_ALIAS || !secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "Signing secrets not provided. To produce an installable release APK, set the following repository secrets: ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD" >&2
+          exit 1
+
+      - name: Create GitHub Release for this build
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: build-${{ github.run_number }}
+          release_name: Build ${{ github.run_number }} (${ { github.sha } })
+          draft: false
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload signed APK to Release
+        if: always()
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: public/downloads/datasell-app-release.apk
+          asset_name: datasell-app-release.apk
+          asset_content_type: application/vnd.android.package-archive
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

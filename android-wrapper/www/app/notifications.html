@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="/config.js"></script>
+  <link rel="stylesheet" href="/css/responsive.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>Notifications - DataSell</title>
+  <style>
+    body { font-family: 'Poppins', sans-serif; background: var(--light-bg, #f8f9fa); padding-bottom:80px; }
+    .app-header { position: sticky; top:0; background:white; border-bottom:1px solid #e9ecef; z-index:100; }
+    .container { max-width:1000px; margin:0 auto; padding:1rem; }
+    .notif-card { background: white; border-radius:12px; padding:1rem; margin-bottom:0.8rem; box-shadow:0 2px 8px rgba(0,0,0,0.05); display:flex; gap:1rem; align-items:flex-start; }
+    .notif-image { width:72px; height:72px; border-radius:8px; object-fit:cover; flex-shrink:0; }
+    .notif-body { flex:1; }
+    .notif-title { font-weight:700; margin:0 0 .25rem; }
+    .notif-time { font-size:0.85rem; color:#666; }
+    .empty { text-align:center; padding:3rem 1rem; color:#666; }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="container d-flex align-items-center" style="justify-content:space-between;">
+      <a href="/" class="btn btn-link"><i class="fas fa-arrow-left"></i></a>
+      <h1 class="app-title">Notifications</h1>
+      <div style="width:40px"></div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="notificationsList">
+      <div class="empty">Loading notifications...</div>
+    </div>
+  </main>
+
+  <script>
+    async function fetchNotifications() {
+      try {
+        const res = await fetch('/api/notifications', { credentials: 'include' });
+        if (!res.ok) throw new Error('Failed to load');
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Failed');
+        const list = data.notifications || [];
+        const container = document.getElementById('notificationsList');
+        if (!list.length) {
+          container.innerHTML = '<div class="empty">No notifications yet</div>';
+          return;
+        }
+        container.innerHTML = '';
+        list.forEach(n => {
+          const el = document.createElement('div');
+          el.className = 'notif-card';
+          el.innerHTML = `
+            ${n.imageUrl ? `<img src="${n.imageUrl}" class="notif-image"/>` : ''}
+            <div class="notif-body">
+              <div class="notif-title">${escapeHtml(n.title)}</div>
+              <div>${escapeHtml(n.body)}</div>
+              <div class="notif-time">${new Date(n.createdAt).toLocaleString()}</div>
+            </div>
+          `;
+          container.appendChild(el);
+        });
+        // mark notifications as seen: store newest createdAt as last seen timestamp
+        try {
+          const newest = list.reduce((max, i) => Math.max(max, Number(i.createdAt) || 0), 0);
+          if (newest > 0) localStorage.setItem('ds_last_notif_ts', String(newest));
+        } catch (e) { /* ignore */ }
+      } catch (e) {
+        document.getElementById('notificationsList').innerHTML = '<div class="empty">Unable to load notifications</div>';
+        console.error(e);
+      }
+    }
+
+    function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c=>'&#'+c.charCodeAt(0)+';'); }
+
+    document.addEventListener('DOMContentLoaded', fetchNotifications);
+  </script>
+</body>
+</html>

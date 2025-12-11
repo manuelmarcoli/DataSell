@@ -1,0 +1,112 @@
+name: DEBUG - Cordova Android Build
+
+on:
+  workflow_dispatch:  # Manual trigger only for debugging
+
+jobs:
+  debug-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 1. Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: 2. Show repository structure
+      run: |
+        echo "=== FULL REPOSITORY STRUCTURE ==="
+        find . -type f -name "*.xml" -o -name "*.json" -o -name "*.sh" | sort
+        echo ""
+        echo "=== ROOT DIRECTORY ==="
+        ls -la
+        echo ""
+        echo "=== WRAPPER DIRECTORY (if exists) ==="
+        ls -la wrapper/ 2>/dev/null || echo "No wrapper directory"
+        echo ""
+        echo "=== CONFIG.XML CONTENT ==="
+        if [ -f "config.xml" ]; then
+          cat config.xml
+        elif [ -f "wrapper/config.xml" ]; then
+          cat wrapper/config.xml
+        else
+          echo "config.xml NOT FOUND!"
+        fi
+    
+    - name: 3. Setup basic tools
+      run: |
+        echo "=== SETTING UP BASIC TOOLS ==="
+        # Install Node.js manually
+        curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+        sudo apt-get install -y nodejs
+        echo "Node.js version: $(node --version)"
+        echo "npm version: $(npm --version)"
+        
+        # Install Cordova
+        npm install -g cordova
+        echo "Cordova version: $(cordova --version 2>/dev/null || echo 'Not installed')"
+    
+    - name: 4. Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '11'  # Try Java 11 instead of 17
+    
+    - name: 5. Try to initialize Cordova project
+      run: |
+        echo "=== ATTEMPTING CORDOVA INIT ==="
+        
+        # Determine where to work
+        WORK_DIR="."
+        if [ -f "wrapper/config.xml" ]; then
+          WORK_DIR="wrapper"
+          cd wrapper
+        fi
+        
+        echo "Working in: $(pwd)"
+        echo "Files here:"
+        ls -la
+        
+        # Try to create a Cordova project
+        if [ ! -d "platforms" ]; then
+          echo "No platforms directory found, creating Cordova project..."
+          
+          # Create package.json if missing
+          if [ ! -f "package.json" ]; then
+            echo "Creating package.json..."
+            cat > package.json << 'EOF'
+{
+  "name": "com.datasell.app",
+  "version": "1.0.0",
+  "description": "DataSell App",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "cordova-android": "^10.1.1"
+  }
+}
+EOF
+          fi
+          
+          # Install dependencies
+          echo "Installing npm dependencies..."
+          npm install
+          
+          # Try to add Android platform
+          echo "Attempting to add Android platform..."
+          cordova platform add android@10.1.1 || echo "Failed to add platform"
+        else
+          echo "Platforms directory exists"
+        fi
+        
+        echo "=== CURRENT STATE ==="
+        ls -la
+        if [ -d "platforms" ]; then
+          echo "Platforms directory contents:"
+          ls -la platforms/
+        fi
