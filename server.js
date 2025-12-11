@@ -13,7 +13,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 // If running behind a proxy (Cloudflare, Heroku, Render, etc.) the
 // 'X-Forwarded-For' header may be set; trust the first proxy by default.
-app.set('trust proxy', true);
+// Do not set 'trust proxy' to avoid conflicts with express-rate-limit validation
+// (since we removed rate-limiting, this is not needed)
 
 // mNotify SMS configuration
 const MNOTIFY_API_KEY = process.env.MNOTIFY_API_KEY || '8QZ7zFXx1iFXvRYnDOmoyUabC';
@@ -629,6 +630,63 @@ app.get('/api/user', requireAuth, async (req, res) => {
   } catch (err) {
     console.error('Get user error:', err);
     res.status(500).json({ success: false, error: 'Failed to fetch user' });
+  }
+});
+
+// Get user profile endpoint
+app.get('/api/profile', requireAuth, async (req, res) => {
+  try {
+    const uid = req.session.user.uid;
+    const snap = await admin.database().ref('users/' + uid).once('value');
+    const userData = snap.val() || {};
+
+    const profile = {
+      uid,
+      firstName: userData.firstName || '',
+      lastName: userData.lastName || '',
+      email: userData.email || '',
+      phone: userData.phone || '',
+      walletBalance: userData.walletBalance || 0,
+      createdAt: userData.createdAt || null,
+      lastLogin: userData.lastLogin || null,
+      isAdmin: userData.isAdmin || false,
+      pricingGroup: userData.pricingGroup || 'regular'
+    };
+
+    res.json({ success: true, profile });
+  } catch (err) {
+    console.error('Get profile error:', err);
+    res.status(500).json({ success: false, error: 'Failed to fetch profile' });
+  }
+});
+
+// Get user profile statistics
+app.get('/api/profile/stats', requireAuth, async (req, res) => {
+  try {
+    const uid = req.session.user.uid;
+    
+    // Get total spent from orders
+    const ordersSnap = await admin.database().ref('orders').orderByChild('userId').equalTo(uid).once('value');
+    const orders = ordersSnap.val() || {};
+    const totalOrders = Object.keys(orders).length;
+    const totalSpent = Object.values(orders).reduce((sum, order) => sum + (order.amount || 0), 0);
+    
+    // Get wallet info
+    const userSnap = await admin.database().ref('users/' + uid).once('value');
+    const userData = userSnap.val() || {};
+    const walletBalance = userData.walletBalance || 0;
+
+    const stats = {
+      totalOrders,
+      totalSpent,
+      walletBalance,
+      memberSince: userData.createdAt || null
+    };
+
+    res.json({ success: true, stats });
+  } catch (err) {
+    console.error('Get profile stats error:', err);
+    res.status(500).json({ success: false, error: 'Failed to fetch stats' });
   }
 });
 
