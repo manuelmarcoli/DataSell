@@ -596,23 +596,16 @@ app.post('/api/login', async (req, res) => {
           lastLogin: new Date().toISOString()
         }).catch(err => console.error('Failed to update lastLogin:', err));
 
-        // Save session to Firebase and respond
-        console.log('✅ Admin login for', userRecord.uid, 'sessionID:', req.sessionID);
-        return req.session.save((err) => {
-          if (err) {
-            console.error('❌ Session save error:', err);
-            return res.status(500).json({ 
-              success: false,
-              error: 'Session save failed - please try again'
-            });
-          }
-
-          console.log('✅ Admin session saved to Firebase');
-          return res.json({ 
-            success: true, 
-            message: 'Admin login successful',
-            user: req.session.user
-          });
+        // Log session info for debugging
+        console.log('✅ Admin login for', userRecord.uid, 'sessionID:', req.sessionID, 'cookieMaxAge:', req.session.cookie.maxAge);
+        console.log('🍪 Session data set:', { uid: req.session.user.uid, sessionID: req.sessionID });
+        
+        // Return response - express-session middleware will automatically save and set Set-Cookie
+        return res.json({ 
+          success: true, 
+          message: 'Admin login successful',
+          user: req.session.user,
+          sessionID: req.sessionID
         });
       } else {
         return res.status(401).json({ 
@@ -674,23 +667,16 @@ app.post('/api/login', async (req, res) => {
       lastLogin: new Date().toISOString()
     }).catch(err => console.error('Failed to update lastLogin:', err));
 
-    // Save session to Firebase and respond
-    console.log('✅ User login for', localId, 'sessionID:', req.sessionID);
-    return req.session.save((err) => {
-      if (err) {
-        console.error('❌ Session save error:', err);
-        return res.status(500).json({ 
-          success: false,
-          error: 'Session save failed - please try again'
-        });
-      }
-
-      console.log('✅ User session saved to Firebase');
-      return res.json({ 
-        success: true, 
-        message: 'Login successful',
-        user: req.session.user
-      });
+    // Log session info for debugging
+    console.log('✅ User login for', localId, 'sessionID:', req.sessionID, 'cookieMaxAge:', req.session.cookie.maxAge);
+    console.log('🍪 Session data set:', { uid: req.session.user.uid, sessionID: req.sessionID });
+    
+    // Return response - express-session middleware will automatically save and set Set-Cookie
+    return res.json({ 
+      success: true, 
+      message: 'Login successful',
+      user: req.session.user,
+      sessionID: req.sessionID
     });
   } catch (error) {
     console.error('Login error:', error);
