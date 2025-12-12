@@ -145,13 +145,82 @@ function initializePackageCache() {
 
 initializePackageCache();
 
+// Custom Firebase Session Store (persists sessions across restarts)
+class FirebaseSessionStore extends session.Store {
+  constructor() {
+    super();
+    this.sessionsRef = admin.database().ref('sessions');
+  }
+
+  get(sessionId, callback) {
+    this.sessionsRef.child(sessionId).once('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data && data.expires > Date.now()) {
+        // Session still valid
+        callback(null, JSON.parse(data.session));
+      } else if (data) {
+        // Session expired, delete it
+        this.sessionsRef.child(sessionId).remove();
+        callback(null, null);
+      } else {
+        callback(null, null);
+      }
+    }).catch((err) => {
+      console.error('Session store get error:', err);
+      callback(err);
+    });
+  }
+
+  set(sessionId, sessionData, callback) {
+    const expiresMs = sessionData.cookie.maxAge || 24 * 60 * 60 * 1000;
+    this.sessionsRef.child(sessionId).set({
+      session: JSON.stringify(sessionData),
+      expires: Date.now() + expiresMs,
+      createdAt: Date.now()
+    }, (err) => {
+      if (err) {
+        console.error('Session store set error:', err);
+        callback(err);
+      } else {
+        callback(null);
+      }
+    });
+  }
+
+  destroy(sessionId, callback) {
+    this.sessionsRef.child(sessionId).remove((err) => {
+      if (err) {
+        console.error('Session store destroy error:', err);
+        callback(err);
+      } else {
+        callback(null);
+      }
+    });
+  }
+
+  touch(sessionId, sessionData, callback) {
+    const expiresMs = sessionData.cookie.maxAge || 24 * 60 * 60 * 1000;
+    this.sessionsRef.child(sessionId).update({
+      expires: Date.now() + expiresMs
+    }, (err) => {
+      if (err) {
+        console.error('Session store touch error:', err);
+        callback(err);
+      } else {
+        callback(null);
+      }
+    });
+  }
+}
+
 // Enhanced middleware setup
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Enhanced session configuration
+// Enhanced session configuration with Firebase persistence
 app.use(session({
+  store: new FirebaseSessionStore(),
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
