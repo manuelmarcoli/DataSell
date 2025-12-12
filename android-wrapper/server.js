@@ -572,41 +572,53 @@ app.post('/api/login', async (req, res) => {
           });
         }
 
-        req.session.user = {
-          uid: userRecord.uid,
-          email: userRecord.email,
-          displayName: userRecord.displayName,
-          isAdmin: true
-        };
-
-        // Respect 'remember me' for admin sessions if provided
-        try {
-          const rememberMs = remember ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000; // 30 days || 24 hours
-          req.session.cookie.maxAge = rememberMs;
-        } catch (e) {
-          // Ignore if session cookie cannot be modified
-        }
-
-        // Update last login
-        await admin.database().ref('users/' + userRecord.uid).update({
-          lastLogin: new Date().toISOString()
-        });
-
-        // Ensure session is saved to Firebase before responding
-        req.session.save((err) => {
+        // Regenerate session to prevent session fixation attacks
+        req.session.regenerate((err) => {
           if (err) {
-            console.error('❌ Session save error:', err);
+            console.error('❌ Session regenerate error:', err);
             return res.status(500).json({ 
-              success: false,
-              error: 'Session save failed - please try again'
+              success: false, 
+              error: 'Session error - please try again' 
             });
           }
 
-          console.log('✅ Admin login session saved for', userRecord.uid);
-          res.json({ 
-            success: true, 
-            message: 'Admin login successful',
-            user: req.session.user
+          req.session.user = {
+            uid: userRecord.uid,
+            email: userRecord.email,
+            displayName: userRecord.displayName,
+            isAdmin: true
+          };
+
+          // Respect 'remember me' for admin sessions if provided
+          try {
+            const rememberMs = remember ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000; // 30 days || 24 hours
+            req.session.cookie.maxAge = rememberMs;
+          } catch (e) {
+            // Ignore if session cookie cannot be modified
+          }
+
+          // Update last login - do this in background
+          admin.database().ref('users/' + userRecord.uid).update({
+            lastLogin: new Date().toISOString()
+          }).catch(err => console.error('Failed to update lastLogin:', err));
+
+          // Ensure session is saved to Firebase before responding
+          req.session.save((err) => {
+            if (err) {
+              console.error('❌ Session save error:', err);
+              return res.status(500).json({ 
+                success: false,
+              error: 'Session save failed - please try again'
+            });
+            }
+
+            console.log('✅ Admin login session saved for', userRecord.uid, 'sessionID:', req.sessionID);
+            res.json({ 
+              success: true, 
+              message: 'Admin login successful',
+              user: req.session.user,
+              sessionId: req.sessionID
+            });
           });
         });
       } else {
@@ -648,41 +660,53 @@ app.post('/api/login', async (req, res) => {
       });
     }
 
-    req.session.user = {
-      uid: localId,
-      email: userEmail,
-      displayName: displayName || `${userData.firstName} ${userData.lastName}`,
-      isAdmin: userData.isAdmin || false
-    };
-
-    // Respect 'remember me' for regular user sessions
-    try {
-      const rememberMs = remember ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000; // 30 days || 24 hours
-      req.session.cookie.maxAge = rememberMs;
-    } catch (e) {
-      // Ignore if session cookie cannot be modified
-    }
-
-    // Update last login
-    await admin.database().ref('users/' + localId).update({
-      lastLogin: new Date().toISOString()
-    });
-
-    // Ensure session is saved to Firebase before responding
-    req.session.save((err) => {
+    // Regenerate session to prevent session fixation attacks
+    req.session.regenerate((err) => {
       if (err) {
-        console.error('❌ Session save error:', err);
+        console.error('❌ Session regenerate error:', err);
         return res.status(500).json({ 
-          success: false,
-          error: 'Session save failed - please try again'
+          success: false, 
+          error: 'Session error - please try again' 
         });
       }
-      
-      console.log('✅ Session saved to Firebase for', localId);
-      res.json({ 
-        success: true, 
-        message: 'Login successful',
-        user: req.session.user
+
+      req.session.user = {
+        uid: localId,
+        email: userEmail,
+        displayName: displayName || `${userData.firstName} ${userData.lastName}`,
+        isAdmin: userData.isAdmin || false
+      };
+
+      // Respect 'remember me' for regular user sessions
+      try {
+        const rememberMs = remember ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000; // 30 days || 24 hours
+        req.session.cookie.maxAge = rememberMs;
+      } catch (e) {
+        // Ignore if session cookie cannot be modified
+      }
+
+      // Update last login - do this in background
+      admin.database().ref('users/' + localId).update({
+        lastLogin: new Date().toISOString()
+      }).catch(err => console.error('Failed to update lastLogin:', err));
+
+      // Ensure session is saved to Firebase before responding
+      req.session.save((err) => {
+        if (err) {
+          console.error('❌ Session save error:', err);
+          return res.status(500).json({ 
+            success: false,
+            error: 'Session save failed - please try again'
+          });
+        }
+        
+        console.log('✅ Session saved to Firebase for', localId, 'sessionID:', req.sessionID);
+        res.json({ 
+          success: true, 
+          message: 'Login successful',
+          user: req.session.user,
+          sessionId: req.sessionID
+        });
       });
     });
   } catch (error) {
