@@ -573,7 +573,7 @@ app.post('/api/login', async (req, res) => {
         }
 
         // Regenerate session to prevent session fixation attacks
-        req.session.regenerate((err) => {
+        return req.session.regenerate((err) => {
           if (err) {
             console.error('❌ Session regenerate error:', err);
             return res.status(500).json({ 
@@ -613,7 +613,7 @@ app.post('/api/login', async (req, res) => {
             }
 
             console.log('✅ Admin login session saved for', userRecord.uid, 'sessionID:', req.sessionID);
-            res.json({ 
+            return res.json({ 
               success: true, 
               message: 'Admin login successful',
               user: req.session.user,
@@ -661,7 +661,7 @@ app.post('/api/login', async (req, res) => {
     }
 
     // Regenerate session to prevent session fixation attacks
-    req.session.regenerate((err) => {
+    return req.session.regenerate((err) => {
       if (err) {
         console.error('❌ Session regenerate error:', err);
         return res.status(500).json({ 
@@ -701,7 +701,7 @@ app.post('/api/login', async (req, res) => {
         }
         
         console.log('✅ Session saved to Firebase for', localId, 'sessionID:', req.sessionID);
-        res.json({ 
+        return res.json({ 
           success: true, 
           message: 'Login successful',
           user: req.session.user,
