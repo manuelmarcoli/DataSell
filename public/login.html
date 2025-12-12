@@ -453,7 +453,8 @@ body.auth-page {
 
             if (result.success) {
                 notyf.success('Login successful!');
-                setTimeout(() => window.location.href = '/', 1500);
+                // Wait 2.5 seconds for Firebase session to persist before redirecting
+                setTimeout(() => window.location.href = '/', 2500);
             } else {
                 notyf.error(result.error || 'Login failed');
             }

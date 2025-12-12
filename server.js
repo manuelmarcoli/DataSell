@@ -153,46 +153,54 @@ class FirebaseSessionStore extends session.Store {
   }
 
   get(sessionId, callback) {
+    console.log('📖 Session store: GET', sessionId);
     this.sessionsRef.child(sessionId).once('value', (snapshot) => {
       const data = snapshot.val();
       if (data && data.expires > Date.now()) {
         // Session still valid
+        console.log('✅ Session store: GET found valid session for', sessionId);
         callback(null, JSON.parse(data.session));
       } else if (data) {
         // Session expired, delete it
+        console.log('⏰ Session store: GET found expired session for', sessionId, '- deleting');
         this.sessionsRef.child(sessionId).remove();
         callback(null, null);
       } else {
+        console.log('❌ Session store: GET found NO session for', sessionId);
         callback(null, null);
       }
     }).catch((err) => {
-      console.error('Session store get error:', err);
+      console.error('❌ Session store GET error:', err);
       callback(err);
     });
   }
 
   set(sessionId, sessionData, callback) {
     const expiresMs = sessionData.cookie.maxAge || 24 * 60 * 60 * 1000;
+    console.log('💾 Session store: SET', sessionId, 'with user:', sessionData.user?.uid || 'no user');
     this.sessionsRef.child(sessionId).set({
       session: JSON.stringify(sessionData),
       expires: Date.now() + expiresMs,
       createdAt: Date.now()
     }, (err) => {
       if (err) {
-        console.error('Session store set error:', err);
+        console.error('❌ Session store SET error:', err);
         callback(err);
       } else {
+        console.log('✅ Session store: SET complete for', sessionId);
         callback(null);
       }
     });
   }
 
   destroy(sessionId, callback) {
+    console.log('🗑️  Session store: DESTROY', sessionId);
     this.sessionsRef.child(sessionId).remove((err) => {
       if (err) {
-        console.error('Session store destroy error:', err);
+        console.error('❌ Session store DESTROY error:', err);
         callback(err);
       } else {
+        console.log('✅ Session store: DESTROY complete for', sessionId);
         callback(null);
       }
     });
@@ -200,13 +208,15 @@ class FirebaseSessionStore extends session.Store {
 
   touch(sessionId, sessionData, callback) {
     const expiresMs = sessionData.cookie.maxAge || 24 * 60 * 60 * 1000;
+    console.log('🔄 Session store: TOUCH', sessionId);
     this.sessionsRef.child(sessionId).update({
       expires: Date.now() + expiresMs
     }, (err) => {
       if (err) {
-        console.error('Session store touch error:', err);
+        console.error('❌ Session store TOUCH error:', err);
         callback(err);
       } else {
+        console.log('✅ Session store: TOUCH complete for', sessionId);
         callback(null);
       }
     });
