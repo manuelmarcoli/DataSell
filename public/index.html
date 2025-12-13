@@ -1019,6 +1019,8 @@ body {
         let userBalance = 0;
         const POLL_INTERVAL = 30 * 1000;
         let pollTimer = null;
+        let hasShownGreetingCard = false;  // Track if greeting has been shown in this session
+        let hasShownInstallBanner = false; // Track if install banner has been shown in this session
 
         // Small helper to ensure cookies are sent with API calls
         function apiFetch(path, opts = {}) {
@@ -1100,14 +1102,18 @@ body {
             }
         }
 
-        // Show greeting card with user name
+        // Show greeting card with user name (only once per session)
         function showGreetingCard() {
+            // Only show greeting once per login session
+            if (hasShownGreetingCard) return;
+            
             const greetingCard = document.getElementById('greetingCard');
             const greetingText = document.getElementById('greetingText');
             
             if (currentUser && currentUser.displayName) {
                 greetingText.textContent = `Greetings!!! Dear ${currentUser.displayName}`;
                 greetingCard.style.display = 'block';
+                hasShownGreetingCard = true; // Mark greeting as shown
                 
                 // Auto-hide after 3 seconds
                 setTimeout(() => {
@@ -1354,10 +1360,16 @@ body {
                 const result = await response.json();
                 
                 if (result.success) {
+                    // Reset flags so greeting and install banner show again on next login
+                    hasShownGreetingCard = false;
+                    hasShownInstallBanner = false;
                     window.location.href = '/login';
                 }
             } catch (error) {
                 console.error('Logout error:', error);
+                // Reset flags even on error to allow fresh start on next login
+                hasShownGreetingCard = false;
+                hasShownInstallBanner = false;
                 window.location.href = '/login';
             }
         }
@@ -1431,8 +1443,11 @@ body {
                     }, 500);
                 });
 
-                // Show install banner
+                // Show install banner (only once per session)
                 function showInstallBanner() {
+                    // Only show banner once per login session
+                    if (hasShownInstallBanner) return;
+                    
                     const banner = document.getElementById('installBanner');
                     if (!banner) {
                         console.warn('Install banner element not found');
@@ -1440,6 +1455,7 @@ body {
                     }
                     
                     banner.style.display = 'flex';
+                    hasShownInstallBanner = true; // Mark banner as shown
                     console.log('Install banner shown');
 
                     // Auto-hide after 5 seconds unless user interacts
