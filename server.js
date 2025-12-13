@@ -746,6 +746,7 @@ app.get('/api/user', requireAuth, async (req, res) => {
       walletBalance: userData.walletBalance || 0,
       firstName: userData.firstName || null,
       lastName: userData.lastName || null,
+      displayName: userData.firstName && userData.lastName ? `${userData.firstName} ${userData.lastName}` : userData.displayName || userData.email || 'User',
       isAdmin: req.session.user.isAdmin || userData.isAdmin || false
     });
 
