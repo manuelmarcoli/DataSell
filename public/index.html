@@ -1443,6 +1443,12 @@ body {
 
                 // Capture the beforeinstallprompt event
                 window.addEventListener('beforeinstallprompt', (e) => {
+                    // Skip if already shown in this session
+                    if (sessionStorage.getItem('ds_install_shown') === 'true') {
+                        e.preventDefault();
+                        return;
+                    }
+                    
                     console.log('beforeinstallprompt event captured');
                     // Prevent the mini-infobar from appearing on mobile
                     e.preventDefault();
@@ -1621,6 +1627,17 @@ body {
                                 }, 5000);
                             }
                         }, 2000);
+                    }
+                });
+
+                // Prevent banner from showing when tab becomes visible again
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden && sessionStorage.getItem('ds_install_shown') === 'true') {
+                        // Tab became visible - ensure banner stays hidden if already shown
+                        const banner = document.getElementById('installBanner');
+                        if (banner) {
+                            banner.style.display = 'none';
+                        }
                     }
                 });
 
