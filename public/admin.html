@@ -2135,6 +2135,30 @@
             }
         }
 
+        async function toggleDelivered(transactionId) {
+            try {
+                const response = await fetch(`/api/admin/transactions/${transactionId}/toggle-delivery`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess(data.message);
+                    loadTransactions();
+                } else {
+                    showError(data.error);
+                }
+            } catch (error) {
+                console.error('Toggle delivery error:', error);
+                showError('Failed to update delivery status');
+            }
+        }
+
         async function viewTransactionDetails(transactionId) {
             try {
                 showLoading();
@@ -2236,16 +2260,39 @@
         }
 
         function searchUsers() {
-            // Implementation for user search
-            console.log('Searching users...');
+            const searchTerm = document.getElementById('userSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#usersTableBody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
         }
 
         function searchTransactions() {
-            // Implementation for transaction search
-            console.log('Searching transactions...');
+            const searchTerm = document.getElementById('transactionSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#transactionsTableBody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
         }
 
-        // Notification handlers
+        function filterTransactions() {
+            const statusFilter = document.getElementById('statusFilter')?.value || 'all';
+            const rows = document.querySelectorAll('#transactionsTableBody tr');
+            
+            rows.forEach(row => {
+                if (statusFilter === 'all') {
+                    row.style.display = '';
+                } else {
+                    const statusCell = row.querySelector('td:nth-child(7)');
+                    const status = statusCell?.textContent.toLowerCase().trim() || '';
+                    row.style.display = status.includes(statusFilter) ? '' : 'none';
+                }
+            });
+        }
         document.getElementById('notifImage').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -2301,8 +2348,18 @@
         });
 
         function filterTransactions() {
-            // Implementation for transaction filtering
-            console.log('Filtering transactions...');
+            const statusFilter = document.getElementById('statusFilter')?.value || 'all';
+            const rows = document.querySelectorAll('#transactionsTableBody tr');
+            
+            rows.forEach(row => {
+                if (statusFilter === 'all') {
+                    row.style.display = '';
+                } else {
+                    const statusCell = row.querySelector('td:nth-child(7)');
+                    const status = statusCell?.textContent.toLowerCase().trim() || '';
+                    row.style.display = status.includes(statusFilter) ? '' : 'none';
+                }
+            });
         }
 
         // Load theme on startup
