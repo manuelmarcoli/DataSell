@@ -823,8 +823,8 @@
             <div class="tab-content" id="system-tab">
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-value" id="hubnetStatus">Checking...</div>
-                        <div class="stat-label">Hubnet Status</div>
+                        <div class="stat-value" id="datamartStatus">Checking...</div>
+                        <div class="stat-label">DataMart Status</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value" id="paystackStatus">Checking...</div>
@@ -1297,9 +1297,9 @@
         }
 
         function updateSystemStatus(status) {
-            document.getElementById('hubnetStatus').innerHTML = `
-                <span class="status-indicator ${status.hubnet.status === 'online' ? 'status-online' : 'status-offline'}"></span>
-                ${status.hubnet.status}
+            document.getElementById('datamartStatus').innerHTML = `
+                <span class="status-indicator ${status.datamart.status === 'online' ? 'status-online' : 'status-offline'}"></span>
+                ${status.datamart.status}
             `;
             document.getElementById('paystackStatus').innerHTML = `
                 <span class="status-indicator ${status.paystack.status === 'online' ? 'status-online' : 'status-offline'}"></span>

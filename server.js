@@ -11,10 +11,10 @@ const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-// If running behind a proxy (Cloudflare, Heroku, Render, etc.) the
-// 'X-Forwarded-For' header may be set; trust the first proxy by default.
-// Do not set 'trust proxy' to avoid conflicts with express-rate-limit validation
-// (since we removed rate-limiting, this is not needed)
+
+// Trust proxy for Render deployment (needed for correct IP addresses and HTTPS)
+// Render uses a reverse proxy, so we need to trust it
+app.set('trust proxy', 1);
 
 // mNotify SMS configuration
 const MNOTIFY_API_KEY = process.env.MNOTIFY_API_KEY || '8QZ7zFXx1iFXvRYnDOmoyUabC';
@@ -52,7 +52,7 @@ const requiredEnvVars = [
   'FIREBASE_CLIENT_EMAIL', 
   'FIREBASE_DATABASE_URL',
   'PAYSTACK_SECRET_KEY',
-  'HUBNET_API_KEY',
+  'DATAMART_API_KEY',
   'SESSION_SECRET',
   'BASE_URL',
   'FIREBASE_API_KEY',
@@ -280,7 +280,7 @@ app.use((req, res, next) => {
   const origin = req.get('origin');
   
   // Skip domain check for health endpoints, webhooks and lightweight config
-  if (req.path === '/api/health' || req.path === '/api/ping' || req.path === '/api/hubnet-webhook' || req.path === '/config.js') {
+  if (req.path === '/api/health' || req.path === '/api/ping' || req.path === '/api/hubnet-webhook' || req.path === '/api/datamart-webhook' || req.path === '/config.js') {
     return next();
   }
   
@@ -1027,7 +1027,7 @@ app.get('/api/orders', requireAuth, async (req, res) => {
         volume: transaction.volume || '0MB',
         status: transaction.status || 'processing',
         reference: transaction.reference || '',
-        transactionId: transaction.transactionId || transaction.hubnetTransactionId || '',
+        transactionId: transaction.transactionId || transaction.datamartTransactionId || transaction.hubnetTransactionId || '',
         timestamp: transaction.timestamp || new Date().toISOString(),
         reason: transaction.reason || ''
       }));
@@ -1063,7 +1063,7 @@ app.get('/api/orders', requireAuth, async (req, res) => {
           volume: transaction.volume || '0MB',
           status: transaction.status || 'processing',
           reference: transaction.reference || '',
-          transactionId: transaction.transactionId || transaction.hubnetTransactionId || '',
+          transactionId: transaction.transactionId || transaction.datamartTransactionId || transaction.hubnetTransactionId || '',
           timestamp: transaction.timestamp || new Date().toISOString(),
           reason: transaction.reason || ''
         }));
@@ -1216,26 +1216,36 @@ app.get('/api/verify-payment/:reference', requireAuth, async (req, res) => {
 // ENHANCED DATA PURCHASE ROUTES
 // ====================
 
-// Helper function to check if Hubnet error is due to provider balance
-function isProviderBalanceError(hubnetData) {
-  if (!hubnetData) return false;
+// Helper function to map internal network names to DataMart network identifiers
+function mapNetworkToDataMart(network) {
+  const networkMap = {
+    'mtn': 'YELLO',
+    'at': 'AT_PREMIUM',
+    'airteltigo': 'AT_PREMIUM',
+    'vodafone': 'TELECEL',
+    'telecel': 'TELECEL'
+  };
+  return networkMap[network?.toLowerCase()] || network?.toUpperCase();
+}
+
+// Helper function to check if DataMart error is due to provider balance
+function isProviderBalanceError(datamartData) {
+  if (!datamartData) return false;
   
-  const code = String(hubnetData.code || hubnetData.status_code || '').toLowerCase();
-  const reason = String(hubnetData.reason || hubnetData.message || '').toLowerCase();
-  const event = String(hubnetData.event || '').toLowerCase();
-  const fullResponse = JSON.stringify(hubnetData || {}).toLowerCase();
+  const message = String(datamartData.message || datamartData.error || '').toLowerCase();
+  const details = String(datamartData.details || '').toLowerCase();
+  const fullResponse = JSON.stringify(datamartData || {}).toLowerCase();
   
-  // Check for common Hubnet balance error codes and messages
+  // Check for common DataMart balance error messages
   const balanceErrorKeywords = [
     'insufficient', 'balance', 'low balance', 'out of stock', 'unavailable', 
-    'account balance', 'transaction', 'no stock', 'low', 'rejected'
+    'account balance', 'no stock', 'low', 'rejected', 'insufficient funds'
   ];
   
-  // Check if any balance error keyword appears in code, reason, or message
+  // Check if any balance error keyword appears in message, details, or full response
   return balanceErrorKeywords.some(keyword => 
-    code.includes(keyword) || 
-    reason.includes(keyword) || 
-    event.includes(keyword) ||
+    message.includes(keyword) || 
+    details.includes(keyword) ||
     fullResponse.includes(keyword)
   );
 }
@@ -1310,11 +1320,13 @@ app.post('/api/purchase-data', requireAuth, async (req, res) => {
       });
     }
 
-    // Convert volume from GB to MB for Hubtel
+    // Convert volume to GB for DataMart (they expect capacity in GB)
     let volumeValue = volume;
-    if (volumeValue && parseInt(volumeValue) < 100) {
-      volumeValue = (parseInt(volumeValue) * 1000).toString();
-      console.log(`🔢 VOLUME CONVERTED: ${volume} → ${volumeValue}MB`);
+    let capacityGB = volumeValue;
+    if (volumeValue && parseInt(volumeValue) >= 100) {
+      // If volume is in MB, convert to GB
+      capacityGB = (parseInt(volumeValue) / 1000).toString();
+      console.log(`🔢 VOLUME CONVERTED: ${volume}MB → ${capacityGB}GB`);
     }
 
     const userRef = admin.database().ref('users/' + userId);
@@ -1351,9 +1363,9 @@ app.post('/api/purchase-data', requireAuth, async (req, res) => {
       status: 'processing',
       reference: reference,
       transactionId: null,
-      hubnetTransactionId: null,
-      hubnetResponse: null,
-      hubnetConfirmed: false,
+      datamartTransactionId: null,
+      datamartResponse: null,
+      datamartConfirmed: false,
       timestamp: new Date().toISOString(),
       paymentMethod: 'wallet'
     };
@@ -1377,58 +1389,54 @@ app.post('/api/purchase-data', requireAuth, async (req, res) => {
       console.error('❌ Failed to send order-created SMS for', transactionId, smsErr);
     }
 
-    // Hubnet API call
-    const hubnetResponse = await axios.post(
-      `https://console.hubnet.app/live/api/context/business/transaction/${network}-new-transaction`,
+    // Map network to DataMart format
+    const datamartNetwork = mapNetworkToDataMart(network);
+    
+    // DataMart API call
+    const datamartResponse = await axios.post(
+      'https://api.datamartgh.shop/api/developer/purchase',
       {
-        phone: phoneNumber,
-        volume: volumeValue,
-        reference: reference,
-        referrer: userData.phone || '',
-        webhook: `${process.env.BASE_URL}/api/hubnet-webhook`
+        phoneNumber: phoneNumber,
+        network: datamartNetwork,
+        capacity: capacityGB,
+        gateway: 'wallet'
       },
       {
         headers: {
-          'token': `Bearer ${process.env.HUBNET_API_KEY}`,
+          'X-API-Key': process.env.DATAMART_API_KEY,
           'Content-Type': 'application/json'
         },
         timeout: 30000
       }
     );
 
-    const hubnetData = hubnetResponse.data;
-    console.log('📡 Hubnet response:', hubnetData);
-    console.log('📡 Hubnet response full:', JSON.stringify(hubnetData, null, 2));
+    const datamartData = datamartResponse.data;
+    console.log('📡 DataMart response:', datamartData);
+    console.log('📡 DataMart response full:', JSON.stringify(datamartData, null, 2));
 
-    // Handle nested data structure from Hubnet
-    let processedHubnetData = hubnetData.data || hubnetData;
-    
-    if (hubnetData.data) {
-      console.log('📡 Hubnet data is nested, using inner data object');
-      processedHubnetData = hubnetData.data;
-    }
-
-    if (processedHubnetData.status === true && processedHubnetData.code === "0000") {
+    // Handle DataMart response structure
+    if (datamartData.status === 'success' && datamartData.data) {
       // SUCCESS: Deduct balance and update order
       const newBalance = userData.walletBalance - amount;
       await userRef.update({ walletBalance: newBalance });
 
+      const purchaseData = datamartData.data;
       await transactionRef.update({
         status: 'success',
-        transactionId: processedHubnetData.transaction_id,
-        hubnetTransactionId: processedHubnetData.transaction_id,
-        hubnetResponse: processedHubnetData
+        transactionId: purchaseData.purchaseId || purchaseData.transactionReference,
+        datamartTransactionId: purchaseData.purchaseId || purchaseData.transactionReference,
+        datamartResponse: purchaseData
       });
 
       console.log('✅ Purchase successful, order updated to success:', {
         reference: reference,
-        transactionId: processedHubnetData.transaction_id,
+        transactionId: purchaseData.purchaseId || purchaseData.transactionReference,
         newBalance: newBalance
       });
 
       res.json({ 
         success: true, 
-        data: processedHubnetData,
+        data: purchaseData,
         newBalance: newBalance,
         reference: reference,
         message: 'Data purchase successful!'
@@ -1437,45 +1445,44 @@ app.post('/api/purchase-data', requireAuth, async (req, res) => {
       // FAILURE: Update order status but DON'T deduct balance
       await transactionRef.update({
         status: 'failed',
-        hubnetResponse: processedHubnetData,
-        reason: processedHubnetData.reason || processedHubnetData.message || `Hubnet error: ${processedHubnetData.code}`
+        datamartResponse: datamartData,
+        reason: datamartData.message || 'Purchase failed'
       });
 
       console.log('❌ Purchase failed, order updated to failed');
 
       // Check if it's a provider balance issue
-      const isOutOfStock = isProviderBalanceError(processedHubnetData);
-      console.log('🔍 Balance error check:', { isOutOfStock, processedHubnetData });
-      const errorMessage = isOutOfStock ? 'Out of Stock - Please try again later' : (processedHubnetData.reason || processedHubnetData.message || 'Purchase failed');
+      const isOutOfStock = isProviderBalanceError(datamartData);
+      console.log('🔍 Balance error check:', { isOutOfStock, datamartData });
+      const errorMessage = isOutOfStock ? 'Out of Stock - Please try again later' : (datamartData.message || 'Purchase failed');
 
       res.status(400).json({ 
         success: false, 
         error: errorMessage,
-        isOutOfStock: isOutOfStock,
-        hubnetCode: hubnetData.code
+        isOutOfStock: isOutOfStock
       });
     }
 
   } catch (error) {
     console.error('❌ Purchase error:', error);
     
-    // Check if it's an Axios error with response data (e.g., 400 from Hubnet)
+    // Check if it's an Axios error with response data (e.g., 400 from DataMart)
     if (error.response && error.response.data) {
-      const hubnetErrorData = error.response.data;
-      console.log('📡 Hubnet error response:', hubnetErrorData);
+      const datamartErrorData = error.response.data;
+      console.log('📡 DataMart error response:', datamartErrorData);
       
       if (transactionRef) {
         await transactionRef.update({
           status: 'failed',
-          hubnetResponse: hubnetErrorData,
-          reason: hubnetErrorData.reason || hubnetErrorData.message || 'Hubnet error'
+          datamartResponse: datamartErrorData,
+          reason: datamartErrorData.message || 'DataMart error'
         });
       }
       
       // Check if it's a provider balance issue
-      const isOutOfStock = isProviderBalanceError(hubnetErrorData);
-      console.log('🔍 Balance error check (from catch):', { isOutOfStock, hubnetErrorData });
-      const errorMessage = isOutOfStock ? 'Out of Stock - Please try again later' : (hubnetErrorData.reason || hubnetErrorData.message || 'Purchase failed');
+      const isOutOfStock = isProviderBalanceError(datamartErrorData);
+      console.log('🔍 Balance error check (from catch):', { isOutOfStock, datamartErrorData });
+      const errorMessage = isOutOfStock ? 'Out of Stock - Please try again later' : (datamartErrorData.message || 'Purchase failed');
       
       return res.status(400).json({ 
         success: false, 
@@ -1488,7 +1495,7 @@ app.post('/api/purchase-data', requireAuth, async (req, res) => {
     if (transactionRef) {
       await transactionRef.update({
         status: 'failed',
-        hubnetResponse: { error: error.message },
+        datamartResponse: { error: error.message },
         reason: 'System error: ' + error.message
       });
     }
@@ -2331,22 +2338,23 @@ app.post('/api/admin/pricing/groups/update', requireAdmin, async (req, res) => {
 // 6. SYSTEM MONITORING ENDPOINTS
 app.get('/api/admin/system/status', requireAdmin, async (req, res) => {
   try {
-    // Check Hubnet balance
-    let hubnetStatus = { status: 'unknown', balance: 0 };
+    // Check DataMart status (balance check not available in DataMart API)
+    let datamartStatus = { status: 'unknown', note: 'Balance check not available' };
     try {
-      const hubnetResponse = await axios.get(
-        'https://console.hubnet.app/live/api/context/business/transaction/check_balance',
+      // Test API connectivity by making a simple request to data-packages endpoint
+      const datamartResponse = await axios.get(
+        'https://api.datamartgh.shop/api/developer/data-packages?network=YELLO',
         {
           headers: {
-            'token': `Bearer ${process.env.HUBNET_API_KEY}`,
+            'X-API-Key': process.env.DATAMART_API_KEY,
             'Content-Type': 'application/json'
           },
           timeout: 10000
         }
       );
-      hubnetStatus = { status: 'online', balance: hubnetResponse.data };
+      datamartStatus = { status: 'online', note: 'API is accessible' };
     } catch (error) {
-      hubnetStatus = { status: 'offline', error: error.message };
+      datamartStatus = { status: 'offline', error: error.message };
     }
 
     // Check Paystack status
@@ -2378,7 +2386,7 @@ app.get('/api/admin/system/status', requireAdmin, async (req, res) => {
       (recentTransactions.filter(t => t.status === 'success').length / recentTransactions.length * 100).toFixed(1) : 100;
 
     const systemStatus = {
-      hubnet: hubnetStatus,
+      datamart: datamartStatus,
       paystack: paystackStatus,
       firebase: { status: 'online' },
       server: { status: 'healthy' },
@@ -2418,13 +2426,14 @@ app.get('/api/admin/security/logs', requireAdmin, async (req, res) => {
 // ENHANCED WEBHOOKS AND UTILITIES
 // ====================
 
-// Enhanced Hubnet webhook
+// Enhanced DataMart webhook (if supported by DataMart)
 // Rate limiting removed for webhook endpoint.
-app.post('/api/hubnet-webhook', async (req, res) => {
-  console.log('📩 Hubnet Webhook received:', req.body);
-  const { reference, status, code, reason, message, transaction_id } = req.body;
+app.post('/api/datamart-webhook', async (req, res) => {
+  console.log('📩 DataMart Webhook received:', req.body);
+  const { reference, transactionReference, purchaseId, status, message } = req.body;
 
-  if (!reference) {
+  const transactionRef = reference || transactionReference || purchaseId;
+  if (!transactionRef) {
     return res.status(400).json({ error: 'Missing reference' });
   }
 
@@ -2432,38 +2441,107 @@ app.post('/api/hubnet-webhook', async (req, res) => {
     const snap = await admin.database()
       .ref('transactions')
       .orderByChild('reference')
-      .equalTo(reference)
+      .equalTo(transactionRef)
       .once('value');
 
     if (!snap.val()) {
-      console.log('❌ Webhook: No transaction found for reference:', reference);
-      return res.status(404).json({ error: 'Transaction not found' });
+      // Try searching by transactionId or datamartTransactionId
+      const allTxs = await admin.database().ref('transactions').once('value');
+      const txEntries = Object.entries(allTxs.val() || {});
+      const foundTx = txEntries.find(([id, tx]) => 
+        tx.datamartTransactionId === transactionRef || 
+        tx.transactionId === transactionRef
+      );
+      
+      if (!foundTx) {
+        console.log('❌ Webhook: No transaction found for reference:', transactionRef);
+        return res.status(404).json({ error: 'Transaction not found' });
+      }
+      
+      const [txId, tx] = foundTx;
+      
+      // Don't process if already confirmed
+      if (tx.datamartConfirmed) {
+        console.log('ℹ️ Webhook: Transaction already processed:', transactionRef);
+        return res.json({ success: true, message: 'Already processed' });
+      }
+
+      let update = { 
+        datamartConfirmed: true, 
+        confirmedAt: new Date().toISOString(),
+        datamartWebhookData: req.body
+      };
+
+      if (status === 'success' || status === 'completed' || message?.toLowerCase().includes('delivered')) {
+        update.status = 'delivered';
+        update.datamartStatus = 'delivered';
+        update.reason = 'Package delivered via webhook';
+        console.log('✅ Webhook: Marking as delivered:', transactionRef);
+      } else {
+        update.status = 'failed';
+        update.datamartStatus = status || 'failed';
+        update.reason = message || 'Delivery failed via webhook';
+        console.log('❌ Webhook: Marking as failed:', transactionRef);
+
+        // Auto-refund only if it was previously successful
+        if (tx.status === 'success') {
+          const user = (await admin.database().ref(`users/${tx.userId}`).once('value')).val();
+          await admin.database().ref(`users/${tx.userId}`).update({
+            walletBalance: (user.walletBalance || 0) + tx.amount
+          });
+          await admin.database().ref('refunds').push({
+            transactionId: txId,
+            userId: tx.userId,
+            amount: tx.amount,
+            reason: `Auto-refund: ${update.reason}`,
+            timestamp: new Date().toISOString()
+          });
+          console.log('💰 Webhook: Auto-refund processed for:', transactionRef);
+        }
+      }
+
+      await admin.database().ref(`transactions/${txId}`).update(update);
+      console.log('✅ Webhook: Transaction updated successfully:', transactionRef);
+      // If delivered and transaction was originally successful, send SMS notification
+      if (update.status === 'delivered' && tx.status === 'success') {
+        try {
+          const network = (tx.network || '').toUpperCase();
+          const packageName = tx.packageName || tx.package || '';
+          const smsMessage = `Your ${network} data purchase (${packageName}) with reference ${transactionRef} has been delivered. Thank you for using DataSell.`;
+          // send to stored phone and fallback to transaction phoneNumber
+          await sendSmsToUser(tx.userId, tx.phoneNumber, smsMessage);
+        } catch (smsErr) {
+          console.error('SMS notification error for delivered transaction', transactionRef, smsErr);
+        }
+      }
+      return res.json({ success: true });
     }
 
+    // If transaction found by reference
     const [txId, tx] = Object.entries(snap.val())[0];
     
     // Don't process if already confirmed
-    if (tx.hubnetConfirmed) {
-      console.log('ℹ️ Webhook: Transaction already processed:', reference);
+    if (tx.datamartConfirmed) {
+      console.log('ℹ️ Webhook: Transaction already processed:', transactionRef);
       return res.json({ success: true, message: 'Already processed' });
     }
 
     let update = { 
-      hubnetConfirmed: true, 
+      datamartConfirmed: true, 
       confirmedAt: new Date().toISOString(),
-      hubnetWebhookData: req.body
+      datamartWebhookData: req.body
     };
 
-    if (status === true || code === '0000' || message?.toLowerCase().includes('delivered')) {
+    if (status === 'success' || status === 'completed' || message?.toLowerCase().includes('delivered')) {
       update.status = 'delivered';
-      update.hubnetStatus = 'delivered';
+      update.datamartStatus = 'delivered';
       update.reason = 'Package delivered via webhook';
-      console.log('✅ Webhook: Marking as delivered:', reference);
+      console.log('✅ Webhook: Marking as delivered:', transactionRef);
     } else {
       update.status = 'failed';
-      update.hubnetStatus = code || 'failed';
-      update.reason = reason || message || 'Delivery failed via webhook';
-      console.log('❌ Webhook: Marking as failed:', reference);
+      update.datamartStatus = status || 'failed';
+      update.reason = message || 'Delivery failed via webhook';
+      console.log('❌ Webhook: Marking as failed:', transactionRef);
 
       // Auto-refund only if it was previously successful
       if (tx.status === 'success') {
@@ -2478,22 +2556,22 @@ app.post('/api/hubnet-webhook', async (req, res) => {
           reason: `Auto-refund: ${update.reason}`,
           timestamp: new Date().toISOString()
         });
-        console.log('💰 Webhook: Auto-refund processed for:', reference);
+        console.log('💰 Webhook: Auto-refund processed for:', transactionRef);
       }
     }
 
     await admin.database().ref(`transactions/${txId}`).update(update);
-    console.log('✅ Webhook: Transaction updated successfully:', reference);
+    console.log('✅ Webhook: Transaction updated successfully:', transactionRef);
     // If delivered and transaction was originally successful, send SMS notification
     if (update.status === 'delivered' && tx.status === 'success') {
       try {
         const network = (tx.network || '').toUpperCase();
         const packageName = tx.packageName || tx.package || '';
-        const message = `Your ${network} data purchase (${packageName}) with reference ${reference} has been delivered. Thank you for using DataSell.`;
+        const smsMessage = `Your ${network} data purchase (${packageName}) with reference ${transactionRef} has been delivered. Thank you for using DataSell.`;
         // send to stored phone and fallback to transaction phoneNumber
-        await sendSmsToUser(tx.userId, tx.phoneNumber, message);
+        await sendSmsToUser(tx.userId, tx.phoneNumber, smsMessage);
       } catch (smsErr) {
-        console.error('SMS notification error for delivered transaction', reference, smsErr);
+        console.error('SMS notification error for delivered transaction', transactionRef, smsErr);
       }
     }
     res.json({ success: true });
@@ -2578,6 +2656,25 @@ app.use((req, res) => {
   });
 });
 
+// Process error handlers for production stability
+process.on('uncaughtException', (error) => {
+  console.error('🚨 Uncaught Exception:', error);
+  // Don't exit immediately in production, log and continue
+  if (process.env.NODE_ENV === 'production') {
+    console.error('Uncaught exception logged, continuing...');
+  } else {
+    process.exit(1);
+  }
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🚨 Unhandled Rejection at:', promise, 'reason:', reason);
+  // Log but don't crash in production
+  if (process.env.NODE_ENV !== 'production') {
+    process.exit(1);
+  }
+});
+
 // Graceful shutdown handling
 process.on('SIGTERM', () => {
   console.log('🔄 SIGTERM received, shutting down gracefully');
@@ -2590,14 +2687,15 @@ process.on('SIGINT', () => {
 });
 
 // Start server with enhanced logging
-app.listen(PORT, () => {
+// Bind to 0.0.0.0 to accept connections from all network interfaces (required for Render)
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`
 🚀 DataSell Server v2.0.0
 📍 Port: ${PORT}
 🌐 Environment: ${process.env.NODE_ENV || 'development'}
 🔗 Base URL: ${process.env.BASE_URL}
 🔥 Firebase: ${process.env.FIREBASE_PROJECT_ID}
-📡 Hubnet: ${process.env.HUBNET_API_KEY ? 'Integrated' : 'Missing'}
+📡 DataMart: ${process.env.DATAMART_API_KEY ? 'Integrated' : 'Missing'}
 💳 Paystack: ${process.env.PAYSTACK_SECRET_KEY ? 'Live Mode' : 'Missing'}
 👑 Admin Panel: /admin
 💾 Package Cache: ${packageCache.isInitialized ? 'Active' : 'Initializing'}

@@ -839,7 +839,7 @@ body {
                 const statusDisplay = getStatusDisplay(order.status);
                 const network = getNetworkDisplay(order.network);
                 const date = formatDate(order.timestamp);
-                const transactionId = order.transactionId || order.hubnetTransactionId || 'N/A';
+                const transactionId = order.transactionId || order.datamartTransactionId || order.hubnetTransactionId || 'N/A';
 
                 return `
                     <div class="order-item ${statusClass}">
