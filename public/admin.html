@@ -1550,13 +1550,21 @@
         }
 
         function updateSystemStatus(status) {
+            // Safe access with null checks
+            const datamartStatus = status?.datamart?.status || 'unknown';
+            const paystackStatus = status?.paystack?.status || 'unknown';
+            const successRate = status?.successRate || 0;
+            const recentTransactions = status?.recentTransactions || 0;
+            const mtnCount = status?.packageCache?.mtnCount || 0;
+            const atCount = status?.packageCache?.atCount || 0;
+            
             document.getElementById('datamartStatus').innerHTML = `
-                <span class="status-indicator ${status.datamart.status === 'online' ? 'status-online' : 'status-offline'}"></span>
-                ${status.datamart.status}
+                <span class="status-indicator ${datamartStatus === 'online' ? 'status-online' : 'status-offline'}"></span>
+                ${datamartStatus}
             `;
             document.getElementById('paystackStatus').innerHTML = `
-                <span class="status-indicator ${status.paystack.status === 'online' ? 'status-online' : 'status-offline'}"></span>
-                ${status.paystack.status}
+                <span class="status-indicator ${paystackStatus === 'online' ? 'status-online' : 'status-offline'}"></span>
+                ${paystackStatus}
             `;
             
             // Update system metrics
@@ -1564,16 +1572,16 @@
             metricsContainer.innerHTML = `
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <strong>Success Rate:</strong> ${status.successRate}%
+                        <strong>Success Rate:</strong> ${successRate}%
                     </div>
                     <div>
-                        <strong>Recent Transactions (24h):</strong> ${status.recentTransactions}
+                        <strong>Recent Transactions (24h):</strong> ${recentTransactions}
                     </div>
                     <div>
-                        <strong>MTN Packages:</strong> ${status.packageCache.mtnCount}
+                        <strong>MTN Packages:</strong> ${mtnCount}
                     </div>
                     <div>
-                        <strong>AirtelTigo Packages:</strong> ${status.packageCache.atCount}
+                        <strong>AirtelTigo Packages:</strong> ${atCount}
                     </div>
                 </div>
             `;
@@ -1598,17 +1606,30 @@
 
         function displaySecurityLogs(logs) {
             const tbody = document.getElementById('securityLogsBody');
-            tbody.innerHTML = logs.map(log => `
-                <tr>
-                    <td>${new Date(log.timestamp).toLocaleString()}</td>
-                    <td class="font-mono text-sm">${log.adminId.substring(0, 8)}...</td>
-                    <td>
-                        <span class="badge badge-info">${log.action}</span>
-                    </td>
-                    <td>${log.details}</td>
-                    <td class="font-mono text-sm">${log.ip}</td>
-                </tr>
-            `).join('');
+            if (!logs || !Array.isArray(logs)) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center">No security logs available</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = logs.map(log => {
+                const adminId = (log?.adminId || 'unknown').substring(0, 8);
+                const timestamp = log?.timestamp ? new Date(log.timestamp).toLocaleString() : 'Unknown';
+                const action = log?.action || 'unknown';
+                const details = log?.details || '-';
+                const ip = log?.ip || 'Unknown';
+                
+                return `
+                    <tr>
+                        <td>${timestamp}</td>
+                        <td class="font-mono text-sm">${adminId}...</td>
+                        <td>
+                            <span class="badge badge-info">${action}</span>
+                        </td>
+                        <td>${details}</td>
+                        <td class="font-mono text-sm">${ip}</td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         // Pricing groups

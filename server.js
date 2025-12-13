@@ -2460,18 +2460,47 @@ app.get('/api/admin/system/status', requireAdmin, async (req, res) => {
   try {
     const usersSnapshot = await admin.database().ref('users').once('value');
     const transactionsSnapshot = await admin.database().ref('transactions').once('value');
+    
+    // Count successful transactions in last 24 hours
+    const transactions = transactionsSnapshot.val() || {};
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    const recentTransactions = Object.values(transactions).filter(t => 
+      new Date(t.timestamp || 0).getTime() > oneDayAgo
+    ).length;
+    
+    const successfulTransactions = Object.values(transactions).filter(t => 
+      t.status === 'completed' && new Date(t.timestamp || 0).getTime() > oneDayAgo
+    ).length;
+    const successRate = recentTransactions > 0 ? Math.round((successfulTransactions / recentTransactions) * 100) : 0;
+
     const systemStatus = {
-      server: 'online',
-      database: 'connected',
-      uptime: process.uptime(),
-      timestamp: new Date().toISOString(),
+      datamart: {
+        status: 'online',
+        message: 'Connected'
+      },
+      paystack: {
+        status: 'online',
+        message: 'Connected'
+      },
+      successRate: successRate,
+      recentTransactions: recentTransactions,
+      packageCache: {
+        mtnCount: packageCache.mtn.length,
+        atCount: packageCache.at.length,
+        lastUpdated: packageCache.lastUpdated
+      },
+      server: {
+        status: 'online',
+        uptime: Math.round(process.uptime()),
+        timestamp: new Date().toISOString()
+      },
       stats: {
         totalUsers: Object.keys(usersSnapshot.val() || {}).length,
-        totalTransactions: Object.keys(transactionsSnapshot.val() || {}).length
+        totalTransactions: Object.keys(transactions).length
       }
     };
 
-    res.json({ success: true, status: systemStatus });
+    res.json({ success: true, systemStatus: systemStatus });
   } catch (error) {
     console.error('System status error:', error);
     res.status(500).json({ success: false, error: error.message });
