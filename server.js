@@ -1482,12 +1482,26 @@ app.post('/api/purchase-data', requireAuth, async (req, res) => {
       // Check if it's a provider balance issue
       const isOutOfStock = isProviderBalanceError(datamartErrorData);
       console.log('🔍 Balance error check (from catch):', { isOutOfStock, datamartErrorData });
-      const errorMessage = isOutOfStock ? 'Out of Stock - Please try again later' : (datamartErrorData.message || 'Purchase failed');
+      
+      // Provide clearer error messages
+      let errorMessage;
+      if (isOutOfStock) {
+        // Check if it's specifically a provider wallet balance issue
+        if (datamartErrorData.message?.toLowerCase().includes('insufficient wallet balance') || 
+            datamartErrorData.message?.toLowerCase().includes('insufficient balance')) {
+          errorMessage = 'Service temporarily unavailable - Provider balance issue. Please try again later or contact support.';
+        } else {
+          errorMessage = 'Out of Stock - Please try again later';
+        }
+      } else {
+        errorMessage = datamartErrorData.message || 'Purchase failed';
+      }
       
       return res.status(400).json({ 
         success: false, 
         error: errorMessage,
-        isOutOfStock: isOutOfStock
+        isOutOfStock: isOutOfStock,
+        details: process.env.NODE_ENV !== 'production' ? datamartErrorData : undefined
       });
     }
     
@@ -2578,6 +2592,119 @@ app.post('/api/datamart-webhook', async (req, res) => {
   } catch (err) {
     console.error('❌ Webhook error:', err);
     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Admin access restoration endpoint (secure - requires ADMIN_EMAIL and ADMIN_PASSWORD)
+app.post('/api/restore-admin', async (req, res) => {
+  try {
+    const { email, password, restoreEmail } = req.body;
+    
+    // Verify admin credentials
+    if (email !== process.env.ADMIN_EMAIL || password !== process.env.ADMIN_PASSWORD) {
+      return res.status(401).json({ 
+        success: false, 
+        error: 'Invalid admin credentials' 
+      });
+    }
+    
+    // Get the user to restore
+    const targetEmail = restoreEmail || email;
+    let userRecord;
+    
+    try {
+      userRecord = await admin.auth().getUserByEmail(targetEmail);
+    } catch (error) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'User not found with email: ' + targetEmail 
+      });
+    }
+    
+    // Restore admin access
+    await admin.database().ref('users/' + userRecord.uid).update({
+      isAdmin: true,
+      adminRestoredAt: new Date().toISOString(),
+      adminRestoredBy: email
+    });
+    
+    console.log('✅ Admin access restored for:', targetEmail, 'UID:', userRecord.uid);
+    
+    res.json({ 
+      success: true, 
+      message: 'Admin access restored successfully',
+      userId: userRecord.uid,
+      email: targetEmail
+    });
+  } catch (error) {
+    console.error('❌ Restore admin error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to restore admin access: ' + error.message 
+    });
+  }
+});
+
+// Self-service admin restoration endpoint (uses user's own login credentials)
+app.post('/api/restore-my-admin', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Email and password are required' 
+      });
+    }
+    
+    // Verify user credentials by attempting login
+    const loginResponse = await axios.post(
+      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_API_KEY}`,
+      {
+        email,
+        password,
+        returnSecureToken: true
+      }
+    );
+    
+    const localId = loginResponse.data.localId;
+    
+    // Get user data
+    const userSnapshot = await admin.database().ref('users/' + localId).once('value');
+    if (!userSnapshot.exists()) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'User account not found in database' 
+      });
+    }
+    
+    // Restore admin access
+    await admin.database().ref('users/' + localId).update({
+      isAdmin: true,
+      adminRestoredAt: new Date().toISOString(),
+      suspended: false
+    });
+    
+    console.log('✅ Admin access self-restored for:', email, 'UID:', localId);
+    
+    res.json({ 
+      success: true, 
+      message: 'Admin access restored successfully. Please log in again.',
+      userId: localId,
+      email: email
+    });
+  } catch (error) {
+    console.error('❌ Self-restore admin error:', error);
+    if (error.response && error.response.data) {
+      return res.status(401).json({ 
+        success: false, 
+        error: 'Invalid email or password' 
+      });
+    }
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to restore admin access: ' + error.message 
+    });
   }
 });
 
