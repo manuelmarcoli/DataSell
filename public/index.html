@@ -1033,19 +1033,16 @@ body {
         function markInstallShown() {
             sessionStorage.setItem('ds_install_shown', 'true');
         }
-
-        // Small helper to ensure cookies are sent with API calls
-        function apiFetch(path, opts = {}) {
-            opts.credentials = opts.credentials || 'include';
-            return fetch(path, opts);
-        }
-
-        // Request notification permission
-        async function requestPermission() {
-            try {
-                if (!('Notification' in window)) return;
-                if (Notification.permission === 'default') {
-                    const ask = confirm('Do you want to receive notifications from DataSell?');
+                
+                // Reset flags if user is not logged in (new session or login required)
+                function resetBannerFlagsIfLoggedOut() {
+                    // Check if we have an active session by looking for user data in localStorage or DOM
+                    // If no currentUser, clear the flags
+                    if (!currentUser || !currentUser.uid) {
+                        sessionStorage.removeItem('ds_greeting_shown');
+                        sessionStorage.removeItem('ds_install_shown');
+                    }
+                }
                     if (!ask) return;
                     const perm = await Notification.requestPermission();
                     if (perm === 'granted') {
@@ -1095,6 +1092,10 @@ body {
 
                 if (result.success && result.user) {
                     currentUser = result.user;
+                    // Reset banner flags on successful login - they'll be set when banners are shown
+                    sessionStorage.removeItem('ds_greeting_shown');
+                    sessionStorage.removeItem('ds_install_shown');
+                    
                     updateUserAvatar();
                     showGreetingCard(); // Show greeting card
                     await loadWalletBalance();
@@ -1429,33 +1430,6 @@ body {
         </div>
     </div>
 
-    <script>
-        // CRITICAL: Check and hide banner IMMEDIATELY if already shown this session
-        // This runs before any other code that might show the banner
-        if (sessionStorage.getItem('ds_install_shown') === 'true') {
-            // Use a style tag to ensure banner stays hidden with !important
-            const style = document.createElement('style');
-            style.textContent = '#installBanner { display: none !important; visibility: hidden !important; }';
-            document.head.appendChild(style);
-            
-            // Also hide it directly when DOM is ready
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', () => {
-                    const banner = document.getElementById('installBanner');
-                    if (banner) {
-                        banner.style.display = 'none';
-                        banner.style.visibility = 'hidden';
-                    }
-                });
-            } else {
-                const banner = document.getElementById('installBanner');
-                if (banner) {
-                    banner.style.display = 'none';
-                    banner.style.visibility = 'hidden';
-                }
-            }
-        }
-    </script>
     <script>
         (function(){
             try {
