@@ -1587,6 +1587,11 @@ body {
 
                 // Show banner on page load if not dismissed (fallback for devices without beforeinstallprompt)
                 window.addEventListener('load', () => {
+                    // Check if already shown in this session
+                    if (sessionStorage.getItem('ds_install_shown') === 'true') {
+                        return;
+                    }
+                    
                     const isDismissed = localStorage.getItem('ds_install_dismissed') === '1';
                     const isOnAPKSupported = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                     
@@ -1596,8 +1601,13 @@ body {
                             const banner = document.getElementById('installBanner');
                             if (banner && !deferredPrompt) {
                                 // This is a fallback for older devices
+                                // Check again before showing (in case it was shown by beforeinstallprompt)
+                                if (sessionStorage.getItem('ds_install_shown') === 'true') {
+                                    return;
+                                }
                                 console.log('Showing fallback install banner');
                                 banner.style.display = 'flex';
+                                sessionStorage.setItem('ds_install_shown', 'true');
                                 
                                 // Auto-hide after 5 seconds
                                 setTimeout(() => {
