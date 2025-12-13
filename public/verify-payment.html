@@ -467,14 +467,12 @@ h3 {
             }
         }
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const reference = urlParams.get('reference');
-        const type = urlParams.get('type'); // Added to distinguish between wallet and purchase
-
-        if (reference && type === 'wallet') {
-            verifyWalletFunding(reference);
-        } else if (reference && type === 'purchase') {
-            processPaymentVerification(reference);
+        // Variables already declared above (urlParams, reference, type)
+        // Just verify the payment based on the type
+        if (paymentReference && type === 'wallet') {
+            verifyWalletFunding(paymentReference);
+        } else if (paymentReference && type === 'purchase') {
+            processPaymentVerification(paymentReference);
         } else {
             alert('No valid payment reference or type found.');
             window.location.href = '/';

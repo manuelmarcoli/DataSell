@@ -3,9 +3,14 @@ services:
     name: datasell
     env: node
     plan: free
+    region: oregon
     buildCommand: npm install
     startCommand: node server.js
     healthCheckPath: /api/health
+    healthCheckInterval: 30
+    maxInstanceCount: 2
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: "3000"

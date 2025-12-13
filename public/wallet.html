@@ -234,6 +234,7 @@ body {
     display: flex;
     padding: 0.5rem 0;
     z-index: 1000;
+    height: 60px;
 }
 
 .nav-item {
@@ -245,30 +246,34 @@ body {
     padding: 0.4rem;
     text-decoration: none;
     color: #6c757d;
-        transition: color 200ms ease, transform 200ms ease;
-        font-size: 0.75rem;
-    min-height: 44px;
+    transition: color 200ms ease;
+    font-size: 0.75rem;
+    min-height: 60px;
+    position: relative;
 }
 
     .nav-item i {
-        transition: transform 200ms ease, color 200ms ease;
+        transition: color 200ms ease;
         display: block;
+        font-size: 1.1rem;
+        margin-bottom: 0.2rem;
     }
 
     .nav-item.active {
         color: var(--primary-color);
-        transform: translateY(-3px);
     }
 
-    .nav-item.active i {
-        transform: scale(1.12);
-        color: var(--primary-color);
+    .nav-item.active::after {
+        content: '';
+        position: absolute;
+        bottom: 2px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 2px;
+        height: 2px;
+        background: var(--primary-color);
+        border-radius: 50%;
     }
-
-.nav-item i {
-    font-size: 1.1rem;
-    margin-bottom: 0.2rem;
-}
 
 .nav-item span {
     font-size: 0.7rem;
@@ -720,9 +725,6 @@ body {
                 <div class="wallet-actions">
                     <button class="wallet-action-btn" onclick="openFundModal()">
                         <i class="fas fa-plus-circle me-1"></i>Fund Wallet
-                    </button>
-                    <button class="wallet-action-btn" onclick="showWithdrawModal()">
-                        <i class="fas fa-money-bill-wave me-1"></i>Withdraw
                     </button>
                 </div>
             </div>

@@ -110,7 +110,7 @@ function initializePackageCache() {
       const packagesArray = Object.entries(packages).map(([key, pkg]) => ({
         id: key,
         ...pkg
-      })).filter(pkg => pkg.active !== false);
+      }));
       
       packageCache.mtn = packagesArray;
       packageCache.lastUpdated = Date.now();
@@ -129,7 +129,7 @@ function initializePackageCache() {
       const packagesArray = Object.entries(packages).map(([key, pkg]) => ({
         id: key,
         ...pkg
-      })).filter(pkg => pkg.active !== false);
+      }));
       
       packageCache.at = packagesArray;
       packageCache.lastUpdated = Date.now();
@@ -428,17 +428,20 @@ app.get('/profile', requireAuth, (req, res) => {
 });
 
 app.get('/admin-login', (req, res) => {
-  if (req.session.user && req.session.user.isAdmin) return res.redirect('/admin');
+  // Always show login page, even if already logged in
+  // This ensures users must always log in when accessing admin
   res.sendFile(path.join(__dirname, 'public', 'admin-login.html'));
 });
 
 app.get('/admin', (req, res) => {
-  // Serve admin page to admins; otherwise redirect browser navigations to /admin-login
-  if (!req.session?.user || !req.session.user.isAdmin) {
-    return res.redirect('/admin-login');
+  // Check if user is authenticated and is admin
+  if (req.session?.user && req.session.user.isAdmin) {
+    // User is already logged in, serve the admin page
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+  } else {
+    // Not logged in or not admin, redirect to login page
+    res.redirect('/admin-login');
   }
-
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
 // ====================
@@ -527,13 +530,15 @@ app.post('/api/signup', async (req, res) => {
 // Enhanced User Login
 app.post('/api/login', async (req, res) => {
   try {
-    let { email, password, remember } = req.body;
+    let { email, password, remember, isAdminLogin } = req.body;
     // Coerce remember to boolean for safety (clients may send 'true'/'false' strings)
     remember = (remember === true || remember === 'true');
-    console.log('Login attempt for:', email, 'remember=', remember);
+    isAdminLogin = (isAdminLogin === true || isAdminLogin === 'true');
+    console.log('🔐 Login attempt received', { email, remember, isAdminLogin });
 
     // Enforce 'remember me' requirement: do not allow login unless user checked it
     if (!remember) {
+      console.log('❌ Remember me not checked');
       return res.status(400).json({
         success: false,
         error: 'You must check "Remember me" to sign in.'
@@ -541,80 +546,76 @@ app.post('/api/login', async (req, res) => {
     }
     
     if (!email || !password) {
+      console.log('❌ Missing email or password');
       return res.status(400).json({ 
         success: false, 
         error: 'Email and password are required' 
       });
     }
 
-    // Enhanced Admin login
-    if (email === process.env.ADMIN_EMAIL) {
-      if (password === process.env.ADMIN_PASSWORD) {
-        let userRecord;
-        try {
-          userRecord = await admin.auth().getUserByEmail(email);
-        } catch (error) {
-          // Create admin user if doesn't exist
-          userRecord = await admin.auth().createUser({
-            email,
-            password: process.env.ADMIN_PASSWORD,
-            displayName: 'Administrator'
-          });
-
-          await admin.database().ref('users/' + userRecord.uid).set({
-            firstName: 'Admin',
-            lastName: 'User',
-            email,
-            phone: '',
-            walletBalance: 0,
-            createdAt: new Date().toISOString(),
-            isAdmin: true,
-            pricingGroup: 'admin',
-            suspended: false
-          });
-        }
-
-        // Set user data directly (no regenerate - it breaks session ID sync)
-        req.session.user = {
-          uid: userRecord.uid,
-          email: userRecord.email,
-          displayName: userRecord.displayName,
-          isAdmin: true
-        };
-
-        // Respect 'remember me' for admin sessions if provided
-        try {
-          const rememberMs = remember ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000; // 30 days || 24 hours
-          req.session.cookie.maxAge = rememberMs;
-        } catch (e) {
-          // Ignore if session cookie cannot be modified
-        }
-
-        // Update last login - do this in background
-        admin.database().ref('users/' + userRecord.uid).update({
-          lastLogin: new Date().toISOString()
-        }).catch(err => console.error('Failed to update lastLogin:', err));
-
-        // Log session info for debugging
-        console.log('✅ Admin login for', userRecord.uid, 'sessionID:', req.sessionID, 'cookieMaxAge:', req.session.cookie.maxAge);
-        console.log('🍪 Session data set:', { uid: req.session.user.uid, sessionID: req.sessionID });
-        
-        // Return response - express-session middleware will automatically save and set Set-Cookie
-        return res.json({ 
-          success: true, 
-          message: 'Admin login successful',
-          user: req.session.user,
-          sessionID: req.sessionID
+    // Check for admin credentials first (works from either login.html or admin-login.html)
+    if ((email === process.env.ADMIN_EMAIL || email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase()) &&
+        password === process.env.ADMIN_PASSWORD) {
+      console.log('🔑 Admin login detected for:', email);
+      // Admin credentials match
+      console.log('✅ Admin credentials match');
+      let userRecord;
+      try {
+        userRecord = await admin.auth().getUserByEmail(email);
+      } catch (error) {
+        console.log('📝 Creating new admin user');
+        // Create admin user if doesn't exist
+        userRecord = await admin.auth().createUser({
+          email,
+          password: process.env.ADMIN_PASSWORD,
+          displayName: 'Administrator'
         });
-      } else {
-        return res.status(401).json({ 
-          success: false, 
-          error: 'Invalid admin credentials' 
+
+        await admin.database().ref('users/' + userRecord.uid).set({
+          firstName: 'Admin',
+          lastName: 'User',
+          email,
+          phone: '',
+          walletBalance: 0,
+          createdAt: new Date().toISOString(),
+          isAdmin: true,
+          pricingGroup: 'admin',
+          suspended: false
         });
       }
+
+      // Set user data directly (no regenerate - it breaks session ID sync)
+      req.session.user = {
+        uid: userRecord.uid,
+        email: userRecord.email,
+        displayName: userRecord.displayName,
+        isAdmin: true
+      };
+
+      // Respect 'remember me' for admin sessions if provided
+      try {
+        const rememberMs = remember ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000; // 30 days || 24 hours
+        req.session.cookie.maxAge = rememberMs;
+      } catch (e) {
+        // Ignore if session cookie cannot be modified
+      }
+
+      // Update last login - do this in background
+      admin.database().ref('users/' + userRecord.uid).update({
+        lastLogin: new Date().toISOString()
+      }).catch(err => console.error('Failed to update lastLogin:', err));
+
+      // Return response - express-session middleware will automatically save and set Set-Cookie
+      return res.json({ 
+        success: true, 
+        message: 'Admin login successful',
+        user: req.session.user,
+        sessionID: req.sessionID
+      });
     }
 
     // Enhanced Regular user login
+    console.log('👤 Regular user login attempt for:', email);
     const signInResponse = await axios.post(
       `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_API_KEY}`,
       {
@@ -631,6 +632,7 @@ app.post('/api/login', async (req, res) => {
     const userData = userSnapshot.val();
 
     if (!userData) {
+      console.log('❌ User data not found in database');
       return res.status(404).json({ 
         success: false, 
         error: 'User data not found' 
@@ -639,6 +641,7 @@ app.post('/api/login', async (req, res) => {
 
     // Check if user is suspended
     if (userData.suspended) {
+      console.log('⛔ User suspended:', email);
       return res.status(403).json({
         success: false,
         error: 'Account suspended. Please contact administrator.'
@@ -766,15 +769,21 @@ app.get('/api/profile/stats', requireAuth, async (req, res) => {
     const totalOrders = Object.keys(orders).length;
     const totalSpent = Object.values(orders).reduce((sum, order) => sum + (order.amount || 0), 0);
     
-    // Get wallet info
+    // Count successful orders (Delivered status)
+    const successfulOrders = Object.values(orders).filter(order => order.status === 'Delivered').length;
+    
+    // Get wallet info and account status
     const userSnap = await admin.database().ref('users/' + uid).once('value');
     const userData = userSnap.val() || {};
     const walletBalance = userData.walletBalance || 0;
+    const accountStatus = userData.isDeactivated === true ? 'Deactivated' : 'Active';
 
     const stats = {
       totalOrders,
+      successfulOrders,
       totalSpent,
       walletBalance,
+      accountStatus,
       memberSince: userData.createdAt || null
     };
 
@@ -802,13 +811,28 @@ app.post('/api/register-fcm-token', requireAuth, async (req, res) => {
 // Get notifications for the logged-in user (latest 100)
 app.get('/api/notifications', requireAuth, async (req, res) => {
   try {
+    const fortyEightHoursAgo = Date.now() - (48 * 60 * 60 * 1000); // Last 48 hours
     const snap = await admin.database().ref('notifications').orderByChild('createdAt').limitToLast(100).once('value');
     const data = snap.val() || {};
-    const list = Object.entries(data).map(([id, n]) => ({ id, ...n }));
+    const list = Object.entries(data)
+      .map(([id, n]) => ({ id, ...n }))
+      .filter(n => n.createdAt >= fortyEightHoursAgo); // Only last 48 hours
     list.sort((a, b) => b.createdAt - a.createdAt);
     res.json({ success: true, notifications: list });
   } catch (err) {
     console.error('Get notifications error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Delete notification
+app.delete('/api/notifications/:id', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await admin.database().ref(`notifications/${id}`).remove();
+    res.json({ success: true, message: 'Notification deleted' });
+  } catch (err) {
+    console.error('Delete notification error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
@@ -891,6 +915,142 @@ app.post('/api/send-notification', requireAdmin, async (req, res) => {
   }
 });
 
+// ====================
+// ADMIN DASHBOARD ENDPOINTS
+// ====================
+
+// Admin Dashboard Statistics
+app.get('/api/admin/dashboard/stats', requireAdmin, async (req, res) => {
+  try {
+    const [usersSnapshot, transactionsSnapshot, paymentsSnapshot] = await Promise.all([
+      admin.database().ref('users').once('value'),
+      admin.database().ref('transactions').once('value'),
+      admin.database().ref('payments').once('value')
+    ]);
+
+    const users = usersSnapshot.val() || {};
+    const transactions = transactionsSnapshot.val() || {};
+    const payments = paymentsSnapshot.val() || {};
+
+    const usersArray = Object.values(users);
+    const transactionsArray = Object.values(transactions);
+    const paymentsArray = Object.values(payments);
+
+    // Calculate time-based metrics
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const monthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+
+    const todayTransactions = transactionsArray.filter(t => 
+      new Date(t.timestamp) >= today
+    );
+    const weekTransactions = transactionsArray.filter(t => 
+      new Date(t.timestamp) >= weekAgo
+    );
+    const monthTransactions = transactionsArray.filter(t => 
+      new Date(t.timestamp) >= monthAgo
+    );
+
+    // Calculate revenue
+    const totalRevenue = paymentsArray.reduce((sum, payment) => sum + (payment.amount || 0), 0);
+    const todayRevenue = todayTransactions.reduce((sum, t) => sum + (t.amount || 0), 0);
+    const weekRevenue = weekTransactions.reduce((sum, t) => sum + (t.amount || 0), 0);
+    const monthRevenue = monthTransactions.reduce((sum, t) => sum + (t.amount || 0), 0);
+
+    // Calculate Paystack fees (3%)
+    const totalPaystackFees = transactionsArray.reduce((sum, t) => sum + (t.paystackFee || 0), 0);
+    const todayPaystackFees = todayTransactions.reduce((sum, t) => sum + (t.paystackFee || 0), 0);
+    const weekPaystackFees = weekTransactions.reduce((sum, t) => sum + (t.paystackFee || 0), 0);
+    const monthPaystackFees = monthTransactions.reduce((sum, t) => sum + (t.paystackFee || 0), 0);
+
+    // Net revenue (after Paystack fees)
+    const netRevenue = totalRevenue - totalPaystackFees;
+    const todayNetRevenue = todayRevenue - todayPaystackFees;
+    const weekNetRevenue = weekRevenue - weekPaystackFees;
+    const monthNetRevenue = monthRevenue - monthPaystackFees;
+
+    // Top packages
+    const packageSales = {};
+    transactionsArray.forEach(t => {
+      if (t.packageName) {
+        packageSales[t.packageName] = (packageSales[t.packageName] || 0) + 1;
+      }
+    });
+
+    const topPackages = Object.entries(packageSales)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+      .map(([name, count]) => ({ name, count }));
+
+    // Network performance
+    const networkStats = {
+      mtn: transactionsArray.filter(t => t.network === 'mtn').length,
+      at: transactionsArray.filter(t => t.network === 'at').length
+    };
+
+    const stats = {
+      totalUsers: usersArray.length,
+      totalTransactions: transactionsArray.length,
+      totalRevenue,
+      netRevenue: parseFloat(netRevenue.toFixed(2)),
+      totalPaystackFees: parseFloat(totalPaystackFees.toFixed(2)),
+      successfulTransactions: transactionsArray.filter(t => t.status === 'success').length,
+      todayTransactions: todayTransactions.length,
+      todayRevenue,
+      todayNetRevenue: parseFloat(todayNetRevenue.toFixed(2)),
+      todayPaystackFees: parseFloat(todayPaystackFees.toFixed(2)),
+      weekRevenue,
+      weekNetRevenue: parseFloat(weekNetRevenue.toFixed(2)),
+      weekPaystackFees: parseFloat(weekPaystackFees.toFixed(2)),
+      monthRevenue,
+      monthNetRevenue: parseFloat(monthNetRevenue.toFixed(2)),
+      monthPaystackFees: parseFloat(monthPaystackFees.toFixed(2)),
+      newUsers: usersArray.filter(u => new Date(u.createdAt) >= monthAgo).length,
+      topPackages,
+      networkStats,
+      successRate: transactionsArray.length > 0 ? 
+        (transactionsArray.filter(t => t.status === 'success').length / transactionsArray.length * 100).toFixed(1) : 0
+    };
+
+    res.json({ success: true, stats });
+  } catch (error) {
+    console.error('Dashboard stats error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Admin Users Management
+app.get('/api/admin/users', requireAdmin, async (req, res) => {
+  try {
+    const usersSnapshot = await admin.database().ref('users').once('value');
+    const transactionsSnapshot = await admin.database().ref('transactions').once('value');
+    
+    const users = usersSnapshot.val() || {};
+    const transactions = transactionsSnapshot.val() || {};
+
+    const usersArray = Object.entries(users).map(([uid, userData]) => {
+      const userTransactions = Object.values(transactions).filter(t => t.userId === uid);
+      const totalSpent = userTransactions.reduce((sum, t) => sum + (t.amount || 0), 0);
+      
+      return {
+        uid,
+        ...userData,
+        totalSpent,
+        transactionCount: userTransactions.length,
+        lastActivity: userData.lastLogin || userData.createdAt,
+        status: userData.suspended ? 'suspended' : 'active',
+        pricingGroup: userData.pricingGroup || 'regular'
+      };
+    });
+
+    res.json({ success: true, users: usersArray });
+  } catch (error) {
+    console.error('Admin users error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Enhanced Logout
 app.post('/api/logout', (req, res) => {
   req.session.destroy((err) => {
@@ -899,6 +1059,17 @@ app.post('/api/logout', (req, res) => {
       return res.status(500).json({ success: false, error: 'Logout failed' });
     }
     res.json({ success: true, message: 'Logged out successfully' });
+  });
+});
+
+// Logout page (GET) - redirects to login after destroying session
+app.get('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Logout error:', err);
+    }
+    // Redirect to admin-login after logout
+    res.redirect('/admin-login');
   });
 });
 
@@ -1585,4 +1756,409 @@ app.post('/api/purchase', async (req, res) => {
     console.error('Error during purchase:', error);
     return res.status(500).json({ success: false, error: 'An error occurred during the purchase process.' });
   }
+});
+
+// ====================
+// ADDITIONAL ADMIN ENDPOINTS
+// ====================
+
+// Admin Packages Management
+app.get('/api/admin/packages', requireAdmin, async (req, res) => {
+  try {
+    // Use cache if available
+    if (!packageCache.isInitialized) {
+      const packagesSnapshot = await admin.database().ref('packages').once('value');
+      const packages = packagesSnapshot.val() || {};
+      
+      packageCache.mtn = Object.entries(packages.mtn || {}).map(([key, pkg]) => ({
+        id: key,
+        ...pkg
+      }));
+      
+      packageCache.at = Object.entries(packages.at || {}).map(([key, pkg]) => ({
+        id: key,
+        ...pkg
+      }));
+      packageCache.isInitialized = true;
+    }
+    
+    res.json({ 
+      success: true, 
+      packages: {
+        mtn: packageCache.mtn,
+        at: packageCache.at
+      }
+    });
+  } catch (error) {
+    console.error('Admin packages error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Update package price
+app.post('/api/admin/packages/update-price', requireAdmin, async (req, res) => {
+  try {
+    const { network, packageId, newPrice } = req.body;
+    
+    console.log('🔄 Updating package:', { network, packageId, newPrice });
+
+    if (!network || !packageId || !newPrice) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Network, packageId, and newPrice are required' 
+      });
+    }
+
+    const packagesRef = admin.database().ref(`packages/${network}`);
+    const packagesSnapshot = await packagesRef.once('value');
+    const packages = packagesSnapshot.val() || {};
+    
+    let packageKey = packageId;
+    
+    // Remove network prefix if present
+    if (packageId.startsWith('mtn-')) {
+      packageKey = packageId.replace('mtn-', '');
+    } else if (packageId.startsWith('at-')) {
+      packageKey = packageId.replace('at-', '');
+    }
+    
+    // Check if package exists
+    if (!packages[packageKey]) {
+      return res.status(404).json({ 
+        success: false, 
+        error: `Package not found. Available packages: ${Object.keys(packages).join(', ')}` 
+      });
+    }
+
+    const oldPrice = packages[packageKey].price;
+    const packageName = packages[packageKey].name;
+
+    // Update the price
+    await admin.database().ref(`packages/${network}/${packageKey}`).update({
+      price: parseFloat(newPrice)
+    });
+
+    // Update cache
+    if (packageCache[network]) {
+      const packageIndex = packageCache[network].findIndex(pkg => pkg.id === packageKey);
+      if (packageIndex !== -1) {
+        packageCache[network][packageIndex].price = parseFloat(newPrice);
+      }
+    }
+
+    // Log admin action
+    const logRef = admin.database().ref('adminLogs').push();
+    await logRef.set({
+      adminId: req.session.user.uid,
+      action: 'update_package_price',
+      targetPackage: packageKey,
+      details: `Updated ${network} package ${packageName} from ₵${oldPrice} to ₵${newPrice}`,
+      timestamp: new Date().toISOString(),
+      ip: req.ip
+    });
+
+    res.json({ 
+      success: true, 
+      message: `"${packageName}" price updated to ₵${newPrice}`,
+      oldPrice: oldPrice,
+      newPrice: parseFloat(newPrice),
+      packageName: packageName
+    });
+  } catch (error) {
+    console.error('Update package error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Toggle package active status
+app.post('/api/admin/packages/toggle-active', requireAdmin, async (req, res) => {
+  try {
+    const { network, packageId } = req.body;
+    
+    if (!network || !packageId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Network and packageId are required' 
+      });
+    }
+
+    const packageRef = admin.database().ref(`packages/${network}/${packageId}`);
+    const packageSnapshot = await packageRef.once('value');
+    
+    if (!packageSnapshot.exists()) {
+      return res.status(404).json({ success: false, error: 'Package not found' });
+    }
+
+    const currentStatus = packageSnapshot.val().active !== false;
+    await packageRef.update({ active: !currentStatus });
+
+    // Update cache
+    if (packageCache[network]) {
+      const packageIndex = packageCache[network].findIndex(pkg => pkg.id === packageId);
+      if (packageIndex !== -1) {
+        packageCache[network][packageIndex].active = !currentStatus;
+      }
+    }
+
+    // Log admin action
+    const logRef = admin.database().ref('adminLogs').push();
+    await logRef.set({
+      adminId: req.session.user.uid,
+      action: 'toggle_package_status',
+      targetPackage: packageId,
+      details: `Package ${!currentStatus ? 'activated' : 'deactivated'}`,
+      timestamp: new Date().toISOString(),
+      ip: req.ip
+    });
+
+    res.json({ 
+      success: true, 
+      message: `Package ${!currentStatus ? 'activated' : 'deactivated'}`,
+      active: !currentStatus
+    });
+  } catch (error) {
+    console.error('Toggle package error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Create a new package
+app.post('/api/admin/packages/create', requireAdmin, async (req, res) => {
+  try {
+    const { network, id, name, price, validity, active } = req.body;
+
+    if (!network || !id || !name || price === undefined) {
+      return res.status(400).json({ success: false, error: 'network, id, name and price are required' });
+    }
+
+    const packageRef = admin.database().ref(`packages/${network}/${id}`);
+    const snap = await packageRef.once('value');
+    if (snap.exists()) {
+      return res.status(400).json({ success: false, error: 'Package with that id already exists' });
+    }
+
+    const payload = {
+      name,
+      price: parseFloat(price),
+      validity: validity || null,
+      active: active === false ? false : true,
+      createdAt: new Date().toISOString()
+    };
+
+    await packageRef.set(payload);
+
+    // Update cache if present
+    if (packageCache[network]) {
+      packageCache[network].push({ id, ...payload });
+    }
+
+    // Log admin action
+    const logRef = admin.database().ref('adminLogs').push();
+    await logRef.set({
+      adminId: req.session.user.uid,
+      action: 'create_package',
+      targetPackage: id,
+      details: `Created package ${id} (${name}) on ${network}`,
+      timestamp: new Date().toISOString(),
+      ip: req.ip
+    });
+
+    res.json({ success: true, message: 'Package created successfully', package: { id, ...payload } });
+  } catch (error) {
+    console.error('Create package error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Delete a package
+app.post('/api/admin/packages/delete', requireAdmin, async (req, res) => {
+  try {
+    const { network, packageId } = req.body;
+
+    if (!network || !packageId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Network and packageId are required' 
+      });
+    }
+
+    const packageRef = admin.database().ref(`packages/${network}/${packageId}`);
+    const packageSnapshot = await packageRef.once('value');
+    
+    if (!packageSnapshot.exists()) {
+      return res.status(404).json({ success: false, error: 'Package not found' });
+    }
+
+    const packageData = packageSnapshot.val();
+    const packageName = packageData.name;
+
+    // Delete the package
+    await packageRef.remove();
+
+    // Update cache
+    if (packageCache[network]) {
+      packageCache[network] = packageCache[network].filter(pkg => pkg.id !== packageId);
+    }
+
+    // Log admin action
+    const logRef = admin.database().ref('adminLogs').push();
+    await logRef.set({
+      adminId: req.session.user.uid,
+      action: 'delete_package',
+      targetPackage: packageId,
+      details: `Deleted package ${packageId} (${packageName}) from ${network}`,
+      timestamp: new Date().toISOString(),
+      ip: req.ip
+    });
+
+    res.json({ 
+      success: true, 
+      message: `Package "${packageName}" deleted successfully`
+    });
+  } catch (error) {
+    console.error('Delete package error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Admin Transactions Management
+app.get('/api/admin/transactions', requireAdmin, async (req, res) => {
+  try {
+    const { status, network, dateFrom, dateTo, search, limit } = req.query;
+    
+    const transactionsSnapshot = await admin.database().ref('transactions').once('value');
+    const usersSnapshot = await admin.database().ref('users').once('value');
+    
+    let transactions = Object.entries(transactionsSnapshot.val() || {}).map(([id, transaction]) => ({
+      id,
+      ...transaction
+    }));
+
+    const users = usersSnapshot.val() || {};
+
+    // Apply filters
+    let filteredTransactions = transactions;
+
+    if (status && status !== 'all') {
+      filteredTransactions = filteredTransactions.filter(t => t.status === status);
+    }
+    
+    if (network && network !== 'all') {
+      filteredTransactions = filteredTransactions.filter(t => t.network === network);
+    }
+    
+    if (dateFrom) {
+      filteredTransactions = filteredTransactions.filter(t => 
+        new Date(t.timestamp) >= new Date(dateFrom)
+      );
+    }
+    
+    if (dateTo) {
+      const endDate = new Date(dateTo);
+      endDate.setHours(23, 59, 59, 999);
+      filteredTransactions = filteredTransactions.filter(t => 
+        new Date(t.timestamp) <= endDate
+      );
+    }
+    
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filteredTransactions = filteredTransactions.filter(t => 
+        t.phoneNumber?.includes(search) ||
+        t.reference?.includes(search) ||
+        t.packageName?.toLowerCase().includes(searchLower) ||
+        t.userId?.includes(search)
+      );
+    }
+
+    // Apply limit if specified
+    if (limit) {
+      filteredTransactions = filteredTransactions.slice(0, parseInt(limit));
+    }
+
+    // Add user information to transactions
+    const transactionsWithUsers = filteredTransactions.map(transaction => {
+      const user = users[transaction.userId];
+      return {
+        ...transaction,
+        userName: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',
+        userEmail: user?.email || 'N/A'
+      };
+    });
+
+    // Sort by timestamp (newest first)
+    transactionsWithUsers.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    res.json({ success: true, transactions: transactionsWithUsers });
+  } catch (error) {
+    console.error('Admin transactions error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Admin Pricing Groups
+app.get('/api/admin/pricing/groups', requireAdmin, async (req, res) => {
+  try {
+    const pricingSnapshot = await admin.database().ref('pricingGroups').once('value');
+    const pricing = pricingSnapshot.val() || {
+      regular: { discount: 0, name: 'Regular Users' },
+      vip: { discount: 10, name: 'VIP Users' },
+      premium: { discount: 15, name: 'Premium Users' }
+    };
+
+    res.json({ success: true, pricingGroups: pricing });
+  } catch (error) {
+    console.error('Pricing groups error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Admin System Status
+app.get('/api/admin/system/status', requireAdmin, async (req, res) => {
+  try {
+    const usersSnapshot = await admin.database().ref('users').once('value');
+    const transactionsSnapshot = await admin.database().ref('transactions').once('value');
+    const systemStatus = {
+      server: 'online',
+      database: 'connected',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+      stats: {
+        totalUsers: Object.keys(usersSnapshot.val() || {}).length,
+        totalTransactions: Object.keys(transactionsSnapshot.val() || {}).length
+      }
+    };
+
+    res.json({ success: true, status: systemStatus });
+  } catch (error) {
+    console.error('System status error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Admin Security Logs
+app.get('/api/admin/security/logs', requireAdmin, async (req, res) => {
+  try {
+    const logsSnapshot = await admin.database().ref('adminLogs').once('value');
+    const logs = logsSnapshot.val() || {};
+    
+    const logsArray = Object.entries(logs)
+      .map(([id, log]) => ({ id, ...log }))
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .slice(0, 100); // Return last 100 logs
+
+    res.json({ success: true, logs: logsArray });
+  } catch (error) {
+    console.error('Security logs error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`
+🚀 DataSell Server is running!
+📍 Port: ${PORT}
+🌐 URL: http://localhost:${PORT}
+  `);
 });

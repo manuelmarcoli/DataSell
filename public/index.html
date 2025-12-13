@@ -150,6 +150,7 @@ body {
     display: flex;
     padding: 0.5rem 0;
     z-index: 1000;
+    height: 60px;
 }
 
 .install-banner {
@@ -223,40 +224,39 @@ body {
         padding: 0.4rem;
         text-decoration: none;
         color: #6c757d;
-        transition: color 200ms ease, transform 200ms ease;
-        font-size: 0.8rem;
-        min-height: 44px;
-        will-change: transform, color;
+        transition: color 200ms ease;
+        font-size: 0.75rem;
+        min-height: 60px;
+        position: relative;
     }
 
     .nav-item i {
-        transition: transform 200ms ease, color 200ms ease;
+        transition: color 200ms ease;
         display: block;
+        font-size: 1.1rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .nav-item span {
+        font-size: 0.7rem;
+        font-weight: 500;
     }
 
     .nav-item.active {
         color: var(--primary-color);
-        transform: translateY(-3px);
     }
 
-    .nav-item.active i {
-        transform: scale(1.12);
-        color: var(--primary-color);
+    .nav-item.active::after {
+        content: '';
+        position: absolute;
+        bottom: 2px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 2px;
+        height: 2px;
+        background: var(--primary-color);
+        border-radius: 50%;
     }
-
-.nav-item i {
-    font-size: 1.1rem;
-    margin-bottom: 0.2rem;
-}
-
-.nav-item span {
-    font-size: 0.7rem;
-    font-weight: 500;
-}
-
-.nav-item:hover {
-    color: var(--primary-color);
-}
 
 .wallet-balance {
     background: linear-gradient(135deg, var(--primary-color), #5a52d5);
@@ -316,51 +316,99 @@ body {
 
 .recent-purchase {
     background: white;
-    border-radius: var(--card-radius);
-    padding: 1rem;
-    margin-bottom: 0.75rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     transition: var(--transition);
     cursor: pointer;
 }
 
 .recent-purchase:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 
 .purchase-info {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
 }
 
 .purchase-details h6 {
     margin: 0;
     color: #333;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
 }
 
 .purchase-details p {
-    margin: 0.25rem 0 0 0;
+    margin: 0.15rem 0 0 0;
     color: #6c757d;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
 }
 
 .purchase-amount {
     font-weight: 700;
+    text-align: right;
+    font-size: 0.9rem;
     color: var(--primary-color);
-    font-size: 1rem;
 }
 
 .purchase-status {
-    padding: 0.25rem 0.6rem;
+    padding: 0.15rem 0.4rem;
     border-radius: 12px;
-    font-size: 0.7rem;
+    font-size: 0.6rem;
     font-weight: 600;
     display: inline-block;
     margin-top: 0.25rem;
+}
+
+.purchase-status {
+    padding: 0.15rem 0.4rem;
+    border-radius: 12px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 0.25rem;
+}
+
+/* Recent Purchases Scrollable Container */
+.recent-purchases-section {
+    margin-top: 1rem;
+    background: white;
+    border-radius: 8px;
+    padding: 0.75rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.recent-purchases-section .section-title {
+    margin-bottom: 0.75rem;
+    padding: 0;
+    font-size: 0.95rem;
+}
+
+.purchases-scroll-container {
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+
+.purchases-scroll-container::-webkit-scrollbar {
+    width: 4px;
+}
+
+.purchases-scroll-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.purchases-scroll-container::-webkit-scrollbar-thumb {
+    background: #d0d0d0;
+    border-radius: 3px;
+}
+
+.purchases-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #999;
 }
 
 /* Footer Card */
@@ -533,8 +581,6 @@ body {
         transform: scale(1.05);
     }
 }
-    }
-}
 
 /* Mobile Styles */
 @media (max-width: 576px) {
@@ -595,6 +641,10 @@ body {
     
     .purchase-amount {
         font-size: 0.9rem;
+    }
+    
+    .purchases-scroll-container {
+        max-height: 200px;
     }
     
     .empty-state {
@@ -903,10 +953,10 @@ body {
                 </div>
             </div>
 
-            <!-- Last Purchase Section -->
-            <div class="last-purchase-section">
-                <h2 class="section-title">LAST PURCHASE</h2>
-                <div id="lastPurchaseContent">
+            <!-- Recent Purchases Section -->
+            <div class="recent-purchases-section">
+                <h2 class="section-title">RECENT PURCHASES</h2>
+                <div id="lastPurchaseContent" class="purchases-scroll-container">
                     <div class="empty-state">
                         <div class="empty-icon">
                             <i class="fas fa-receipt"></i>
@@ -1151,7 +1201,7 @@ body {
             // Clear empty states
             lastPurchaseContent.innerHTML = '';
 
-            // Filter and get the most recent purchase (from either wallet or orders)
+            // Filter and get valid purchases (from either wallet or orders)
             const validPurchases = transactions.filter(t => 
                 t.type === 'purchase' || 
                 t.type === 'order' || 
@@ -1161,44 +1211,69 @@ body {
                 t.status === 'Processing'
             );
 
-            // Display last purchase
+            // Display last 5 purchases
             if (validPurchases.length > 0) {
-                const lastPurchase = validPurchases[0];
-                const packageName = lastPurchase.description || lastPurchase.packageName || 'Data Package';
-                const amount = lastPurchase.amount || 0;
-                const displayAmount = typeof amount === 'number' ? Math.abs(amount) : Math.abs(parseFloat(amount) || 0);
+                // Get the last 5 purchases
+                const recentPurchases = validPurchases.slice(0, 5);
                 
-                let statusClass = 'status-success';
-                let statusText = 'Delivered';
+                const purchasesHTML = recentPurchases.map(purchase => {
+                    const packageName = purchase.description || purchase.packageName || 'Data Package';
+                    const amount = purchase.amount || 0;
+                    const displayAmount = typeof amount === 'number' ? Math.abs(amount) : Math.abs(parseFloat(amount) || 0);
+                    const purchaseTime = new Date(purchase.timestamp);
+                    const timeString = purchaseTime.toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        year: purchaseTime.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+                    });
+                    const timeOfDay = purchaseTime.toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit'
+                    });
+                    
+                    let statusClass = 'status-success';
+                    let statusText = 'Delivered';
 
-                if (lastPurchase.status) {
-                    if (lastPurchase.status === 'Accepted' || lastPurchase.status === 'pending') {
-                        statusClass = 'status-pending';
-                        statusText = 'Pending';
-                    } else if (lastPurchase.status === 'Processing') {
-                        statusClass = 'status-pending';
-                        statusText = 'Processing';
-                    } else if (lastPurchase.status === 'Delivered' || lastPurchase.status === 'success') {
-                        statusClass = 'status-success';
-                        statusText = 'Delivered';
-                    } else {
-                        statusClass = 'status-pending';
-                        statusText = lastPurchase.status;
+                    if (purchase.status) {
+                        if (purchase.status === 'Accepted' || purchase.status === 'pending') {
+                            statusClass = 'status-pending';
+                            statusText = 'Pending';
+                        } else if (purchase.status === 'Processing') {
+                            statusClass = 'status-pending';
+                            statusText = 'Processing';
+                        } else if (purchase.status === 'Delivered' || purchase.status === 'success') {
+                            statusClass = 'status-success';
+                            statusText = 'Delivered';
+                        } else {
+                            statusClass = 'status-pending';
+                            statusText = purchase.status;
+                        }
                     }
-                }
-                
-                lastPurchaseContent.innerHTML = `
-                    <div class="recent-purchase" onclick="window.location.href='/orders'">
-                        <div class="purchase-info">
-                            <div class="purchase-details">
-                                <h6>${packageName}</h6>
-                                <p>${new Date(lastPurchase.timestamp).toLocaleDateString()}</p>
-                            </div>
-                            <div class="text-end">
-                                <div class="purchase-amount">₵${displayAmount.toFixed(2)}</div>
-                                <span class="purchase-status ${statusClass}">${statusText}</span>
+                    
+                    return `
+                        <div class="recent-purchase" onclick="window.location.href='/orders'">
+                            <div class="purchase-info">
+                                <div class="purchase-details">
+                                    <h6>${packageName}</h6>
+                                    <p>${timeString} at ${timeOfDay}</p>
+                                </div>
+                                <div class="text-end">
+                                    <div class="purchase-amount">₵${displayAmount.toFixed(2)}</div>
+                                    <span class="purchase-status ${statusClass}">${statusText}</span>
+                                </div>
                             </div>
                         </div>
+                    `;
+                }).join('');
+                
+                lastPurchaseContent.innerHTML = purchasesHTML;
+            } else {
+                lastPurchaseContent.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-receipt"></i>
+                        </div>
+                        <p class="empty-text">No recent purchases</p>
                     </div>
                 `;
             }
@@ -1536,7 +1611,8 @@ body {
                     });
                 }
 
-                async function pollNotifications() {
+                // Override placeholder with actual pollNotifications implementation
+                pollNotifications = async function() {
                     try {
                         const res = await fetch('/api/notifications', { credentials: 'include' });
                         if (!res.ok) return;
@@ -1563,7 +1639,7 @@ body {
                         // update badge (do not auto-clear lastTs here; lastTs is only updated when user views notifications)
                         updateBadge(newCount);
                     } catch (e) { console.error('Polling error', e); }
-                }
+                };
 
                 // Removed automatic permission request on DOMContentLoaded to avoid
                 // requesting notifications before authentication is established.

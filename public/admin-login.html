@@ -107,7 +107,7 @@ body.admin-login-body {
                             <i class="fa-solid fa-envelope"></i>
                         </span>
                         <input type="email" class="form-control" id="email" 
-                            placeholder="admin@example.com" required autocomplete="username">
+                            placeholder="Enter your admin email" required autocomplete="off" value="">
                     </div>
                 </div>
                 <div class="mb-3">
@@ -117,12 +117,12 @@ body.admin-login-body {
                             <i class="fa-solid fa-lock"></i>
                         </span>
                         <input type="password" class="form-control" id="password" 
-                            placeholder="Your password" required autocomplete="current-password">
+                            placeholder="Enter your password" required autocomplete="off" value="">
                     </div>
                 </div>
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="remember" name="remember" checked>
-                    <label class="form-check-label" for="remember">Remember me</label>
+                    <label class="form-check-label" for="remember">Remember me (required)</label>
                 </div>
                 <button type="submit" class="login-btn" id="submitBTN">
                     <i class="fa-solid fa-sign-in-alt"></i>Sign In
@@ -147,6 +147,12 @@ body.admin-login-body {
         appId: "1:717867799921:web:2a0c6e675dd3c598e012d0"
     };
     firebase.initializeApp(firebaseConfig);
+
+    // Clear any autofilled values on page load
+    window.addEventListener('load', function() {
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
+    });
 
     document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -175,7 +181,7 @@ body.admin-login-body {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 credentials: 'include',
-                body: JSON.stringify({ email, password, remember })
+                body: JSON.stringify({ email, password, remember, isAdminLogin: true })
             });
 
             let data;

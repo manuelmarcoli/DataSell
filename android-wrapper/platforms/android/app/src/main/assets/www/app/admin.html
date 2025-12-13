@@ -261,6 +261,15 @@
             background: var(--hover-bg);
         }
 
+        tr.inactive-row {
+            opacity: 0.65;
+            background-color: rgba(107, 114, 128, 0.1);
+        }
+
+        tr.inactive-row:hover {
+            opacity: 0.8;
+        }
+
         /* Form Styles */
         .form-group {
             margin-bottom: 1rem;
@@ -1153,7 +1162,7 @@
             }
             
             tbody.innerHTML = packages.map(pkg => `
-                <tr>
+                <tr class="${pkg.active === false ? 'inactive-row' : ''}">
                     <td class="font-mono">${pkg.id}</td>
                     <td>${pkg.name}</td>
                     <td>₵${pkg.price}</td>
@@ -1169,7 +1178,8 @@
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-sm ${pkg.active !== false ? 'btn-warning' : 'btn-success'}" 
-                                    onclick="togglePackageActive('${currentNetwork}', '${pkg.id}', ${pkg.active !== false})">
+                                    onclick="togglePackageActive('${currentNetwork}', '${pkg.id}', ${pkg.active !== false})"
+                                    title="${pkg.active !== false ? 'Deactivate' : 'Reactivate'} package">
                                 <i class="fas ${pkg.active !== false ? 'fa-eye-slash' : 'fa-eye'}"></i>
                             </button>
                             <button class="btn btn-sm btn-danger" onclick="deletePackage('${currentNetwork}', '${pkg.id}')">

@@ -238,6 +238,7 @@ body {
     display: flex;
     padding: 0.5rem 0;
     z-index: 1000;
+    height: 60px;
 }
 
 .nav-item {
@@ -249,30 +250,34 @@ body {
     padding: 0.4rem;
     text-decoration: none;
     color: #6c757d;
-        transition: color 200ms ease, transform 200ms ease;
-        font-size: 0.75rem;
-    min-height: 44px;
+    transition: color 200ms ease;
+    font-size: 0.75rem;
+    min-height: 60px;
+    position: relative;
 }
 
     .nav-item i {
-        transition: transform 200ms ease, color 200ms ease;
+        transition: color 200ms ease;
         display: block;
+        font-size: 1.1rem;
+        margin-bottom: 0.2rem;
     }
 
     .nav-item.active {
         color: var(--primary-color);
-        transform: translateY(-3px);
     }
 
-    .nav-item.active i {
-        transform: scale(1.12);
-        color: var(--primary-color);
+    .nav-item.active::after {
+        content: '';
+        position: absolute;
+        bottom: 2px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 2px;
+        height: 2px;
+        background: var(--primary-color);
+        border-radius: 50%;
     }
-
-.nav-item i {
-    font-size: 1.1rem;
-    margin-bottom: 0.2rem;
-}
 
 .nav-item span {
     font-size: 0.7rem;
@@ -828,19 +833,25 @@ body {
             <!-- Support -->
             <div class="menu-section">
                 <h3 class="section-title">Support</h3>
+                <!-- Support Contact Card -->
+                <div style="background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #6c63ff, #5a52d5); display: flex; align-items: center; justify-content: center; color: white;">
+                            <i class="fas fa-headset" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div>
+                            <h4 style="margin: 0; font-weight: 700; color: #333; font-size: 1rem;">Support Team</h4>
+                            <p style="margin: 0; color: #6c757d; font-size: 0.85rem;">We're here to help!</p>
+                        </div>
+                    </div>
+                    <div style="background: #f8f9fa; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                        <p style="margin: 0 0 0.75rem 0; color: #6c757d; font-size: 0.9rem;"><strong>Email:</strong></p>
+                        <p style="margin: 0 0 1rem 0; color: #333; font-weight: 600;">fotsiemmanuel397@gmail.com</p>
+                        <p style="margin: 0 0 0.75rem 0; color: #6c757d; font-size: 0.9rem;"><strong>Phone:</strong></p>
+                        <p style="margin: 0; color: #333; font-weight: 600;">📱 0505573287 | 0592680202</p>
+                    </div>
+                </div>
                 <ul class="menu-list">
-                    <a class="menu-item" href="javascript:void(0)" onclick="contactSupport()">
-                        <div class="menu-icon">
-                            <i class="fas fa-headset"></i>
-                        </div>
-                        <div class="menu-content">
-                            <div class="menu-title">Contact Support</div>
-                            <div class="menu-description">Get help with your account</div>
-                        </div>
-                        <div class="menu-arrow">
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                    </a>
                     <a class="menu-item" href="javascript:void(0)" onclick="viewFAQ()">
                         <div class="menu-icon">
                             <i class="fas fa-question-circle"></i>
@@ -919,7 +930,7 @@ body {
             </div>
 
             <!-- Account Actions -->
-            <div class="menu-section">
+            <div class="menu-section" style="margin-bottom: 8rem;">
                 <ul class="menu-list">
                     <a class="menu-item danger" href="javascript:void(0)" onclick="showLogoutConfirmation()">
                         <div class="menu-icon">
@@ -1032,8 +1043,6 @@ body {
                             <li>Multiple Network Support</li>
                             <li>24/7 Customer Support</li>
                         </ul>
-                        <hr>
-                        <p><strong>Contact:</strong> wavesdc118@gmail.com</p>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1127,14 +1136,18 @@ body {
             try {
                 const response = await fetch('/api/profile/stats');
                 const result = await response.json();
+                console.log('Stats API response:', result);
                 
                 if (result.success) {
                     userStats = result.stats;
+                    console.log('Stats loaded:', userStats);
                 } else {
+                    console.warn('Stats API failed, using defaults');
                     userStats = {
                         totalOrders: 0,
                         successfulOrders: 0,
-                        totalSpent: 0
+                        totalSpent: 0,
+                        accountStatus: 'Active'
                     };
                 }
             } catch (error) {
@@ -1142,7 +1155,8 @@ body {
                 userStats = {
                     totalOrders: 0,
                     successfulOrders: 0,
-                    totalSpent: 0
+                    totalSpent: 0,
+                    accountStatus: 'Active'
                 };
             }
         }
@@ -1160,9 +1174,12 @@ body {
             document.getElementById('memberSince').textContent = `Member since ${joinDate.toLocaleDateString()}`;
             
             // Update stats
-            document.getElementById('totalOrders').textContent = userStats.totalOrders;
-            document.getElementById('successfulOrders').textContent = userStats.successfulOrders;
-            document.getElementById('totalSpent').textContent = userStats.totalSpent.toFixed(2);
+            console.log('Updating stats:', userStats);
+            document.getElementById('totalOrders').textContent = userStats?.totalOrders || 0;
+            document.getElementById('successfulOrders').textContent = userStats?.successfulOrders || 0;
+            const totalSpent = userStats?.totalSpent || 0;
+            document.getElementById('totalSpent').textContent = (typeof totalSpent === 'number' ? totalSpent.toFixed(2) : '0.00');
+            document.getElementById('accountStatus').textContent = userStats?.accountStatus || 'Active';
             
             // Show admin badge and section if user is admin
             if (userProfile.isAdmin) {

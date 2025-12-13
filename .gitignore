@@ -1,6 +1,46 @@
-﻿node_modules/
+﻿# Dependencies
+node_modules/
+npm-debug.log
+package-lock.json
+yarn.lock
+
+# Environment variables
 .env
 .env.local
 .env.*.local
+.env.production
 
-node_modules/
+# Build outputs
+build/
+dist/
+.next/
+out/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+.cache/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Firebase
+.firebase/
+.firebaserc
+
+# Testing
+coverage/
+.nyc_output/
