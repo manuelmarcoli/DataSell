@@ -1033,7 +1033,7 @@ body {
                             <li>24/7 Customer Support</li>
                         </ul>
                         <hr>
-                        <p><strong>Contact or Whatsapp:</strong>0505573287 or 0592680202 </p>
+                        <p><strong>Contact:</strong> wavesdc118@gmail.com</p>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1072,7 +1072,7 @@ body {
                 aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
 
                 // Check authentication
-                const userResponse = await fetch('/api/user', { credentials: 'include' });
+                const userResponse = await fetch('/api/user');
                 const userResult = await userResponse.json();
                 
                 if (userResult.success && userResult.user) {
@@ -1092,7 +1092,7 @@ body {
         // Load user profile data
         async function loadUserProfile() {
             try {
-                const response = await fetch('/api/profile', { credentials: 'include' });
+                const response = await fetch('/api/profile');
                 const result = await response.json();
                 
                 if (result.success) {
@@ -1189,7 +1189,7 @@ body {
             try {
                 logoutModal.hide();
                 
-                const response = await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+                const response = await fetch('/api/logout', { method: 'POST' });
                 const result = await response.json();
                 
                 if (result.success) {

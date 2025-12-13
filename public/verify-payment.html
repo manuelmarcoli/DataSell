@@ -365,14 +365,17 @@ h3 {
         const urlParams = new URLSearchParams(window.location.search);
         const reference = urlParams.get('reference');
         const trxref = urlParams.get('trxref');
+        const type = urlParams.get('type'); // Added to distinguish between wallet and purchase
 
         // Use the reference from Paystack callback
         const paymentReference = reference || trxref;
 
-        if (paymentReference) {
+        if (paymentReference && type === 'purchase') {
             processPaymentVerification(paymentReference);
+        } else if (paymentReference && type === 'wallet') {
+            verifyWalletFunding(paymentReference);
         } else {
-            notyf.error('No payment reference found. Please try again.');
+            notyf.error('No valid payment reference or type found. Please try again.');
             setTimeout(() => {
                 window.location.href = '/purchase';
             }, 2000);
@@ -428,6 +431,53 @@ h3 {
                     </div>
                 `;
             }
+        }
+
+        async function verifyWalletFunding(reference) {
+            try {
+                const response = await fetch(`/api/verify-wallet-funding/${reference}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('paymentStatus').innerHTML = `
+                        <div style="text-align: center; padding: 2rem;">
+                            <i class="fas fa-check-circle" style="font-size: 3rem; color: #4caf50; margin-bottom: 1rem; display: block;"></i>
+                            <p style="font-size: 1.1rem; color: #333; margin: 0;">Wallet funding verified successfully!</p>
+                        </div>
+                    `;
+                    setTimeout(() => {
+                        window.location.href = '/wallet';
+                    }, 2000);
+                } else {
+                    document.getElementById('paymentStatus').innerHTML = `
+                        <div style="text-align: center; padding: 2rem;">
+                            <i class="fas fa-exclamation-circle" style="font-size: 3rem; color: #f44336; margin-bottom: 1rem; display: block;"></i>
+                            <p style="font-size: 1.1rem; color: #333; margin: 0;">Failed to verify wallet funding: ${result.error}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error verifying wallet funding:', error);
+                document.getElementById('paymentStatus').innerHTML = `
+                    <div style="text-align: center; padding: 2rem;">
+                        <i class="fas fa-exclamation-circle" style="font-size: 3rem; color: #f44336; margin-bottom: 1rem; display: block;"></i>
+                        <p style="font-size: 1.1rem; color: #333; margin: 0;">An error occurred while verifying wallet funding.</p>
+                    </div>
+                `;
+            }
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const reference = urlParams.get('reference');
+        const type = urlParams.get('type'); // Added to distinguish between wallet and purchase
+
+        if (reference && type === 'wallet') {
+            verifyWalletFunding(reference);
+        } else if (reference && type === 'purchase') {
+            processPaymentVerification(reference);
+        } else {
+            alert('No valid payment reference or type found.');
+            window.location.href = '/';
         }
     </script>
 </body>

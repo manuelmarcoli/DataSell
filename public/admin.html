@@ -495,6 +495,29 @@
             border-radius: 9999px;
             font-size: 0.875rem;
         }
+
+        /* Orders Table */
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .orders-table th, .orders-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .orders-table th {
+            background: var(--hover-bg);
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .orders-table tr:hover {
+            background: var(--hover-bg);
+        }
     </style>
 </head>
 <body>
@@ -753,13 +776,15 @@
                                     <th>Phone</th>
                                     <th>Amount</th>
                                     <th>Status</th>
+                                    <th>Delivered</th>
+                                    <th>Toggle</th>
                                     <th>Date</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="transactionsTableBody">
                                 <tr>
-                                    <td colspan="9" class="text-center">Loading transactions...</td>
+                                    <td colspan="11" class="text-center">Loading transactions...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -880,9 +905,8 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- SweetAlert2 -->
+        <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     
     <script>
@@ -1252,6 +1276,17 @@
                             ${tx.status}
                         </span>
                     </td>
+                    <td>
+                        <span class="badge ${tx.delivered ? 'badge-success' : 'badge-danger'}">
+                            ${tx.delivered ? 'Delivered' : 'Pending'}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm ${tx.delivered ? 'btn-danger' : 'btn-success'}" 
+                                onclick="toggleDelivered('${tx.reference}')">
+                            <i class="fas ${tx.delivered ? 'fa-times' : 'fa-check'}"></i>
+                        </button>
+                    </td>
                     <td>${new Date(tx.timestamp).toLocaleDateString()}</td>
                     <td>
                         <div class="flex gap-1">
@@ -1390,6 +1425,52 @@
                 document.getElementById('premiumDiscount').value = groups.premium.discount;
                 document.querySelector('#pricingGroups .pricing-group:nth-child(3) .discount-badge').textContent = 
                     `${groups.premium.discount}% Discount`;
+            }
+        }
+
+        // Orders management
+        async function fetchOrders() {
+            try {
+                const response = await fetch('/api/orders');
+                const orders = await response.json();
+
+                const ordersTableBody = document.getElementById('ordersTableBody');
+                ordersTableBody.innerHTML = '';
+
+                orders.forEach(order => {
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+                        <td>${order.id}</td>
+                        <td>${order.recipientNumber}</td>
+                        <td>${order.delivered ? 'Delivered' : 'Pending'}</td>
+                        <td>
+                            <button onclick="toggleDeliveryStatus('${order.id}')">
+                                ${order.delivered ? 'Mark as Pending' : 'Mark as Delivered'}
+                            </button>
+                        </td>
+                    `;
+
+                    ordersTableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching orders:', error);
+            }
+        }
+
+        async function toggleDeliveryStatus(orderId) {
+            try {
+                const response = await fetch(`/api/orders/${orderId}/toggle-delivery`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    fetchOrders();
+                } else {
+                    console.error('Failed to toggle delivery status');
+                }
+            } catch (error) {
+                console.error('Error toggling delivery status:', error);
             }
         }
 

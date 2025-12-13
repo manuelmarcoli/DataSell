@@ -36,4 +36,5 @@ Then open `http://localhost:3000` and verify the site loads and the install/down
 - The server already includes `datasell.onrender.com` in its CORS allow-list. If you use a different domain, update the `allowedDomains` array in `server.js` or set the `BASE_URL` accordingly.
 - Consider precomputing the APK checksum during your build pipeline and embedding it into `public/download.html` to avoid client-side hashing for large APKs.
 
-If you want, I can add a small Render `service.yaml` snippet or CI workflow to compute the checksum and copy the APK into `public/downloads` automatically.
+If you want, I can add a small Render `service.yaml` snippet or CI workflow to compute the checksum and copy the APK into `public/downloads` automatically.sk_live_1e391b5e1279118463aad86963eae9c172015c3c
+PAYSTACK_PUBLIC_KEY=pk_live_1ab0cbfd78adf80ea97911b53ca1bbfaee891316

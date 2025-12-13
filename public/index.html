@@ -4,14 +4,20 @@
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- APK URL for install banner (update if you host APK elsewhere) -->
-    <meta name="apk-url" content="/downloads/datasell-app-release.apk">
-    <!-- Runtime config injected by server: /config.js -->
+    <!-- Web App Install & PWA Setup -->
+    <meta name="theme-color" content="#6c63ff">
+    <meta name="description" content="Your favourite online store for affordable data bundles">
+    <meta name="web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DataSell">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/x-icon" href="/images/app-icon.png">
+    <link rel="apple-touch-icon" href="/images/app-icon.png">
     <script src="/config.js"></script>
     <link rel="stylesheet" href="/css/responsive.css">
     
-       <!-- ADD FAVICON -->
-    <link rel="icon" type="image/x-icon" href="/images/app-icon.png">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -150,24 +156,54 @@ body {
     position: fixed;
     left: 12px;
     right: 12px;
-    top: 12px;
-    background: linear-gradient(180deg,#fff 0,#f8fbff 100%);
-    border: 1px solid rgba(37,99,235,0.08);
-    box-shadow: 0 8px 20px rgba(37,99,235,0.06);
+    bottom: 80px;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    border: 1px solid rgba(37,99,235,0.3);
+    box-shadow: 0 8px 20px rgba(37,99,235,0.2);
     padding: 12px 14px;
     border-radius: 12px;
     display: flex;
     gap: 12px;
     align-items: center;
     z-index: 1400;
+    animation: slideUpFromBottom 0.4s ease-out;
 }
+
+@keyframes slideUpFromBottom {
+    from {
+        transform: translateY(150%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideDownToBottom {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(150%);
+        opacity: 0;
+    }
+}
+
+.install-banner.hide {
+    animation: slideDownToBottom 0.4s ease-in;
+}
+
 .install-banner img{width:48px;height:48px;border-radius:8px;object-fit:contain}
 .install-banner .install-content{flex:1}
-.install-banner .install-title{font-weight:700;color:#0f172a}
-.install-banner .install-sub{font-size:0.9rem;color:#475569}
+.install-banner .install-title{font-weight:700;color:white;margin:0}
+.install-banner .install-sub{font-size:0.9rem;color:rgba(255,255,255,0.9);margin:0}
 .install-banner .install-actions{display:flex;gap:8px}
-.install-banner .btn-install{background:#2563eb;color:#fff;padding:.5rem .8rem;border-radius:8px;border:0}
-.install-banner .btn-dismiss{background:transparent;border:0;color:#475569}
+.install-banner .btn-install{background:white;color:#2563eb;padding:.5rem .8rem;border-radius:8px;border:0;font-weight:600;cursor:pointer}
+.install-banner .btn-install:hover{opacity:0.9}
+.install-banner .btn-dismiss{background:transparent;border:0;color:rgba(255,255,255,0.8);cursor:pointer;font-weight:500}
+.install-banner .btn-dismiss:hover{color:white}
 
 /* Install modal */
 .install-modal-overlay{position:fixed;inset:0;background:rgba(2,6,23,0.5);display:none;align-items:center;justify-content:center;z-index:1300}
@@ -327,6 +363,78 @@ body {
     margin-top: 0.25rem;
 }
 
+/* Footer Card */
+.footer-card {
+    background: white;
+    border-radius: var(--card-radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    margin-top: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-top: 3px solid var(--primary-color);
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.footer-section h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.3;
+}
+
+.footer-section p {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.footer-divider {
+    border-top: 1px solid #e9ecef;
+    padding-top: 1rem;
+    text-align: center;
+}
+
+.copyright-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin: 0;
+    font-weight: 500;
+}
+
+/* Mobile Styles for Footer */
+@media (max-width: 576px) {
+    .footer-card {
+        padding: 1rem;
+        margin-top: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .footer-section h3 {
+        font-size: 1rem;
+    }
+    
+    .footer-section p {
+        font-size: 0.85rem;
+    }
+    
+    .copyright-text {
+        font-size: 0.8rem;
+    }
+}
+
 .status-success {
     background: rgba(76, 175, 80, 0.1);
     color: #4caf50;
@@ -358,17 +466,33 @@ body {
     right: 20px;
     background: #25D366;
     color: white;
-    border-radius: 50px;
-    padding: 12px 20px;
-    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
-    display: flex;
-    align-items: center;
-    gap: 10px;
     text-decoration: none;
     z-index: 1000;
-    animation: slideInFromRight 0.8s ease-out;
-    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     min-height: 44px;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: pulse 0.8s ease-in-out infinite 0.5s;
+}
+
+/* Initial circular state */
+.whatsapp-float {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    padding: 0;
+    gap: 0;
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+}
+
+/* Expanded state with text */
+.whatsapp-float.expanded {
+    border-radius: 50px;
+    padding: 12px 20px;
+    gap: 10px;
+    width: auto;
+    animation: none;
 }
 
 .whatsapp-float:hover {
@@ -388,16 +512,27 @@ body {
     font-weight: 600;
     font-size: 0.9rem;
     white-space: nowrap;
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    transition: opacity 0.5s ease, width 0.5s ease;
 }
 
-@keyframes slideInFromRight {
-    0% {
-        transform: translateX(100px);
-        opacity: 0;
+.whatsapp-float.expanded .whatsapp-text {
+    opacity: 1;
+    width: auto;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+        transform: scale(1);
     }
-    100% {
-        transform: translateX(0);
-        opacity: 1;
+    50% {
+        box-shadow: 0 4px 30px rgba(37, 211, 102, 0.7);
+        transform: scale(1.05);
+    }
+}
     }
 }
 
@@ -607,10 +742,68 @@ body {
     }
 }
 
+/* Greeting Card Animation */
+.greeting-card {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    background: white;
+    color: #6c63ff;
+    padding: 0.75rem 1rem;
+    text-align: center;
+    z-index: 2000;
+    border: 4px solid #6c63ff;
+    border-radius: 25px;
+    box-shadow: 0 4px 20px rgba(108, 99, 255, 0.2);
+    animation: slideInFromTop 0.5s ease-out forwards;
+    width: calc(100% - 8px);
+    margin: 0 4px;
+}
+
+.greeting-card h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.3;
+    word-break: break-word;
+    color: #6c63ff;
+}
+
+@keyframes slideInFromTop {
+    from {
+        transform: translateY(-150%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutToTop {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(-150%);
+        opacity: 0;
+    }
+}
+
+.greeting-card.hide {
+    animation: slideOutToTop 0.5s ease-in forwards;
+}
+
 /* Print Styles */
 @media print {
     .bottom-nav,
     .whatsapp-float {
+        display: none !important;
+    }
+    
+    .greeting-card {
         display: none !important;
     }
     
@@ -629,15 +822,20 @@ body {
     </style>
 </head>
 <body class="mobile-layout">
-    <!-- Install banner: appears on Android with APK link or configured URL -->
+    <!-- Greeting Card -->
+    <div id="greetingCard" class="greeting-card" style="display: none;">
+        <h2 id="greetingText"></h2>
+    </div>
+
+    <!-- Install banner: appears on devices promoting web app installation -->
     <div id="installBanner" class="install-banner" style="display:none" role="dialog" aria-live="polite">
         <img id="installLogo" src="/images/app-icon.png" alt="App logo">
         <div class="install-content">
-            <div class="install-title">Install DataSell App</div>
-            <div class="install-sub">Open faster and access offline features.</div>
+            <div class="install-title">Add DataSell to Home Screen</div>
+            <div class="install-sub">Quick access to your favorite data store</div>
         </div>
         <div class="install-actions">
-            <a id="installBtn" class="btn-install" href="#" role="button">Install</a>
+            <button id="installBtn" class="btn-install" role="button">Install</button>
             <button id="dismissInstall" class="btn-dismiss" aria-label="Dismiss">Later</button>
         </div>
     </div>
@@ -717,6 +915,23 @@ body {
                     </div>
                 </div>
             </div>
+
+            <!-- Footer Card -->
+            <div class="footer-card">
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h3>DataSell GH</h3>
+                        <p>Your favourite online store for affordable data bundles</p>
+                    </div>
+                    <div class="footer-section">
+                        <h3>WORKING HOURS</h3>
+                        <p>MON-SUN 8am-10pm</p>
+                    </div>
+                </div>
+                <div class="footer-divider">
+                    <p class="copyright-text">©2025 DataSell. All Rights Reserved</p>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -751,11 +966,58 @@ body {
 
         let currentUser = null;
         let userBalance = 0;
+        const POLL_INTERVAL = 30 * 1000;
+        let pollTimer = null;
 
         // Small helper to ensure cookies are sent with API calls
         function apiFetch(path, opts = {}) {
             opts.credentials = opts.credentials || 'include';
             return fetch(path, opts);
+        }
+
+        // Request notification permission
+        async function requestPermission() {
+            try {
+                if (!('Notification' in window)) return;
+                if (Notification.permission === 'default') {
+                    const ask = confirm('Do you want to receive notifications from DataSell?');
+                    if (!ask) return;
+                    const perm = await Notification.requestPermission();
+                    if (perm === 'granted') {
+                        pollNotifications();
+                        pollTimer = setInterval(pollNotifications, POLL_INTERVAL);
+                        // attempt to register FCM token now that permission is granted
+                        try { if (window.__registerFcmToken) window.__registerFcmToken(); } catch (e) { console.warn('FCM register after permission failed', e); }
+                    }
+                } else if (Notification.permission === 'granted') {
+                    pollNotifications();
+                    pollTimer = setInterval(pollNotifications, POLL_INTERVAL);
+                    try { if (window.__registerFcmToken) window.__registerFcmToken(); } catch (e) { console.warn('FCM register after permission failed', e); }
+                }
+            } catch (e) { console.error('requestPermission error:', e); }
+        }
+
+        // Placeholder for pollNotifications (will be defined below)
+        function pollNotifications() {
+            // This will be defined in the notifications section
+        }
+
+        // Get last notification timestamp
+        function getLastTs() {
+            try { return Number(localStorage.getItem('ds_last_notif_ts') || '0'); } catch(e){return 0;}
+        }
+
+        // Set last notification timestamp
+        function setLastTs(ts){ 
+            try{ localStorage.setItem('ds_last_notif_ts', String(ts)); }catch(e){}  
+        }
+
+        // Update notification badge
+        function updateBadge(count){
+            const notifBadge = document.getElementById('notifBadge');
+            if (!notifBadge) return;
+            if (count > 0) { notifBadge.style.display = 'flex'; notifBadge.textContent = count >= 100 ? '99+' : String(count); }
+            else { notifBadge.style.display = 'none'; }
         }
 
         // Check authentication and load user data
@@ -769,6 +1031,7 @@ body {
                 if (result.success && result.user) {
                     currentUser = result.user;
                     updateUserAvatar();
+                    showGreetingCard(); // Show greeting card
                     await loadWalletBalance();
                     await loadRecentTransactions();
 
@@ -783,6 +1046,25 @@ body {
             } catch (error) {
                 console.error('Auth check failed:', error);
                 window.location.href = '/login';
+            }
+        }
+
+        // Show greeting card with user name
+        function showGreetingCard() {
+            const greetingCard = document.getElementById('greetingCard');
+            const greetingText = document.getElementById('greetingText');
+            
+            if (currentUser && currentUser.displayName) {
+                greetingText.textContent = `Greetings!!! Dear ${currentUser.displayName}`;
+                greetingCard.style.display = 'block';
+                
+                // Auto-hide after 3 seconds
+                setTimeout(() => {
+                    greetingCard.classList.add('hide');
+                    setTimeout(() => {
+                        greetingCard.style.display = 'none';
+                    }, 500); // Wait for animation to complete
+                }, 3000);
             }
         }
 
@@ -818,11 +1100,43 @@ body {
         // Load recent transactions
         async function loadRecentTransactions() {
             try {
-                const response = await apiFetch('/api/wallet/transactions');
-                const result = await response.json();
+                // Fetch both wallet transactions and orders
+                const [transRes, ordersRes] = await Promise.all([
+                    apiFetch('/api/wallet/transactions'),
+                    apiFetch('/api/orders')
+                ]);
+
+                const transResult = await transRes.json();
+                const ordersResult = await ordersRes.json();
                 
-                if (result.success && result.transactions && result.transactions.length > 0) {
-                    displayRecentTransactions(result.transactions);
+                let allPurchases = [];
+
+                // Add wallet transactions (purchases)
+                if (transResult.success && transResult.transactions && transResult.transactions.length > 0) {
+                    const purchases = transResult.transactions.filter(t => t.type === 'purchase' && (t.status === 'success' || t.status === 'delivered'));
+                    allPurchases = allPurchases.concat(purchases);
+                }
+
+                // Add orders (latest purchases)
+                if (ordersResult.success && ordersResult.orders && ordersResult.orders.length > 0) {
+                    const orders = ordersResult.orders.map(order => ({
+                        ...order,
+                        type: 'order',
+                        timestamp: order.timestamp || Date.now(),
+                        description: order.packageName || 'Data Package'
+                    }));
+                    allPurchases = allPurchases.concat(orders);
+                }
+
+                // Sort by timestamp (newest first)
+                allPurchases.sort((a, b) => {
+                    const timeA = new Date(a.timestamp).getTime();
+                    const timeB = new Date(b.timestamp).getTime();
+                    return timeB - timeA;
+                });
+
+                if (allPurchases.length > 0) {
+                    displayRecentTransactions(allPurchases);
                 }
             } catch (error) {
                 console.error('Failed to load transactions:', error);
@@ -832,22 +1146,46 @@ body {
 
         // Display recent transactions
         function displayRecentTransactions(transactions) {
-            const buyAgainContent = document.getElementById('buyAgainContent');
             const lastPurchaseContent = document.getElementById('lastPurchaseContent');
             
             // Clear empty states
-            buyAgainContent.innerHTML = '';
             lastPurchaseContent.innerHTML = '';
 
-            // Filter only successful purchases (type = 'purchase')
-            const purchases = transactions.filter(t => t.type === 'purchase' && (t.status === 'success' || t.status === 'delivered'));
+            // Filter and get the most recent purchase (from either wallet or orders)
+            const validPurchases = transactions.filter(t => 
+                t.type === 'purchase' || 
+                t.type === 'order' || 
+                t.status === 'success' || 
+                t.status === 'delivered' || 
+                t.status === 'Accepted' || 
+                t.status === 'Processing'
+            );
 
             // Display last purchase
-            if (purchases.length > 0) {
-                const lastPurchase = purchases[0];
-                // Extract package name from description (format: "1GB - MTN")
-                const packageName = lastPurchase.description || 'Data Package';
-                const amount = Math.abs(lastPurchase.amount); // Remove negative sign for purchases
+            if (validPurchases.length > 0) {
+                const lastPurchase = validPurchases[0];
+                const packageName = lastPurchase.description || lastPurchase.packageName || 'Data Package';
+                const amount = lastPurchase.amount || 0;
+                const displayAmount = typeof amount === 'number' ? Math.abs(amount) : Math.abs(parseFloat(amount) || 0);
+                
+                let statusClass = 'status-success';
+                let statusText = 'Delivered';
+
+                if (lastPurchase.status) {
+                    if (lastPurchase.status === 'Accepted' || lastPurchase.status === 'pending') {
+                        statusClass = 'status-pending';
+                        statusText = 'Pending';
+                    } else if (lastPurchase.status === 'Processing') {
+                        statusClass = 'status-pending';
+                        statusText = 'Processing';
+                    } else if (lastPurchase.status === 'Delivered' || lastPurchase.status === 'success') {
+                        statusClass = 'status-success';
+                        statusText = 'Delivered';
+                    } else {
+                        statusClass = 'status-pending';
+                        statusText = lastPurchase.status;
+                    }
+                }
                 
                 lastPurchaseContent.innerHTML = `
                     <div class="recent-purchase" onclick="window.location.href='/orders'">
@@ -857,36 +1195,12 @@ body {
                                 <p>${new Date(lastPurchase.timestamp).toLocaleDateString()}</p>
                             </div>
                             <div class="text-end">
-                                <div class="purchase-amount">₵${amount.toFixed(2)}</div>
-                                <span class="purchase-status status-success">Success</span>
+                                <div class="purchase-amount">₵${displayAmount.toFixed(2)}</div>
+                                <span class="purchase-status ${statusClass}">${statusText}</span>
                             </div>
                         </div>
                     </div>
                 `;
-            }
-
-            // Display recent purchases for "Buy Again" section
-            if (purchases.length > 1) {
-                const recentPurchases = purchases.slice(1, 4);
-                recentPurchases.forEach(purchase => {
-                    const purchaseElement = document.createElement('div');
-                    purchaseElement.className = 'recent-purchase';
-                    purchaseElement.innerHTML = `
-                        <div class="purchase-info">
-                            <div class="purchase-details">
-                                <h6>${purchase.description || 'Data Package'}</h6>
-                                <p>${new Date(purchase.timestamp).toLocaleDateString()}</p>
-                            </div>
-                            <div class="text-end">
-                                <div class="purchase-amount">₵${Math.abs(purchase.amount).toFixed(2)}</div>
-                                <button class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation(); window.location.href='/purchase'">
-                                    Buy
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    buyAgainContent.appendChild(purchaseElement);
-                });
             }
         }
 
@@ -973,19 +1287,44 @@ body {
         }
 
         // Initialize app when page loads (and request notification permission after auth completes)
-        document.addEventListener('DOMContentLoaded', initializeApp);
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            
+            // WhatsApp button animation cycle: circle → expand → circle (repeat)
+            function animateWhatsappButton() {
+                const whatsappBtn = document.querySelector('.whatsapp-float');
+                if (!whatsappBtn) return;
+                
+                // After 3 seconds of pulsing, expand
+                setTimeout(() => {
+                    whatsappBtn.classList.add('expanded');
+                    
+                    // After 3 more seconds of being expanded, collapse back
+                    setTimeout(() => {
+                        whatsappBtn.classList.remove('expanded');
+                        
+                        // Repeat the cycle after 1 second (to allow pulse animation to restart)
+                        setTimeout(() => {
+                            animateWhatsappButton();
+                        }, 1000);
+                    }, 3000);
+                }, 3000);
+            }
+            
+            // Start the animation cycle
+            animateWhatsappButton();
+        });
     </script>
-    <!-- Install prompt script -->
-    <!-- Install modal markup -->
+    <!-- Install modal for web app -->
     <div id="installModalOverlay" class="install-modal-overlay" role="dialog" aria-modal="true">
         <div class="install-modal" id="installModal">
-            <h3>Install DataSell App</h3>
-            <p>The APK will be downloaded to your device. After download, open the file and follow the prompts to install.</p>
-            <p style="font-size:.9rem;color:#6b7280">If you see a message about "Unknown apps" or "Install unknown apps", allow your browser to install apps from this source in your device settings.</p>
+            <h3>Add to Home Screen</h3>
+            <p>Install DataSell as a web app for quick access and offline functionality.</p>
+            <p style="font-size:.9rem;color:#6b7280">You can access DataSell anytime from your home screen or app drawer.</p>
             <div class="modal-actions">
                 <button id="dontShowBtn" class="btn-secondary">Don't show again</button>
                 <button id="closeModalBtn" class="btn-secondary">Close</button>
-                <a id="downloadApkBtn" class="btn-primary" href="#" download>Download APK</a>
+                <button id="installWebAppBtn" class="btn-primary">Install Now</button>
             </div>
         </div>
     </div>
@@ -993,80 +1332,182 @@ body {
     <script>
         (function(){
             try {
-                // Detect if running inside Cordova (installed app)
-                const isInCordova = !!(window.cordova || window.Cordova);
-                if (isInCordova) return; // Don't show banner if already in the app
-                
-                // Detect Android-like user agents (Android, Fire OS / Silk browsers, Kindle devices)
-                const ua = navigator.userAgent || '';
-                const isAndroid = /Android|Silk|Kindle|KF[A-Z0-9]+|FireOS|Fire/i.test(ua);
-                
-                // Show banner every time on Android (removed dismissed/installed checks)
-                // so users see it on every login
-                if (!isAndroid) return;
+                // Web App Install Prompt
+                let deferredPrompt = null;
+                let isPWAInstalled = false;
 
-                const banner = document.getElementById('installBanner');
-                const installBtn = document.getElementById('installBtn');
-                const dismissBtn = document.getElementById('dismissInstall');
-                const apkMeta = document.querySelector('meta[name="apk-url"]');
-                // Prefer runtime-provided APK URL (served from server-side env), then meta tag, then fallback
-                const apkUrl = (window && window.__APK_URL) || (apkMeta ? apkMeta.getAttribute('content') : '/downloads/datasell-app-release.apk');
+                // Check if app is already installed
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    isPWAInstalled = false;
+                });
 
-                const modalOverlay = document.getElementById('installModalOverlay');
-                const downloadBtn = document.getElementById('downloadApkBtn');
-                const closeModalBtn = document.getElementById('closeModalBtn');
-                const dontShowBtn = document.getElementById('dontShowBtn');
+                // Capture the beforeinstallprompt event
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    console.log('beforeinstallprompt event captured');
+                    // Prevent the mini-infobar from appearing on mobile
+                    e.preventDefault();
+                    // Stash the event so it can be triggered later
+                    deferredPrompt = e;
+                    
+                    // Delay showing banner to ensure DOM is ready
+                    setTimeout(() => {
+                        showInstallBanner();
+                    }, 500);
+                });
 
-                // Show banner at top on Android devices and auto-hide after 5 seconds
-                setTimeout(() => {
+                // Show install banner
+                function showInstallBanner() {
+                    const banner = document.getElementById('installBanner');
+                    if (!banner) {
+                        console.warn('Install banner element not found');
+                        return;
+                    }
+                    
                     banner.style.display = 'flex';
+                    console.log('Install banner shown');
 
-                    // Auto-hide after 5 seconds (5000ms) unless the user interacts
+                    // Auto-hide after 5 seconds unless user interacts
                     const autoHideTimer = setTimeout(() => {
                         try {
-                            banner.style.display = 'none';
-                        } catch (e) { /* ignore */ }
+                            banner.classList.add('hide');
+                            setTimeout(() => {
+                                banner.style.display = 'none';
+                                banner.classList.remove('hide');
+                            }, 400);
+                        } catch (e) { console.warn('Auto-hide error', e); }
                     }, 5000);
 
-                    // If user interacts (hover, click install or dismiss), clear auto-hide
-                    const clearAutoHide = () => { try { clearTimeout(autoHideTimer); } catch (e) {} };
-                    installBtn.addEventListener('click', clearAutoHide);
-                    dismissBtn.addEventListener('click', clearAutoHide);
-                    banner.addEventListener('mouseenter', clearAutoHide);
-                    banner.addEventListener('touchstart', clearAutoHide, {passive:true});
-                }, 100);
+                    // Clear auto-hide on interaction
+                    const clearAutoHide = () => { 
+                        try { 
+                            clearTimeout(autoHideTimer); 
+                        } catch (e) {}
+                    };
+                    
+                    const installBtn = document.getElementById('installBtn');
+                    const dismissBtn = document.getElementById('dismissInstall');
+                    
+                    if (installBtn) installBtn.addEventListener('click', clearAutoHide);
+                    if (dismissBtn) dismissBtn.addEventListener('click', clearAutoHide);
+                    if (banner) {
+                        banner.addEventListener('mouseenter', clearAutoHide);
+                        banner.addEventListener('touchstart', clearAutoHide, {passive:true});
+                    }
+                }
 
-                // Set APK link on both the banner and modal. Use direct download for Install button.
-                installBtn.setAttribute('href', apkUrl);
-                installBtn.setAttribute('download', 'datasell-app-release.apk');
-                // Also update modal download button to point to release APK
-                downloadBtn.setAttribute('href', apkUrl || downloadBtn.getAttribute('href'));
-                downloadBtn.setAttribute('href', apkUrl);
+                // When install button is clicked
+                document.addEventListener('DOMContentLoaded', () => {
+                    const installBtn = document.getElementById('installBtn');
+                    if (installBtn) {
+                        installBtn.addEventListener('click', async (e) => {
+                            e.preventDefault();
+                            if (deferredPrompt) {
+                                console.log('Showing install prompt');
+                                // Show the install prompt
+                                deferredPrompt.prompt();
+                                // Wait for the user to respond to the prompt
+                                const { outcome } = await deferredPrompt.userChoice;
+                                console.log(`User response to the install prompt: ${outcome}`);
+                                if (outcome === 'accepted') {
+                                    isPWAInstalled = true;
+                                }
+                                deferredPrompt = null;
+                            } else {
+                                console.warn('No deferred prompt available');
+                            }
+                            // Hide the banner
+                            const banner = document.getElementById('installBanner');
+                            if (banner) banner.style.display = 'none';
+                        });
+                    }
 
-                // When install button is clicked it will start download by default (no interception).
+                    // Dismiss banner
+                    const dismissBtn = document.getElementById('dismissInstall');
+                    if (dismissBtn) {
+                        dismissBtn.addEventListener('click', function(e){
+                            e.preventDefault();
+                            const banner = document.getElementById('installBanner');
+                            if (banner) banner.style.display = 'none';
+                        });
+                    }
 
-                // Download button in modal: let browser handle download
-                downloadBtn.addEventListener('click', function(){
-                    // No longer mark as installed; show banner again on next login
+                    // Modal handlers
+                    const modalOverlay = document.getElementById('installModalOverlay');
+                    const installWebAppBtn = document.getElementById('installWebAppBtn');
+                    const closeModalBtn = document.getElementById('closeModalBtn');
+                    const dontShowBtn = document.getElementById('dontShowBtn');
+
+                    // Install from modal
+                    if (installWebAppBtn) {
+                        installWebAppBtn.addEventListener('click', async (e) => {
+                            e.preventDefault();
+                            if (deferredPrompt) {
+                                deferredPrompt.prompt();
+                                const { outcome } = await deferredPrompt.userChoice;
+                                console.log(`User response to the install prompt: ${outcome}`);
+                                if (outcome === 'accepted') {
+                                    isPWAInstalled = true;
+                                }
+                                deferredPrompt = null;
+                            }
+                            if (modalOverlay) modalOverlay.style.display = 'none';
+                        });
+                    }
+
+                    // Close modal
+                    if (closeModalBtn) {
+                        closeModalBtn.addEventListener('click', function(){
+                            if (modalOverlay) modalOverlay.style.display = 'none';
+                        });
+                    }
+
+                    // Don't show again
+                    if (dontShowBtn) {
+                        dontShowBtn.addEventListener('click', function(){
+                            if (modalOverlay) modalOverlay.style.display = 'none';
+                            const banner = document.getElementById('installBanner');
+                            if (banner) banner.style.display = 'none';
+                            localStorage.setItem('ds_install_dismissed','1');
+                        });
+                    }
                 });
 
-                // Close modal
-                closeModalBtn.addEventListener('click', function(){
-                    modalOverlay.style.display = 'none';
+                // Handle app installed event
+                window.addEventListener('appinstalled', () => {
+                    console.log('DataSell web app installed successfully');
+                    const banner = document.getElementById('installBanner');
+                    if (banner) banner.style.display = 'none';
+                    localStorage.removeItem('ds_install_dismissed');
+                    isPWAInstalled = true;
                 });
 
-                // Don't show again button (kept for UX but user can re-enable by clearing localStorage manually)
-                dontShowBtn.addEventListener('click', function(){
-                    modalOverlay.style.display = 'none';
-                    banner.style.display = 'none';
-                    localStorage.setItem('ds_install_dismissed','1');
-                });
-
-                // Dismiss banner action
-                dismissBtn.addEventListener('click', function(e){
-                    e.preventDefault();
-                    banner.style.display = 'none';
-                    // Don't set dismissed flag; show again on next login
+                // Show banner on page load if not dismissed (fallback for devices without beforeinstallprompt)
+                window.addEventListener('load', () => {
+                    const isDismissed = localStorage.getItem('ds_install_dismissed') === '1';
+                    const isOnAPKSupported = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                    
+                    if (!isDismissed && isOnAPKSupported && !isPWAInstalled) {
+                        // Only show after a delay to not interfere with initial page load
+                        setTimeout(() => {
+                            const banner = document.getElementById('installBanner');
+                            if (banner && !deferredPrompt) {
+                                // This is a fallback for older devices
+                                console.log('Showing fallback install banner');
+                                banner.style.display = 'flex';
+                                
+                                // Auto-hide after 5 seconds
+                                setTimeout(() => {
+                                    try {
+                                        banner.classList.add('hide');
+                                        setTimeout(() => {
+                                            banner.style.display = 'none';
+                                            banner.classList.remove('hide');
+                                        }, 400);
+                                    } catch (e) {}
+                                }, 5000);
+                            }
+                        }, 2000);
+                    }
                 });
 
             } catch (err) { console.error('Install banner error', err); }
@@ -1093,17 +1534,6 @@ body {
                         try { setLastTs(Date.now()); updateBadge(0); } catch (e) {}
                         window.location.href = '/notifications';
                     });
-                }
-
-        function getLastTs() {
-          try { return Number(localStorage.getItem('ds_last_notif_ts') || '0'); } catch(e){return 0;}
-        }
-        function setLastTs(ts){ try{ localStorage.setItem('ds_last_notif_ts', String(ts)); }catch(e){}  }
-
-                function updateBadge(count){
-                    if (!notifBadge) return;
-                    if (count > 0) { notifBadge.style.display = 'flex'; notifBadge.textContent = count >= 100 ? '99+' : String(count); }
-                    else { notifBadge.style.display = 'none'; }
                 }
 
                 async function pollNotifications() {
@@ -1135,27 +1565,6 @@ body {
                     } catch (e) { console.error('Polling error', e); }
                 }
 
-        async function requestPermission() {
-          try {
-            if (!('Notification' in window)) return;
-            if (Notification.permission === 'default') {
-              const ask = confirm('Do you want to receive notifications from DataSell?');
-              if (!ask) return;
-              const perm = await Notification.requestPermission();
-              if (perm === 'granted') {
-                                pollNotifications();
-                                pollTimer = setInterval(pollNotifications, POLL_INTERVAL);
-                                // attempt to register FCM token now that permission is granted
-                                try { if (window.__registerFcmToken) window.__registerFcmToken(); } catch (e) { console.warn('FCM register after permission failed', e); }
-              }
-            } else if (Notification.permission === 'granted') {
-              pollNotifications();
-              pollTimer = setInterval(pollNotifications, POLL_INTERVAL);
-                            try { if (window.__registerFcmToken) window.__registerFcmToken(); } catch (e) { console.warn('FCM register after permission failed', e); }
-            }
-          } catch (e) { console.error(e); }
-        }
-
                 // Removed automatic permission request on DOMContentLoaded to avoid
                 // requesting notifications before authentication is established.
                 // `initializeApp` will call `requestPermission()` after successful auth.
@@ -1172,6 +1581,11 @@ body {
             (async function(){
                 if (!('serviceWorker' in navigator)) return;
                 try {
+                    // Register app service worker for offline support
+                    const appSwReg = await navigator.serviceWorker.register('/sw.js');
+                    console.log('App SW registered:', appSwReg);
+
+                    // Register Firebase messaging service worker
                     const reg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
                     console.log('Firebase SW registered:', reg);
 

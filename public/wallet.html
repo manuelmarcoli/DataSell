@@ -1147,6 +1147,39 @@ function checkPaystackCallback() {
 
     // Initialize app when page loads
     document.addEventListener('DOMContentLoaded', initializeApp);
+
+    async function fundWallet(amount) {
+        try {
+            const response = await fetch('/api/fund-wallet', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ amount })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('Wallet funded successfully!');
+                location.reload();
+            } else {
+                alert('Failed to fund wallet: ' + result.error);
+            }
+        } catch (error) {
+            console.error('Error funding wallet:', error);
+            alert('An error occurred while funding the wallet.');
+        }
+    }
+
+    document.querySelectorAll('.fund-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const amount = parseFloat(button.dataset.amount);
+            if (amount > 0) {
+                fundWallet(amount);
+            }
+        });
+    });
 </script>
 </body>
 </html>
