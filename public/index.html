@@ -1430,6 +1430,33 @@ body {
     </div>
 
     <script>
+        // CRITICAL: Check and hide banner IMMEDIATELY if already shown this session
+        // This runs before any other code that might show the banner
+        if (sessionStorage.getItem('ds_install_shown') === 'true') {
+            // Use a style tag to ensure banner stays hidden with !important
+            const style = document.createElement('style');
+            style.textContent = '#installBanner { display: none !important; visibility: hidden !important; }';
+            document.head.appendChild(style);
+            
+            // Also hide it directly when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    const banner = document.getElementById('installBanner');
+                    if (banner) {
+                        banner.style.display = 'none';
+                        banner.style.visibility = 'hidden';
+                    }
+                });
+            } else {
+                const banner = document.getElementById('installBanner');
+                if (banner) {
+                    banner.style.display = 'none';
+                    banner.style.visibility = 'hidden';
+                }
+            }
+        }
+    </script>
+    <script>
         (function(){
             try {
                 // Web App Install Prompt
@@ -1640,6 +1667,32 @@ body {
                         }
                     }
                 });
+
+                // Monitor and prevent any style changes to banner if already shown
+                if (sessionStorage.getItem('ds_install_shown') === 'true') {
+                    const banner = document.getElementById('installBanner');
+                    if (banner) {
+                        // Use MutationObserver to catch any attempts to show the banner
+                        const observer = new MutationObserver((mutations) => {
+                            mutations.forEach((mutation) => {
+                                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                                    // Someone tried to change the style - revert it
+                                    if (banner.style.display !== 'none') {
+                                        console.log('Reverting banner display style change');
+                                        banner.style.display = 'none';
+                                        banner.style.visibility = 'hidden';
+                                    }
+                                }
+                            });
+                        });
+                        
+                        observer.observe(banner, { 
+                            attributes: true, 
+                            attributeFilter: ['style'],
+                            subtree: false
+                        });
+                    }
+                }
 
             } catch (err) { console.error('Install banner error', err); }
         })();
