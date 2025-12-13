@@ -435,11 +435,20 @@ app.get('/admin-login', (req, res) => {
 
 app.get('/admin', (req, res) => {
   // Check if user is authenticated and is admin
+  console.log('📍 /admin route accessed, session:', { 
+    hasSession: !!req.session?.user, 
+    uid: req.session?.user?.uid,
+    isAdmin: req.session?.user?.isAdmin, 
+    sessionID: req.sessionID 
+  });
+  
   if (req.session?.user && req.session.user.isAdmin) {
     // User is already logged in, serve the admin page
+    console.log('✅ Admin access granted for:', req.session.user.uid);
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
   } else {
     // Not logged in or not admin, redirect to login page
+    console.log('❌ Admin access denied, redirecting to login');
     res.redirect('/admin-login');
   }
 });
@@ -592,6 +601,8 @@ app.post('/api/login', async (req, res) => {
         isAdmin: true
       };
 
+      console.log('✅ Admin session set:', { uid: req.session.user.uid, isAdmin: req.session.user.isAdmin, sessionID: req.sessionID });
+
       // Respect 'remember me' for admin sessions if provided
       try {
         const rememberMs = remember ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000; // 30 days || 24 hours
@@ -606,11 +617,13 @@ app.post('/api/login', async (req, res) => {
       }).catch(err => console.error('Failed to update lastLogin:', err));
 
       // Return response - express-session middleware will automatically save and set Set-Cookie
+      console.log('📤 Sending admin login response with sessionID:', req.sessionID);
       return res.json({ 
         success: true, 
         message: 'Admin login successful',
         user: req.session.user,
-        sessionID: req.sessionID
+        sessionID: req.sessionID,
+        isAdmin: true
       });
     }
 
@@ -671,14 +684,23 @@ app.post('/api/login', async (req, res) => {
 
     // Log session info for debugging
     console.log('✅ User login for', localId, 'sessionID:', req.sessionID, 'cookieMaxAge:', req.session.cookie.maxAge);
-    console.log('🍪 Session data set:', { uid: req.session.user.uid, sessionID: req.sessionID });
+    console.log('🍪 Session data set:', { uid: req.session.user.uid, isAdmin: req.session.user.isAdmin, sessionID: req.sessionID });
     
-    // Return response - express-session middleware will automatically save and set Set-Cookie
-    return res.json({ 
-      success: true, 
-      message: 'Login successful',
-      user: req.session.user,
-      sessionID: req.sessionID
+    // Save session explicitly before returning response
+    return req.session.save((err) => {
+      if (err) {
+        console.error('❌ Session save error:', err);
+        return res.status(500).json({ success: false, error: 'Session save failed' });
+      }
+      
+      console.log('✅ User session saved successfully');
+      // Return response - session is now saved
+      return res.json({ 
+        success: true, 
+        message: 'Login successful',
+        user: req.session.user,
+        sessionID: req.sessionID
+      });
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -713,6 +735,8 @@ app.post('/api/login', async (req, res) => {
 app.get('/api/user', requireAuth, async (req, res) => {
   try {
     const uid = req.session.user.uid;
+    console.log('📋 Fetching user data for:', uid, 'isAdmin from session:', req.session.user.isAdmin);
+    
     const snap = await admin.database().ref('users/' + uid).once('value');
     const userData = snap.val() || {};
 
@@ -721,9 +745,11 @@ app.get('/api/user', requireAuth, async (req, res) => {
       phoneNumber: userData.phone || userData.phoneNumber || null,
       walletBalance: userData.walletBalance || 0,
       firstName: userData.firstName || null,
-      lastName: userData.lastName || null
+      lastName: userData.lastName || null,
+      isAdmin: req.session.user.isAdmin || userData.isAdmin || false
     });
 
+    console.log('✅ User data response:', { uid: user.uid, email: user.email, isAdmin: user.isAdmin });
     res.json({ success: true, user });
   } catch (err) {
     console.error('Get user error:', err);
@@ -2096,6 +2122,123 @@ app.get('/api/admin/transactions', requireAdmin, async (req, res) => {
   }
 });
 
+// Get transaction details
+app.get('/api/admin/transactions/:id', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const transactionSnapshot = await admin.database().ref(`transactions/${id}`).once('value');
+    const transaction = transactionSnapshot.val();
+
+    if (!transaction) {
+      return res.status(404).json({ success: false, error: 'Transaction not found' });
+    }
+
+    const userSnapshot = await admin.database().ref(`users/${transaction.userId}`).once('value');
+    const user = userSnapshot.val();
+
+    res.json({
+      success: true,
+      transaction: {
+        id,
+        ...transaction,
+        userName: user ? `${user.firstName} ${user.lastName}` : 'Unknown User',
+        userEmail: user?.email || 'N/A'
+      }
+    });
+  } catch (error) {
+    console.error('Get transaction error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Refund transaction
+app.post('/api/admin/transactions/:id/refund', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    const transactionSnapshot = await admin.database().ref(`transactions/${id}`).once('value');
+    const transaction = transactionSnapshot.val();
+
+    if (!transaction) {
+      return res.status(404).json({ success: false, error: 'Transaction not found' });
+    }
+
+    if (transaction.status === 'refunded') {
+      return res.status(400).json({ success: false, error: 'Transaction already refunded' });
+    }
+
+    // Update transaction status
+    await admin.database().ref(`transactions/${id}`).update({
+      status: 'refunded',
+      refundedAt: new Date().toISOString(),
+      refundReason: reason || 'Admin refund'
+    });
+
+    // Refund amount to user wallet
+    const userSnapshot = await admin.database().ref(`users/${transaction.userId}`).once('value');
+    const user = userSnapshot.val();
+
+    if (user) {
+      await admin.database().ref(`users/${transaction.userId}`).update({
+        walletBalance: (user.walletBalance || 0) + transaction.amount,
+        updatedAt: new Date().toISOString()
+      });
+    }
+
+    // Log admin action
+    await admin.database().ref('adminLogs').push({
+      adminId: req.session.userId,
+      action: 'refund_transaction',
+      details: `Refunded transaction ${id} for user ${transaction.userId.substring(0, 8)}...`,
+      timestamp: new Date().toISOString(),
+      ip: req.ip
+    });
+
+    res.json({ success: true, message: 'Transaction refunded successfully' });
+  } catch (error) {
+    console.error('Refund transaction error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Toggle transaction delivery status
+app.post('/api/admin/transactions/:id/toggle-delivery', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const transactionSnapshot = await admin.database().ref(`transactions/${id}`).once('value');
+    const transaction = transactionSnapshot.val();
+
+    if (!transaction) {
+      return res.status(404).json({ success: false, error: 'Transaction not found' });
+    }
+
+    const newDeliveredStatus = !transaction.delivered;
+    await admin.database().ref(`transactions/${id}`).update({
+      delivered: newDeliveredStatus,
+      deliveredAt: newDeliveredStatus ? new Date().toISOString() : null,
+      updatedAt: new Date().toISOString()
+    });
+
+    // Log admin action
+    await admin.database().ref('adminLogs').push({
+      adminId: req.session.userId,
+      action: 'toggle_delivery',
+      details: `${newDeliveredStatus ? 'Marked' : 'Unmarkked'} transaction ${id} as ${newDeliveredStatus ? 'delivered' : 'pending'}`,
+      timestamp: new Date().toISOString(),
+      ip: req.ip
+    });
+
+    res.json({ 
+      success: true, 
+      message: newDeliveredStatus ? 'Marked as delivered' : 'Marked as pending'
+    });
+  } catch (error) {
+    console.error('Toggle delivery error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Admin Pricing Groups
 app.get('/api/admin/pricing/groups', requireAdmin, async (req, res) => {
   try {
@@ -2109,6 +2252,205 @@ app.get('/api/admin/pricing/groups', requireAdmin, async (req, res) => {
     res.json({ success: true, pricingGroups: pricing });
   } catch (error) {
     console.error('Pricing groups error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Update pricing group discounts
+app.post('/api/admin/pricing/groups/update', requireAdmin, async (req, res) => {
+  try {
+    const { group, discount } = req.body;
+    
+    if (!group || discount === undefined || discount < 0 || discount > 100) {
+      return res.status(400).json({ success: false, error: 'Invalid group or discount value' });
+    }
+
+    await admin.database().ref(`pricingGroups/${group}`).update({
+      discount: parseFloat(discount),
+      updatedAt: new Date().toISOString()
+    });
+
+    // Log admin action
+    await admin.database().ref('adminLogs').push({
+      adminId: req.session.userId,
+      action: 'update_pricing_group',
+      details: `Updated ${group} group discount to ${discount}%`,
+      timestamp: new Date().toISOString(),
+      ip: req.ip
+    });
+
+    res.json({ success: true, message: `${group} group discount updated to ${discount}%` });
+  } catch (error) {
+    console.error('Update pricing group error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Update user pricing group
+app.post('/api/admin/users/:uid/update-role', requireAdmin, async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const { role } = req.body;
+
+    if (!role || !['regular', 'vip', 'premium'].includes(role)) {
+      return res.status(400).json({ success: false, error: 'Invalid pricing group' });
+    }
+
+    await admin.database().ref(`users/${uid}`).update({
+      pricingGroup: role,
+      updatedAt: new Date().toISOString()
+    });
+
+    // Log admin action
+    await admin.database().ref('adminLogs').push({
+      adminId: req.session.userId,
+      action: 'update_user_role',
+      details: `Changed user ${uid.substring(0, 8)}... pricing group to ${role}`,
+      timestamp: new Date().toISOString(),
+      ip: req.ip
+    });
+
+    res.json({ success: true, message: `User pricing group updated to ${role}` });
+  } catch (error) {
+    console.error('Update user role error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Toggle user suspension
+app.post('/api/admin/users/:uid/toggle-suspend', requireAdmin, async (req, res) => {
+  try {
+    const { uid } = req.params;
+    
+    const userSnapshot = await admin.database().ref(`users/${uid}`).once('value');
+    const user = userSnapshot.val();
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    const newSuspended = !user.suspended;
+    await admin.database().ref(`users/${uid}`).update({
+      suspended: newSuspended,
+      suspendedAt: newSuspended ? new Date().toISOString() : null,
+      updatedAt: new Date().toISOString()
+    });
+
+    // Log admin action
+    await admin.database().ref('adminLogs').push({
+      adminId: req.session.userId,
+      action: newSuspended ? 'suspend_user' : 'activate_user',
+      details: `${newSuspended ? 'Suspended' : 'Activated'} user ${uid.substring(0, 8)}...`,
+      timestamp: new Date().toISOString(),
+      ip: req.ip
+    });
+
+    res.json({ 
+      success: true, 
+      message: newSuspended ? 'User suspended' : 'User activated'
+    });
+  } catch (error) {
+    console.error('Toggle suspension error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Add funds to user wallet
+app.post('/api/admin/users/:uid/add-funds', requireAdmin, async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const { amount, note } = req.body;
+
+    if (!amount || isNaN(amount) || amount <= 0) {
+      return res.status(400).json({ success: false, error: 'Invalid amount' });
+    }
+
+    const userSnapshot = await admin.database().ref(`users/${uid}`).once('value');
+    const user = userSnapshot.val();
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    const newBalance = (user.walletBalance || 0) + parseFloat(amount);
+    
+    await admin.database().ref(`users/${uid}`).update({
+      walletBalance: newBalance,
+      updatedAt: new Date().toISOString()
+    });
+
+    // Log transaction
+    await admin.database().ref('adminLogs').push({
+      adminId: req.session.userId,
+      action: 'add_funds',
+      details: `Added ₵${amount} to user ${uid.substring(0, 8)}... wallet. Note: ${note || 'N/A'}`,
+      timestamp: new Date().toISOString(),
+      ip: req.ip
+    });
+
+    // Record in transactions
+    await admin.database().ref('transactions').push({
+      userId: uid,
+      type: 'admin_fund',
+      amount: parseFloat(amount),
+      description: `Admin added funds: ${note || 'No note'}`,
+      timestamp: new Date().toISOString(),
+      status: 'completed'
+    });
+
+    res.json({ success: true, message: `₵${amount} added to user wallet` });
+  } catch (error) {
+    console.error('Add funds error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Deduct funds from user wallet
+app.post('/api/admin/users/:uid/deduct-funds', requireAdmin, async (req, res) => {
+  try {
+    const { uid } = req.params;
+    const { amount, note } = req.body;
+
+    if (!amount || isNaN(amount) || amount <= 0) {
+      return res.status(400).json({ success: false, error: 'Invalid amount' });
+    }
+
+    const userSnapshot = await admin.database().ref(`users/${uid}`).once('value');
+    const user = userSnapshot.val();
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    const newBalance = Math.max(0, (user.walletBalance || 0) - parseFloat(amount));
+    
+    await admin.database().ref(`users/${uid}`).update({
+      walletBalance: newBalance,
+      updatedAt: new Date().toISOString()
+    });
+
+    // Log admin action
+    await admin.database().ref('adminLogs').push({
+      adminId: req.session.userId,
+      action: 'deduct_funds',
+      details: `Deducted ₵${amount} from user ${uid.substring(0, 8)}... wallet. Note: ${note || 'N/A'}`,
+      timestamp: new Date().toISOString(),
+      ip: req.ip
+    });
+
+    // Record in transactions
+    await admin.database().ref('transactions').push({
+      userId: uid,
+      type: 'admin_deduction',
+      amount: parseFloat(amount),
+      description: `Admin deducted funds: ${note || 'No note'}`,
+      timestamp: new Date().toISOString(),
+      status: 'completed'
+    });
+
+    res.json({ success: true, message: `₵${amount} deducted from user wallet` });
+  } catch (error) {
+    console.error('Deduct funds error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
