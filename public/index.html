@@ -1019,8 +1019,20 @@ body {
         let userBalance = 0;
         const POLL_INTERVAL = 30 * 1000;
         let pollTimer = null;
-        let hasShownGreetingCard = false;  // Track if greeting has been shown in this session
-        let hasShownInstallBanner = false; // Track if install banner has been shown in this session
+        
+        // Use sessionStorage to persist flags across page reloads within same session
+        function hasShownGreeting() {
+            return sessionStorage.getItem('ds_greeting_shown') === 'true';
+        }
+        function markGreetingShown() {
+            sessionStorage.setItem('ds_greeting_shown', 'true');
+        }
+        function hasShownInstall() {
+            return sessionStorage.getItem('ds_install_shown') === 'true';
+        }
+        function markInstallShown() {
+            sessionStorage.setItem('ds_install_shown', 'true');
+        }
 
         // Small helper to ensure cookies are sent with API calls
         function apiFetch(path, opts = {}) {
@@ -1105,7 +1117,7 @@ body {
         // Show greeting card with user name (only once per session)
         function showGreetingCard() {
             // Only show greeting once per login session
-            if (hasShownGreetingCard) return;
+            if (hasShownGreeting()) return;
             
             const greetingCard = document.getElementById('greetingCard');
             const greetingText = document.getElementById('greetingText');
@@ -1113,7 +1125,7 @@ body {
             if (currentUser && currentUser.displayName) {
                 greetingText.textContent = `Greetings!!! Dear ${currentUser.displayName}`;
                 greetingCard.style.display = 'block';
-                hasShownGreetingCard = true; // Mark greeting as shown
+                markGreetingShown(); // Mark greeting as shown
                 
                 // Auto-hide after 3 seconds
                 setTimeout(() => {
@@ -1361,15 +1373,15 @@ body {
                 
                 if (result.success) {
                     // Reset flags so greeting and install banner show again on next login
-                    hasShownGreetingCard = false;
-                    hasShownInstallBanner = false;
+                    sessionStorage.removeItem('ds_greeting_shown');
+                    sessionStorage.removeItem('ds_install_shown');
                     window.location.href = '/login';
                 }
             } catch (error) {
                 console.error('Logout error:', error);
                 // Reset flags even on error to allow fresh start on next login
-                hasShownGreetingCard = false;
-                hasShownInstallBanner = false;
+                sessionStorage.removeItem('ds_greeting_shown');
+                sessionStorage.removeItem('ds_install_shown');
                 window.location.href = '/login';
             }
         }
@@ -1446,7 +1458,7 @@ body {
                 // Show install banner (only once per session)
                 function showInstallBanner() {
                     // Only show banner once per login session
-                    if (hasShownInstallBanner) return;
+                    if (hasShownInstall()) return;
                     
                     const banner = document.getElementById('installBanner');
                     if (!banner) {
@@ -1455,7 +1467,7 @@ body {
                     }
                     
                     banner.style.display = 'flex';
-                    hasShownInstallBanner = true; // Mark banner as shown
+                    markInstallShown(); // Mark banner as shown
                     console.log('Install banner shown');
 
                     // Auto-hide after 5 seconds unless user interacts
