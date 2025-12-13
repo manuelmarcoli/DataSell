@@ -1033,27 +1033,26 @@ body {
         function markInstallShown() {
             sessionStorage.setItem('ds_install_shown', 'true');
         }
-                
-                // Reset flags if user is not logged in (new session or login required)
-                function resetBannerFlagsIfLoggedOut() {
-                    // Check if we have an active session by looking for user data in localStorage or DOM
-                    // If no currentUser, clear the flags
-                    if (!currentUser || !currentUser.uid) {
-                        sessionStorage.removeItem('ds_greeting_shown');
-                        sessionStorage.removeItem('ds_install_shown');
-                    }
-                }
-                    if (!ask) return;
-                    const perm = await Notification.requestPermission();
-                    if (perm === 'granted') {
-                        pollNotifications();
-                        pollTimer = setInterval(pollNotifications, POLL_INTERVAL);
-                        // attempt to register FCM token now that permission is granted
-                        try { if (window.__registerFcmToken) window.__registerFcmToken(); } catch (e) { console.warn('FCM register after permission failed', e); }
-                    }
-                } else if (Notification.permission === 'granted') {
+        
+        // Reset flags if user is not logged in (new session or login required)
+        function resetBannerFlagsIfLoggedOut() {
+            // Check if we have an active session by looking for user data in localStorage or DOM
+            // If no currentUser, clear the flags
+            if (!currentUser || !currentUser.uid) {
+                sessionStorage.removeItem('ds_greeting_shown');
+                sessionStorage.removeItem('ds_install_shown');
+            }
+        }
+
+        // Request notification permission
+        async function requestPermission(ask = true) {
+            try {
+                if (!ask) return;
+                const perm = await Notification.requestPermission();
+                if (perm === 'granted') {
                     pollNotifications();
                     pollTimer = setInterval(pollNotifications, POLL_INTERVAL);
+                    // attempt to register FCM token now that permission is granted
                     try { if (window.__registerFcmToken) window.__registerFcmToken(); } catch (e) { console.warn('FCM register after permission failed', e); }
                 }
             } catch (e) { console.error('requestPermission error:', e); }
