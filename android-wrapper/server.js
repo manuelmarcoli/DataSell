@@ -1235,14 +1235,6 @@ app.get('/api/verify-payment/:reference', requireAuth, async (req, res) => {
     });
   }
 });
-  } catch (error) {
-    console.error('Payment verification error:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Payment verification failed' 
-    });
-  }
-});
 
 // Direct payment endpoints removed: application now supports wallet purchases and wallet funding only.
 
