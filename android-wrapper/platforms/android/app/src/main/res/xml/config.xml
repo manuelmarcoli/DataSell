@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.datasell.app" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>DataSellApp</name>
+    <description>DataSell Web wrapper (Cordova)</description>
+    <author email="support@example.com" href="https://example.com">DataSell</author>
+    <content src="index.html" />
+    <access origin="*" />
+    <allow-navigation href="*" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <allow-intent href="market:*" />
+    <icon density="ldpi" src="www/images/web-logo2-36.png" />
+    <icon density="mdpi" src="www/images/web-logo2-48.png" />
+    <icon density="hdpi" src="www/images/web-logo2-72.png" />
+    <icon density="xhdpi" src="www/images/web-logo2-96.png" />
+    <preference name="loglevel" value="DEBUG" />
+    <preference name="SplashScreenDelay" value="3000" />
+    <preference name="Orientation" value="portrait" />
+    <preference name="DisallowOverscroll" value="true" />
+    <preference name="BackupWebStorage" value="none" />
+</widget>

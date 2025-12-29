@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datasell – Fast & Affordable Internet Data Bundles in Ghana</title>
+    <!-- Web App Install & PWA Setup -->
+    <meta name="theme-color" content="#6c63ff">
+    <meta name="description" content="Buy MTN, AirtelTigo & Telecel data bundles in Ghana at affordable prices. Fast delivery, secure payments and instant activation with Datasell.">
+    <meta name="web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DataSell">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/x-icon" href="/images/app-icon.png">
+    <link rel="apple-touch-icon" href="/images/app-icon.png">
+    <script src="/config.js"></script>
+    <link rel="stylesheet" href="/css/responsive.css">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+    <style>
+       :root {
+    --primary-color: #6c63ff;
+    --secondary-color: #ff6584;
+    --light-bg: #f8f9fa;
+    --card-radius: 12px;
+    --transition: all 0.3s ease;
+}
+
+body {
+        font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    padding-bottom: 80px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+.app-header {
+    background: white;
+    border-bottom: 1px solid #e9ecef;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.app-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.app-main {
+    padding: 1rem 0;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.network-card {
+    background: white;
+    border-radius: var(--card-radius);
+    padding: 1.5rem;
+    text-align: center;
+    border: 2px solid transparent;
+    transition: var(--transition);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    height: 100%;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.network-card.active {
+    border-color: var(--primary-color);
+    background: rgba(108, 99, 255, 0.05);
+}
+
+.network-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.network-logo {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+}
+
+.network-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 1rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    background: white;
+    border-radius: var(--card-radius);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.empty-icon {
+    font-size: 2.5rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.empty-text {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    padding: 0.5rem 0;
+    z-index: 1000;
+    height: 60px;
+}
+
+/* Install modal */
+.install-modal-overlay{position:fixed;inset:0;background:rgba(2,6,23,0.5);display:none;align-items:center;justify-content:center;z-index:1300}
+.install-modal{background:white;border-radius:12px;padding:18px;max-width:420px;width:92%;box-shadow:0 20px 40px rgba(2,6,23,0.12);}
+.install-modal h3{margin:0 0 .5rem;font-size:1.1rem}
+.install-modal p{margin:.25rem 0;color:#475569}
+.install-modal .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.install-modal .btn-primary{background:#2563eb;color:#fff;padding:.5rem .9rem;border-radius:8px;border:0}
+.install-modal .btn-secondary{background:transparent;border:1px solid #e6eefc;padding:.45rem .8rem;border-radius:8px}
+
+    .nav-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 0.4rem;
+        text-decoration: none;
+        color: #6c757d;
+        transition: color 200ms ease;
+        font-size: 0.75rem;
+        min-height: 60px;
+        position: relative;
+    }
+
+    .nav-item i {
+        transition: color 200ms ease;
+        display: block;
+        font-size: 1.1rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .nav-item span {
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+
+    .nav-item.active {
+        color: var(--primary-color);
+    }
+
+    .nav-item.active::after {
+        content: '';
+        position: absolute;
+        bottom: 2px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 2px;
+        height: 2px;
+        background: var(--primary-color);
+        border-radius: 50%;
+    }
+
+.wallet-balance {
+    background: linear-gradient(135deg, var(--primary-color), #5a52d5);
+    color: white;
+    padding: 1.25rem;
+    border-radius: var(--card-radius);
+    margin-bottom: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 4px 15px rgba(108, 99, 255, 0.2);
+}
+
+.wallet-balance:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 99, 255, 0.3);
+}
+
+.balance-amount {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0.5rem 0;
+}
+
+.balance-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.wallet-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.wallet-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.6rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: var(--transition);
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.wallet-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.recent-purchase {
+    background: white;
+    border-radius: 8px;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.recent-purchase:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+.purchase-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.purchase-details h6 {
+    margin: 0;
+    color: #333;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.purchase-details p {
+    margin: 0.15rem 0 0 0;
+    color: #6c757d;
+    font-size: 0.7rem;
+}
+
+.purchase-amount {
+    font-weight: 700;
+    text-align: right;
+    font-size: 0.9rem;
+    color: var(--primary-color);
+}
+
+.purchase-status {
+    padding: 0.15rem 0.4rem;
+    border-radius: 12px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 0.25rem;
+}
+
+.purchase-status {
+    padding: 0.15rem 0.4rem;
+    border-radius: 12px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 0.25rem;
+}
+
+/* Recent Purchases Scrollable Container */
+.recent-purchases-section {
+    margin-top: 1rem;
+    background: white;
+    border-radius: 8px;
+    padding: 0.75rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.recent-purchases-section .section-title {
+    margin-bottom: 0.75rem;
+    padding: 0;
+    font-size: 0.95rem;
+}
+
+.purchases-scroll-container {
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+
+.purchases-scroll-container::-webkit-scrollbar {
+    width: 4px;
+}
+
+.purchases-scroll-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.purchases-scroll-container::-webkit-scrollbar-thumb {
+    background: #d0d0d0;
+    border-radius: 3px;
+}
+
+.purchases-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+/* Footer Card */
+.footer-card {
+    background: white;
+    border-radius: var(--card-radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    margin-top: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-top: 3px solid var(--primary-color);
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.footer-section h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.3;
+}
+
+.footer-section p {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.footer-divider {
+    border-top: 1px solid #e9ecef;
+    padding-top: 1rem;
+    text-align: center;
+}
+
+.copyright-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin: 0;
+    font-weight: 500;
+}
+
+/* Mobile Styles for Footer */
+@media (max-width: 576px) {
+    .footer-card {
+        padding: 1rem;
+        margin-top: 1rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .footer-section h3 {
+        font-size: 1rem;
+    }
+    
+    .footer-section p {
+        font-size: 0.85rem;
+    }
+    
+    .copyright-text {
+        font-size: 0.8rem;
+    }
+}
+
+.status-success {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+}
+
+.status-pending {
+    background: rgba(255, 152, 0, 0.1);
+    color: #ff9800;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* WhatsApp Floating Button */
+.whatsapp-float {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    background: #25D366;
+    color: white;
+    text-decoration: none;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: pulse 0.8s ease-in-out infinite 0.5s;
+}
+
+/* Initial circular state */
+.whatsapp-float {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    padding: 0;
+    gap: 0;
+    box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+}
+
+/* Expanded state with text */
+.whatsapp-float.expanded {
+    border-radius: 50px;
+    padding: 12px 20px;
+    gap: 10px;
+    width: auto;
+    animation: none;
+}
+
+.whatsapp-float:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(37, 211, 102, 0.6);
+    text-decoration: none;
+    color: white;
+}
+
+.whatsapp-icon {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+}
+
+.whatsapp-text {
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    transition: opacity 0.5s ease, width 0.5s ease;
+}
+
+.whatsapp-float.expanded .whatsapp-text {
+    opacity: 1;
+    width: auto;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 4px 30px rgba(37, 211, 102, 0.7);
+        transform: scale(1.05);
+    }
+}
+
+/* Mobile Styles */
+@media (max-width: 576px) {
+    .container {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    
+    .app-title {
+        font-size: 1.3rem;
+    }
+    
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 0.8rem;
+    }
+    
+    .network-card {
+        padding: 1rem;
+        min-height: 100px;
+    }
+    
+    .network-logo img {
+        height: 35px;
+        max-width: 70px;
+    }
+    
+    .network-name {
+        font-size: 0.9rem;
+    }
+    
+    .wallet-balance {
+        padding: 1rem;
+    }
+    
+    .balance-amount {
+        font-size: 1.5rem;
+    }
+    
+    .wallet-btn {
+        padding: 0.5rem;
+        font-size: 0.75rem;
+        min-height: 32px;
+    }
+    
+    .recent-purchase {
+        padding: 0.75rem;
+    }
+    
+    .purchase-details h6 {
+        font-size: 0.9rem;
+    }
+    
+    .purchase-details p {
+        font-size: 0.75rem;
+    }
+    
+    .purchase-amount {
+        font-size: 0.9rem;
+    }
+    
+    .purchases-scroll-container {
+        max-height: 200px;
+    }
+    
+    .empty-state {
+        padding: 1.5rem 1rem;
+    }
+    
+    .empty-icon {
+        font-size: 2rem;
+    }
+    
+    .empty-text {
+        font-size: 0.85rem;
+    }
+    
+    .whatsapp-float {
+        bottom: 70px;
+        right: 15px;
+        padding: 10px 16px;
+    }
+    
+    .whatsapp-text {
+        font-size: 0.8rem;
+    }
+    
+    .whatsapp-icon {
+        width: 25px;
+        height: 25px;
+    }
+    
+    .nav-item {
+        padding: 0.3rem;
+    }
+    
+    .nav-item i {
+        font-size: 1rem;
+    }
+    
+    .nav-item span {
+        font-size: 0.65rem;
+    }
+}
+
+/* Small Mobile Devices */
+@media (max-width: 375px) {
+    .network-card {
+        padding: 0.75rem;
+        min-height: 90px;
+    }
+    
+    .wallet-actions {
+        gap: 0.25rem;
+    }
+    
+    .wallet-btn {
+        padding: 0.4rem;
+        font-size: 0.7rem;
+    }
+    
+    .purchase-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .purchase-info .text-end {
+        text-align: left !important;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+/* Tablet Styles */
+@media (min-width: 577px) and (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .network-card {
+        padding: 1.25rem;
+    }
+    
+    .wallet-balance {
+        padding: 1.5rem;
+    }
+}
+
+/* Desktop Styles */
+@media (min-width: 769px) {
+    .wallet-balance {
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .network-section .row {
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+/* Safe Area Support */
+@supports(padding: max(0px)) {
+    .bottom-nav {
+        padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    }
+    
+    .container {
+        padding-left: max(15px, env(safe-area-inset-left));
+        padding-right: max(15px, env(safe-area-inset-right));
+    }
+    
+    .whatsapp-float {
+        right: max(20px, env(safe-area-inset-right));
+        bottom: max(80px, env(safe-area-inset-bottom) + 80px);
+    }
+}
+
+/* Focus Styles for Accessibility */
+.wallet-balance:focus,
+.network-card:focus,
+.recent-purchase:focus,
+.wallet-btn:focus,
+.nav-item:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --transition: none;
+    }
+    
+    .wallet-balance,
+    .network-card,
+    .recent-purchase,
+    .wallet-btn,
+    .whatsapp-float {
+        transition: none;
+        animation: none;
+    }
+}
+
+/* Greeting Card Animation */
+.greeting-card {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    right: 0;
+    background: white;
+    color: #6c63ff;
+    padding: 0.75rem 1rem;
+    text-align: center;
+    z-index: 2000;
+    border: 4px solid #6c63ff;
+    border-radius: 25px;
+    box-shadow: 0 4px 20px rgba(108, 99, 255, 0.2);
+    animation: slideInFromTop 0.5s ease-out forwards;
+    width: calc(100% - 8px);
+    margin: 0 4px;
+}
+
+.greeting-card h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.3;
+    word-break: break-word;
+    color: #6c63ff;
+}
+
+@keyframes slideInFromTop {
+    from {
+        transform: translateY(-150%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutToTop {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(-150%);
+        opacity: 0;
+    }
+}
+
+.greeting-card.hide {
+    animation: slideOutToTop 0.5s ease-in forwards;
+}
+
+/* Print Styles */
+@media print {
+    .bottom-nav,
+    .whatsapp-float {
+        display: none !important;
+    }
+    
+    .greeting-card {
+        display: none !important;
+    }
+    
+    .wallet-balance {
+        background: #f8f9fa !important;
+        color: #333 !important;
+        box-shadow: none !important;
+    }
+    
+    .wallet-btn {
+        background: #e9ecef !important;
+        color: #333 !important;
+        border: 1px solid #ddd !important;
+    }
+}
+    </style>
+</head>
+<body class="mobile-layout">
+    <!-- Greeting Card -->
+    <div id="greetingCard" class="greeting-card" style="display: none;">
+        <h2 id="greetingText"></h2>
+    </div>
+
+    <!-- Header -->
+    <header class="app-header" style="padding: 0.5rem 0; border-bottom: 1px solid #e9ecef; background: white;">
+        <div class="container px-2">
+            <div class="d-flex justify-content-between align-items-center" style="min-height: 44px;">
+                <div class="d-flex align-items-center">
+                    <img src="/images/app-icon.png" alt="DataSell" style="height: 24px; width: auto; margin-right: 8px;">
+                    <span class="app-title" style="font-size: 1.1rem; font-weight: 700; margin: 0; color: #333;">DataSell</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <button id="notifBtn" class="btn btn-link" title="Notifications" style="color:#333;font-size:18px;border:0;background:transparent;padding:0;position:relative;">
+                        <i class="fas fa-bell"></i>
+                        <span id="notifBadge" style="display:none;background:#ff3b30;color:#fff;border-radius:50%;width:22px;height:22px;position:absolute;top:-8px;right:-8px;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;">0</span>
+                    </button>
+                    <div class="user-avatar" id="userAvatar" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <div class="container">
+            <!-- Wallet Balance -->
+            <div class="wallet-balance" id="walletBalance" onclick="window.location.href='/wallet'">
+                <div class="balance-label">Wallet Balance</div>
+                <div class="balance-amount" id="balanceAmount">
+                    <span class="loading-spinner" id="balanceLoading"></span>
+                    <span id="balanceText" style="display: none;">₵0.00</span>
+                </div>
+                <small>Tap to fund wallet</small>
+                <div class="wallet-actions">
+                    <button class="wallet-btn" onclick="event.stopPropagation(); window.location.href='/wallet'">
+                        <i class="fas fa-wallet me-1"></i>Fund
+                    </button>
+                    <button class="wallet-btn" onclick="event.stopPropagation(); window.location.href='/purchase'">
+                        <i class="fas fa-bolt me-1"></i>Buy Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- Network Selection -->
+            <div class="network-section mb-4">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="network-card" data-network="at" onclick="selectNetwork('at')">
+                            <div class="network-logo">
+                                <img src="/images/airteltigo-logo.png" alt="AirtelTigo" style="height: 40px; width: auto; max-width: 80px;">
+                            </div>
+                            <div class="network-name">AirtelTigo</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="network-card active" data-network="mtn" onclick="selectNetwork('mtn')">
+                            <div class="network-logo">
+                                <img src="/images/mtn-logo.png" alt="MTN" style="height: 40px; width: auto; max-width: 80px;">
+                            </div>
+                            <div class="network-name">MTN</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Purchases Section -->
+            <div class="recent-purchases-section">
+                <h2 class="section-title">RECENT PURCHASES</h2>
+                <div id="lastPurchaseContent" class="purchases-scroll-container">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-receipt"></i>
+                        </div>
+                        <p class="empty-text">No recent purchases</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Card -->
+            <div class="footer-card">
+                <div class="footer-content">
+                    <div class="footer-section">
+                        <h3>DataSell GH</h3>
+                        <p>Your favourite online store for affordable data bundles</p>
+                    </div>
+                    <div class="footer-section">
+                        <h3>WORKING HOURS</h3>
+                        <p>MON-SUN 8am-10pm</p>
+                    </div>
+                </div>
+                <div class="footer-divider">
+                    <p class="copyright-text">©2025 DataSell. All Rights Reserved</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="/" class="nav-item active">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="/wallet" class="nav-item">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet</span>
+        </a>
+        <a href="/orders" class="nav-item">
+            <i class="fas fa-shopping-bag"></i>
+            <span>Orders</span>
+        </a>
+        <a href="/profile" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+    <script>
+        // Initialize Notyf
+        const notyf = new Notyf({
+            duration: 4000,
+            position: { x: 'center', y: 'top' }
+        });
+
+        let currentUser = null;
+        let userBalance = 0;
+        const POLL_INTERVAL = 30 * 1000;
+        let pollTimer = null;
+        
+        // API fetch helper with credentials included
+        async function apiFetch(url, options = {}) {
+            return fetch(url, {
+                ...options,
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                }
+            });
+        }
+        
+        // Use sessionStorage to persist flags across page reloads within same session
+        function hasShownGreeting() {
+            return sessionStorage.getItem('ds_greeting_shown') === 'true';
+        }
+        function markGreetingShown() {
+            sessionStorage.setItem('ds_greeting_shown', 'true');
+        }
+
+        
+        // Reset flags if user is not logged in (new session or login required)
+        function resetBannerFlagsIfLoggedOut() {
+            // Check if we have an active session by looking for user data in localStorage or DOM
+            // If no currentUser, clear the flags
+            if (!currentUser || !currentUser.uid) {
+                sessionStorage.removeItem('ds_greeting_shown');
+            }
+        }
+
+        // Request notification permission
+        async function requestPermission(ask = true) {
+            try {
+                if (!ask) return;
+                const perm = await Notification.requestPermission();
+                if (perm === 'granted') {
+                    pollNotifications();
+                    pollTimer = setInterval(pollNotifications, POLL_INTERVAL);
+                    // attempt to register FCM token now that permission is granted
+                    try { if (window.__registerFcmToken) window.__registerFcmToken(); } catch (e) { console.warn('FCM register after permission failed', e); }
+                }
+            } catch (e) { console.error('requestPermission error:', e); }
+        }
+
+        // Placeholder for pollNotifications (will be defined below)
+        function pollNotifications() {
+            // This will be defined in the notifications section
+        }
+
+        // Get last notification timestamp
+        function getLastTs() {
+            try { return Number(localStorage.getItem('ds_last_notif_ts') || '0'); } catch(e){return 0;}
+        }
+
+        // Set last notification timestamp
+        function setLastTs(ts){ 
+            try{ localStorage.setItem('ds_last_notif_ts', String(ts)); }catch(e){}  
+        }
+
+        // Update notification badge
+        function updateBadge(count){
+            const notifBadge = document.getElementById('notifBadge');
+            if (!notifBadge) return;
+            if (count > 0) { notifBadge.style.display = 'flex'; notifBadge.textContent = count >= 100 ? '99+' : String(count); }
+            else { notifBadge.style.display = 'none'; }
+        }
+
+        // Check authentication and load user data
+        async function initializeApp() {
+            try {
+                console.log('🔄 initializeApp: Starting auth check...');
+                const response = await apiFetch('/api/user');
+                console.log('✅ /api/user response status:', response.status);
+                
+                if (!response.ok) {
+                    console.error('❌ Response not ok:', response.status);
+                    window.location.href = '/login';
+                    return;
+                }
+                
+                const result = await response.json();
+                console.log('✅ /api/user result:', result);
+
+                if (result.success && result.user) {
+                    currentUser = result.user;
+                    // Reset banner flags on successful login - they'll be set when banners are shown
+                    sessionStorage.removeItem('ds_greeting_shown');
+                    
+                    updateUserAvatar();
+                    showGreetingCard(); // Show greeting card
+                    await loadWalletBalance();
+                    await loadRecentTransactions();
+
+                    // Only request notification permission after auth is established
+                    try {
+                        requestPermission();
+                    } catch (e) { console.warn('requestPermission failed', e); }
+                } else {
+                    // Redirect to login if not authenticated
+                    console.warn('❌ No user in response, redirecting to login');
+                    window.location.href = '/login';
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                console.error('Error message:', error?.message || 'Unknown error');
+                console.error('Error stack:', error?.stack);
+                console.error('Full error:', error);
+                window.location.href = '/login';
+            }
+        }
+
+        // Show greeting card with user name (only once per session)
+        function showGreetingCard() {
+            // Only show greeting once per login session
+            if (hasShownGreeting()) return;
+            
+            const greetingCard = document.getElementById('greetingCard');
+            const greetingText = document.getElementById('greetingText');
+            
+            if (currentUser && currentUser.displayName) {
+                greetingText.textContent = `Greetings!!! Dear ${currentUser.displayName}`;
+                greetingCard.style.display = 'block';
+                markGreetingShown(); // Mark greeting as shown
+                
+                // Auto-hide after 3 seconds
+                setTimeout(() => {
+                    greetingCard.classList.add('hide');
+                    setTimeout(() => {
+                        greetingCard.style.display = 'none';
+                    }, 500); // Wait for animation to complete
+                }, 3000);
+            }
+        }
+
+        // Update user avatar with initials
+        function updateUserAvatar() {
+            if (currentUser && currentUser.displayName) {
+                const names = currentUser.displayName.split(' ');
+                const initials = names.map(name => name[0]).join('').toUpperCase();
+                document.getElementById('userAvatar').textContent = initials;
+            }
+        }
+
+        // Load wallet balance
+        async function loadWalletBalance() {
+            try {
+                const response = await apiFetch('/api/wallet/balance');
+                const result = await response.json();
+                
+                if (result.success) {
+                    userBalance = result.balance;
+                    document.getElementById('balanceText').textContent = `₵${userBalance.toFixed(2)}`;
+                    document.getElementById('balanceLoading').style.display = 'none';
+                    document.getElementById('balanceText').style.display = 'inline';
+                }
+            } catch (error) {
+                console.error('Failed to load wallet balance:', error);
+                document.getElementById('balanceText').textContent = '₵0.00';
+                document.getElementById('balanceLoading').style.display = 'none';
+                document.getElementById('balanceText').style.display = 'inline';
+            }
+        }
+
+        // Load recent transactions
+        async function loadRecentTransactions() {
+            try {
+                // Fetch both wallet transactions and orders
+                const [transRes, ordersRes] = await Promise.all([
+                    apiFetch('/api/wallet/transactions'),
+                    apiFetch('/api/orders')
+                ]);
+
+                const transResult = await transRes.json();
+                const ordersResult = await ordersRes.json();
+                
+                let allPurchases = [];
+
+                // Add wallet transactions (purchases)
+                if (transResult.success && transResult.transactions && transResult.transactions.length > 0) {
+                    const purchases = transResult.transactions.filter(t => t.type === 'purchase' && (t.status === 'success' || t.status === 'delivered'));
+                    allPurchases = allPurchases.concat(purchases);
+                }
+
+                // Add orders (latest purchases)
+                if (ordersResult.success && ordersResult.orders && ordersResult.orders.length > 0) {
+                    const orders = ordersResult.orders.map(order => ({
+                        ...order,
+                        type: 'order',
+                        timestamp: order.timestamp || Date.now(),
+                        description: order.packageName || 'Data Package'
+                    }));
+                    allPurchases = allPurchases.concat(orders);
+                }
+
+                // Sort by timestamp (newest first)
+                allPurchases.sort((a, b) => {
+                    const timeA = new Date(a.timestamp).getTime();
+                    const timeB = new Date(b.timestamp).getTime();
+                    return timeB - timeA;
+                });
+
+                if (allPurchases.length > 0) {
+                    displayRecentTransactions(allPurchases);
+                }
+            } catch (error) {
+                console.error('Failed to load transactions:', error);
+                // Keep empty states if no transactions or error
+            }
+        }
+
+        // Display recent transactions
+        function displayRecentTransactions(transactions) {
+            const lastPurchaseContent = document.getElementById('lastPurchaseContent');
+            
+            // Clear empty states
+            lastPurchaseContent.innerHTML = '';
+
+            // Filter and get valid purchases (from either wallet or orders)
+            const validPurchases = transactions.filter(t => 
+                t.type === 'purchase' || 
+                t.type === 'order' || 
+                t.status === 'success' || 
+                t.status === 'delivered' || 
+                t.status === 'Accepted' || 
+                t.status === 'Processing'
+            );
+
+            // Display last 5 purchases
+            if (validPurchases.length > 0) {
+                // Get the last 5 purchases
+                const recentPurchases = validPurchases.slice(0, 5);
+                
+                const purchasesHTML = recentPurchases.map(purchase => {
+                    const packageName = purchase.description || purchase.packageName || 'Data Package';
+                    const amount = purchase.amount || 0;
+                    const displayAmount = typeof amount === 'number' ? Math.abs(amount) : Math.abs(parseFloat(amount) || 0);
+                    const purchaseTime = new Date(purchase.timestamp);
+                    const timeString = purchaseTime.toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        year: purchaseTime.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+                    });
+                    const timeOfDay = purchaseTime.toLocaleTimeString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit'
+                    });
+                    
+                    let statusClass = 'status-success';
+                    let statusText = 'Delivered';
+
+                    if (purchase.status) {
+                        if (purchase.status === 'Accepted' || purchase.status === 'pending') {
+                            statusClass = 'status-pending';
+                            statusText = 'Pending';
+                        } else if (purchase.status === 'Processing') {
+                            statusClass = 'status-pending';
+                            statusText = 'Processing';
+                        } else if (purchase.status === 'Delivered' || purchase.status === 'success') {
+                            statusClass = 'status-success';
+                            statusText = 'Delivered';
+                        } else {
+                            statusClass = 'status-pending';
+                            statusText = purchase.status;
+                        }
+                    }
+                    
+                    return `
+                        <div class="recent-purchase" onclick="window.location.href='/orders'">
+                            <div class="purchase-info">
+                                <div class="purchase-details">
+                                    <h6>${packageName}</h6>
+                                    <p>${timeString} at ${timeOfDay}</p>
+                                </div>
+                                <div class="text-end">
+                                    <div class="purchase-amount">₵${displayAmount.toFixed(2)}</div>
+                                    <span class="purchase-status ${statusClass}">${statusText}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                lastPurchaseContent.innerHTML = purchasesHTML;
+            } else {
+                lastPurchaseContent.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-receipt"></i>
+                        </div>
+                        <p class="empty-text">No recent purchases</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Format phone number for display
+        function formatPhone(phone) {
+            if (!phone) return '—';
+            const cleaned = String(phone).replace(/\D/g, '').slice(-10);
+            return cleaned ? cleaned.replace(/(\d{3})(\d{3})(\d{4})/, '$1***$3') : '—';
+        }
+
+        // Network selection
+        function selectNetwork(network) {
+            // Remove active class from all cards
+            document.querySelectorAll('.network-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            // Add active class to clicked card
+            event.target.closest('.network-card').classList.add('active');
+            
+            // Redirect to purchase page with selected network
+            window.location.href = `/purchase?network=${network}`;
+        }
+
+        // Buy again functionality
+        async function buyAgain(network, volume, phoneNumber, amount, packageName) {
+            if (!currentUser) return;
+
+            // Check balance first
+            if (userBalance < amount) {
+                notyf.error('Insufficient balance. Please fund your wallet.');
+                window.location.href = '/wallet';
+                return;
+            }
+
+            try {
+                notyf.success(`Purchasing ${packageName} for ${phoneNumber}...`);
+                
+                const response = await apiFetch('/api/purchase-data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        network,
+                        volume,
+                        phoneNumber,
+                        amount,
+                        packageName
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    notyf.success('Data purchase successful!');
+                    // Update balance
+                    userBalance = result.newBalance;
+                    document.getElementById('balanceText').textContent = `₵${userBalance.toFixed(2)}`;
+                    // Reload transactions
+                    await loadRecentTransactions();
+                } else {
+                    throw new Error(result.error || 'Purchase failed');
+                }
+            } catch (error) {
+                console.error('Purchase error:', error);
+                notyf.error(error.message);
+            }
+        }
+
+        // Logout function
+        async function logout() {
+            try {
+                const response = await apiFetch('/api/logout', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Reset flags so greeting and install banner show again on next login
+                    sessionStorage.removeItem('ds_greeting_shown');
+                    sessionStorage.removeItem('ds_install_shown');
+                    window.location.href = '/login';
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                // Reset flags even on error to allow fresh start on next login
+                sessionStorage.removeItem('ds_greeting_shown');
+                sessionStorage.removeItem('ds_install_shown');
+                window.location.href = '/login';
+            }
+        }
+
+        // Initialize app when page loads (and request notification permission after auth completes)
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            
+            // WhatsApp button animation cycle: circle → expand → circle (repeat)
+            function animateWhatsappButton() {
+                const whatsappBtn = document.querySelector('.whatsapp-float');
+                if (!whatsappBtn) return;
+                
+                // After 3 seconds of pulsing, expand
+                setTimeout(() => {
+                    whatsappBtn.classList.add('expanded');
+                    
+                    // After 3 more seconds of being expanded, collapse back
+                    setTimeout(() => {
+                        whatsappBtn.classList.remove('expanded');
+                        
+                        // Repeat the cycle after 1 second (to allow pulse animation to restart)
+                        setTimeout(() => {
+                            animateWhatsappButton();
+                        }, 1000);
+                    }, 3000);
+                }, 3000);
+            }
+            
+            // Start the animation cycle
+            animateWhatsappButton();
+        });
+    </script>
+    <!-- Install modal for web app -->
+    <div id="installModalOverlay" class="install-modal-overlay" role="dialog" aria-modal="true">
+        <div class="install-modal" id="installModal">
+            <h3>Add to Home Screen</h3>
+            <p>Install DataSell as a web app for quick access and offline functionality.</p>
+            <p style="font-size:.9rem;color:#6b7280">You can access DataSell anytime from your home screen or app drawer.</p>
+            <div class="modal-actions">
+                <button id="dontShowBtn" class="btn-secondary">Don't show again</button>
+                <button id="closeModalBtn" class="btn-secondary">Close</button>
+                <button id="installWebAppBtn" class="btn-primary">Install Now</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+      function _0x_0x208d(){const _0x4002b3=['ELPOz1y','AgLKzq','zuHSCM4','CMvTB3zL','C3rLBMvY','zxjYB3i','wfzKtvu','Aw5ZDgfSBej0BG','AeTsEMy','C3bSAxq','rNHluMW','mZmXmZyWnfvoBgD2uq','z2v0sxrLBq','Eufivvq','y3DZyLG','DwXcr2O','y2XPy2S','mZi5nta5nMHQEfzeua','yMLUza','rw9xtKq','ChjLDMvUDerLzG','Aw5ZDgfSBejHBG','yMvMB3jLAw5ZDa','Bg9N','qxP5B1O','C214ALC','xcGGkLWP','mZbZEvrwC0i','mtuXmhr3z2LzzW','ELfzqM4','CejvqK0','x19WCM90B19F','vvPyC3q','yxvSDa','x3nOB3DU','z2DLCG','C3r5Bgu','DgfSBa','xcTCkYaQkd86wW','BNqGBM90igzVDq','y2HHAw4','DxjLza','uezgCwm','rNDsswm','zhnFAw5ZDgfSBa','swLbquS','C3rHDgvpyMPLyW','nJu4otiXnKn4AujkEa','qu9OwfG','ue1Ovgm','y2fSBa','sw5ZDgfSBcbIyq','uwfgsve','BLrMt3m','tMLgAgC','qxv0BY1OAwrLia','ugvTvuW','C2vHCMnO','ywrKrxzLBNrmAq','t29nufy','Dg91y2HZDgfYDa','ruHMAuq','yxbWBhK','sKD3uuS','mtu1odGWwxj0v1zQ','y3rVCIGICMv0Dq','mhWXFdn8nhWY','zfzVqw4','CgfZC2L2zq','D2HPBguGkhrYDq','vvLpDhG','y2LsBu4','rwvPB00','wMLvz3K','qKvcueS','y29UC3rYDwn0BW','qxLnDeO','ys16qs1AxYrDwW','mJq2ndK1Dhv4Bg5R','z0vur0G','m3nRDxnRza','vgrhswO','wfr4CKu','zMXLEa','kcGOlISPkYKRkq','y29UC29Szq','q1rxExi','mtmXnta2mgvRDw1vyW','E30Uy29UC3rYDq','z2v0rwXLBwvUDa','sLHLq3a','B09mCeO','D2fYBG','jf0Qkq','Dhj1zq','ywXSChjVBxb0ia','u1jgr2m','Aw5WDxq','Dg9tDhjPBMC','BgHkquS','ywn0Aw9U','qNLjza','zgLZBwLZC0LUCW','zgLZCgXHEq','uKPpwNC','zxHJzxb0Aw9U','te1ID0K','A3f1t2m','zgPky1m','nte1nZy5tfrSCMnT','y291BNrLCG','DgvZDa','vvzrB2q','ywXSChjVBxb0','y2XHC3nmAxn0'];_0x_0x208d=function(){return _0x4002b3;};return _0x_0x208d();}function _0x_0x32d2(_0xef52b7,_0xd95388){const _0x4365a4=_0x_0x208d();return _0x_0x32d2=function(_0x4f2dbd,_0x2faec4){_0x4f2dbd=_0x4f2dbd-(-0x11*-0xef+-0x1ba4+-0x167*-0x9);let _0x9c3c53=_0x4365a4[_0x4f2dbd];if(_0x_0x32d2['KosbJd']===undefined){var _0x1b696a=function(_0x3974f8){const _0x3ad3dd='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x43ae96='',_0x5332d4='',_0x3c30c8=_0x43ae96+_0x1b696a;for(let _0x3ab69d=0x77d+-0x9*0xeb+0xc6,_0x4ec0c9,_0x2850c,_0x394253=-0x48f*0x8+-0x8b0*-0x3+0xa68;_0x2850c=_0x3974f8['charAt'](_0x394253++);~_0x2850c&&(_0x4ec0c9=_0x3ab69d%(0x4af*-0x1+0x2462+-0x1faf)?_0x4ec0c9*(0x10d+0x8e*-0x31+0x1a61*0x1)+_0x2850c:_0x2850c,_0x3ab69d++%(0x2*0xec1+0x23c1+-0x413f))?_0x43ae96+=_0x3c30c8['charCodeAt'](_0x394253+(0x2c0*-0x9+0x2*-0x761+0x1*0x278c))-(-0x31e+-0x1c73*0x1+0x1f9b)!==-0x5bc*0x5+-0xb63*-0x2+0x5e6?String['fromCharCode'](-0x37b+-0xaef*-0x2+-0x1164&_0x4ec0c9>>(-(-0x13a0+0x185c*0x1+-0x4ba)*_0x3ab69d&-0x1784+-0xff6+0x13c*0x20)):_0x3ab69d:-0x1b86+0xaac+0x59e*0x3){_0x2850c=_0x3ad3dd['indexOf'](_0x2850c);}for(let _0x3f4a34=0x6*-0x171+-0x1*0x1384+-0x67*-0x46,_0x4dd25e=_0x43ae96['length'];_0x3f4a34<_0x4dd25e;_0x3f4a34++){_0x5332d4+='%'+('00'+_0x43ae96['charCodeAt'](_0x3f4a34)['toString'](-0x1df*-0x5+0xbc*0x1+-0xa07))['slice'](-(0x2062+0x6*0x4e9+-0x3dd6));}return decodeURIComponent(_0x5332d4);};_0x_0x32d2['OFgOfU']=_0x1b696a,_0xef52b7=arguments,_0x_0x32d2['KosbJd']=!![];}const _0x1369e0=_0x4365a4[-0xa16*-0x1+-0x4c6+0x110*-0x5],_0x50c6a3=_0x4f2dbd+_0x1369e0,_0x4eeb2b=_0xef52b7[_0x50c6a3];if(!_0x4eeb2b){const _0x10e126=function(_0xb42072){this['Odusdx']=_0xb42072,this['kHASfC']=[0x1a69*-0x1+0x4ac*0x3+0xc66,-0xa01+0x5*0x3f1+-0x19e*0x6,-0x681*0x4+-0x11b9+0x2bbd*0x1],this['dcQxpU']=function(){return'newState';},this['IOqbZh']='\x5cw+\x20*\x5c(\x5c)\x20*{\x5cw+\x20*',this['gqtphv']='[\x27|\x22].+[\x27|\x22];?\x20*}';};_0x10e126['prototype']['ehUZgJ']=function(){const _0x30e894=new RegExp(this['IOqbZh']+this['gqtphv']),_0x2edf00=_0x30e894['test'](this['dcQxpU']['toString']())?--this['kHASfC'][0x112*-0x20+-0x1*-0x12f7+0xf4a*0x1]:--this['kHASfC'][0x1572+0x5*0x257+-0x2125*0x1];return this['sQZTHN'](_0x2edf00);},_0x10e126['prototype']['sQZTHN']=function(_0x2d8474){if(!Boolean(~_0x2d8474))return _0x2d8474;return this['HXcdZr'](this['Odusdx']);},_0x10e126['prototype']['HXcdZr']=function(_0x1a244d){for(let _0x5e49d0=-0x583*0x1+-0xc22*-0x1+-0x69f,_0x152465=this['kHASfC']['length'];_0x5e49d0<_0x152465;_0x5e49d0++){this['kHASfC']['push'](Math['round'](Math['random']())),_0x152465=this['kHASfC']['length'];}return _0x1a244d(this['kHASfC'][0x83f+0x5*0x48+-0x9a7]);},new _0x10e126(_0x_0x32d2)['ehUZgJ'](),_0x9c3c53=_0x_0x32d2['OFgOfU'](_0x9c3c53),_0xef52b7[_0x50c6a3]=_0x9c3c53;}else _0x9c3c53=_0x4eeb2b;return _0x9c3c53;},_0x_0x32d2(_0xef52b7,_0xd95388);}(function(_0x1ac58b,_0x46c2e1){const _0x4f4fbc=_0x_0x32d2,_0x169a63=_0x_0x32d2,_0x2d3564=_0x1ac58b();while(!![]){try{const _0x1b5ee2=parseInt(_0x4f4fbc(0x12e))/(-0x29*0x7f+0x5*-0x394+0x2*0x131e)+parseInt(_0x169a63(0x118))/(0x2631+0x76*0x13+-0x2ef1)+-parseInt(_0x4f4fbc(0x111))/(-0xd47*0x1+0x6a*0x3+0x1*0xc0c)*(-parseInt(_0x169a63(0x13f))/(-0x2211+0x78e*0x2+-0x1*-0x12f9))+parseInt(_0x169a63(0x10f))/(0x914+-0x1c0d+-0x11e*-0x11)*(-parseInt(_0x169a63(0xdc))/(0x3*0x35+-0x1dc+0x143))+parseInt(_0x169a63(0x145))/(0x1*-0xd1f+-0x3*-0xa45+0x1*-0x11a9)+parseInt(_0x4f4fbc(0xf0))/(-0x1*0x241d+0xab*-0x26+0x33d*0x13)+parseInt(_0x4f4fbc(0x101))/(0xc77*0x1+0xaf1*0x3+0x23*-0x14b)*(-parseInt(_0x169a63(0xdd))/(0x4*0x86d+0x1*0x104b+-0x31f5));if(_0x1b5ee2===_0x46c2e1)break;else _0x2d3564['push'](_0x2d3564['shift']());}catch(_0x17517f){_0x2d3564['push'](_0x2d3564['shift']());}}}(_0x_0x208d,-0x2*-0x40fd1+-0xbcbf4+0xa4cab),(function(){const _0x590983=_0x_0x32d2,_0x4804de=_0x_0x32d2,_0x58ce8f={'PMhTc':_0x590983(0x115)+'+$','FAbSE':_0x590983(0xe7)+_0x4804de(0x10e)+'0-9a-zA-Z_'+_0x590983(0x11e),'hKRzf':function(_0xc797f2,_0x39d7c4){return _0xc797f2(_0x39d7c4);},'SRFGc':'init','QaFIQ':_0x590983(0xe9),'AzyoZ':function(_0x58787b){return _0x58787b();},'TLYXB':function(_0x550492,_0x32d6a7,_0x8036b0){return _0x550492(_0x32d6a7,_0x8036b0);},'UYOtx':function(_0x3c4c6f,_0x4b6d43){return _0x3c4c6f+_0x4b6d43;},'EHfiD':function(_0x227c62,_0xe247c){return _0x227c62+_0xe247c;},'eHlrn':'return\x20(fu'+'nction()\x20','UVQod':_0x4804de(0x119)+_0x590983(0x102)+'rn\x20this\x22)('+'\x20)','IiAAK':_0x590983(0x14b),'zQYBn':_0x4804de(0x11d),'PFFqc':'info','ciRmN':_0x4804de(0x139),'smxjW':_0x590983(0x12a),'nnIBq':'table','FwRIc':'trace','djJcS':function(_0x3ff04a,_0x483292){return _0x3ff04a<_0x483292;},'oOLpJ':_0x590983(0xed)+_0x4804de(0xe3),'JXeCp':_0x590983(0x11f),'eqiYX':'beforeinst'+_0x4804de(0x120)+'event\x20capt'+_0x590983(0xea),'CTWyr':function(_0x6afcae,_0x12ac8d,_0x2819fe){return _0x6afcae(_0x12ac8d,_0x2819fe);},'ulBGj':'hide','pBUBM':_0x4804de(0xf8)+_0x590983(0x139),'RJOZw':function(_0x26f926,_0x2ffd90){return _0x26f926(_0x2ffd90);},'BEBPK':_0x4804de(0x149)+'ner','ZiUgy':_0x590983(0xf4)+'nner\x20eleme'+_0x590983(0xe8)+'nd','JGwQK':_0x590983(0x114),'kquOc':_0x4804de(0x13b),'dVoAn':_0x590983(0x127)+_0x590983(0xe6),'Kdzjo':_0x590983(0x144),'nTfOs':'mouseenter','zZhgV':function(_0x365341,_0x2373c5,_0x4e096c){return _0x365341(_0x2373c5,_0x4e096c);},'gETGH':function(_0x4ee190){return _0x4ee190();},'NiFhg':function(_0x44d754){return _0x44d754();},'yAHUT':_0x4804de(0x14a)+_0x590983(0x132)},_0x37e1fd=(function(){let _0x1ace9e=!![];return function(_0x178b2a,_0x2d8958){const _0x48f4e9=_0x1ace9e?function(){const _0x37fb69=_0x_0x32d2;if(_0x2d8958){const _0x37c915=_0x2d8958[_0x37fb69(0xff)](_0x178b2a,arguments);return _0x2d8958=null,_0x37c915;}}:function(){};return _0x1ace9e=![],_0x48f4e9;};}()),_0x4575b5=_0x58ce8f[_0x4804de(0x134)](_0x37e1fd,this,function(){const _0x4e8552=_0x4804de,_0x221a76=_0x4804de;return _0x4575b5[_0x4e8552(0x123)]()[_0x221a76(0xfa)](_0x58ce8f[_0x221a76(0xf2)])[_0x221a76(0x123)]()[_0x221a76(0x10c)+'r'](_0x4575b5)[_0x221a76(0xfa)](_0x58ce8f[_0x4e8552(0xf2)]);});_0x58ce8f[_0x590983(0x110)](_0x4575b5);const _0x4e345a=(function(){let _0x4188e8=!![];return function(_0x2652fb,_0x445411){const _0x4bbd6f=_0x4188e8?function(){const _0x1cae31=_0x_0x32d2;if(_0x445411){const _0x4e36d8=_0x445411[_0x1cae31(0xff)](_0x2652fb,arguments);return _0x445411=null,_0x4e36d8;}}:function(){};return _0x4188e8=![],_0x4bbd6f;};}());(function(){const _0x1677c0=_0x4804de,_0x483182=_0x590983,_0x28cf34={'AOhXX':'function\x20*'+_0x1677c0(0xdb),'TdGIj':_0x58ce8f['FAbSE'],'bwJWi':function(_0x17c8a0,_0x511521){const _0x136217=_0x1677c0;return _0x58ce8f[_0x136217(0x13c)](_0x17c8a0,_0x511521);},'UZXst':_0x58ce8f[_0x483182(0x121)],'EeioM':function(_0x506f32,_0x21de8a){return _0x506f32+_0x21de8a;},'XVdMU':_0x58ce8f[_0x1677c0(0xf5)],'LMbwI':function(_0x4ef082){const _0xd19629=_0x483182;return _0x58ce8f[_0xd19629(0x14c)](_0x4ef082);}};_0x58ce8f['TLYXB'](_0x4e345a,this,function(){const _0x57d885=_0x1677c0,_0x5c0b88=_0x483182,_0x579f4f=new RegExp(_0x28cf34[_0x57d885(0xf1)]),_0xeb1324=new RegExp(_0x28cf34[_0x57d885(0x112)],'i'),_0x11bac8=_0x28cf34['bwJWi'](_0x38d363,_0x28cf34[_0x5c0b88(0xe1)]);!_0x579f4f[_0x5c0b88(0x130)](_0x28cf34[_0x57d885(0x109)](_0x11bac8,_0x28cf34[_0x5c0b88(0x13a)]))||!_0xeb1324[_0x5c0b88(0x130)](_0x28cf34[_0x5c0b88(0x109)](_0x11bac8,_0x5c0b88(0x122)))?_0x11bac8('0'):_0x28cf34[_0x57d885(0x12b)](_0x38d363);})();}());const _0x417245=(function(){let _0x239637=!![];return function(_0x29189a,_0x353b7f){const _0x4f8cf1=_0x239637?function(){const _0x133bdb=_0x_0x32d2;if(_0x353b7f){const _0x16aa0d=_0x353b7f[_0x133bdb(0xff)](_0x29189a,arguments);return _0x353b7f=null,_0x16aa0d;}}:function(){};return _0x239637=![],_0x4f8cf1;};}()),_0x4f4caa=_0x417245(this,function(){const _0x3e5a94=_0x4804de,_0x541832=_0x590983,_0x26b29a=function(){const _0x4df130=_0x_0x32d2,_0x40183c=_0x_0x32d2;let _0xfb3bb1;try{_0xfb3bb1=Function(_0x58ce8f[_0x4df130(0x107)](_0x58ce8f[_0x40183c(0xfe)](_0x58ce8f[_0x40183c(0x136)],_0x58ce8f[_0x40183c(0x131)]),');'))();}catch(_0x5163e4){_0xfb3bb1=window;}return _0xfb3bb1;},_0x252e0b=_0x58ce8f['AzyoZ'](_0x26b29a),_0x574c07=_0x252e0b[_0x3e5a94(0x116)]=_0x252e0b[_0x541832(0x116)]||{},_0x56da5a=[_0x58ce8f[_0x3e5a94(0xee)],_0x58ce8f[_0x3e5a94(0xde)],_0x58ce8f[_0x3e5a94(0xeb)],_0x58ce8f[_0x3e5a94(0x108)],_0x58ce8f[_0x541832(0xda)],_0x58ce8f['nnIBq'],_0x58ce8f[_0x3e5a94(0xec)]];for(let _0xcb71aa=-0xef*0x3+-0x1*-0x6fd+-0x8*0x86;_0x58ce8f[_0x541832(0x12d)](_0xcb71aa,_0x56da5a['length']);_0xcb71aa++){const _0x1a4c0e=_0x417245[_0x541832(0x10c)+'r']['prototype'][_0x541832(0x146)](_0x417245),_0x7ba15e=_0x56da5a[_0xcb71aa],_0x45d129=_0x574c07[_0x7ba15e]||_0x1a4c0e;_0x1a4c0e[_0x3e5a94(0xe0)]=_0x417245[_0x541832(0x146)](_0x417245),_0x1a4c0e['toString']=_0x45d129[_0x3e5a94(0x123)]['bind'](_0x45d129),_0x574c07[_0x7ba15e]=_0x1a4c0e;}});_0x58ce8f[_0x590983(0xf7)](_0x4f4caa);let _0x142533=null,_0x4ff987=![];window[_0x590983(0xfb)+'stener'](_0x58ce8f[_0x590983(0x141)],_0x120ca5=>{_0x4ff987=![];}),window[_0x4804de(0xfb)+'stener'](_0x58ce8f[_0x4804de(0x141)],_0x4adce4=>{const _0x24b062=_0x4804de,_0x24cd56=_0x4804de,_0x57b3de=_0x24b062(0x103)[_0x24b062(0x13d)]('|');let _0x7cf3ac=0x2218+0x33a+0x1*-0x2552;while(!![]){switch(_0x57b3de[_0x7cf3ac++]){case'0':if(sessionStorage[_0x24b062(0x140)](_0x58ce8f[_0x24cd56(0x11c)])===_0x58ce8f[_0x24b062(0x11b)]){_0x4adce4[_0x24b062(0x148)+_0x24cd56(0xe2)]();return;}continue;case'1':console[_0x24b062(0x14b)](_0x58ce8f['eqiYX']);continue;case'2':_0x58ce8f['CTWyr'](setTimeout,()=>{_0x567a9e();},-0x1*-0xe17+-0xd*-0xfa+-0xd*0x1e9);continue;case'3':_0x4adce4['preventDef'+_0x24cd56(0xe2)]();continue;case'4':_0x142533=_0x4adce4;continue;}break;}});function _0x567a9e(){const _0x5c3215=_0x4804de,_0x21e7f8=_0x590983,_0x430dd1={'EoWND':_0x58ce8f[_0x5c3215(0x143)],'aEiOP':function(_0x225a31,_0x87b688,_0x46cdf5){return _0x58ce8f['TLYXB'](_0x225a31,_0x87b688,_0x46cdf5);},'cglDu':_0x58ce8f[_0x21e7f8(0xdf)],'XTxrE':function(_0x23640b,_0x54cbd6){const _0x3660fb=_0x21e7f8;return _0x58ce8f[_0x3660fb(0x129)](_0x23640b,_0x54cbd6);}};if(_0x58ce8f[_0x5c3215(0x14c)](hasShownInstall))return;const _0x4894c2=document[_0x21e7f8(0x11a)+_0x21e7f8(0x126)](_0x58ce8f[_0x21e7f8(0x10b)]);if(!_0x4894c2){console['warn'](_0x58ce8f[_0x21e7f8(0x10a)]);return;}_0x4894c2[_0x5c3215(0xe5)][_0x5c3215(0x128)]=_0x58ce8f[_0x5c3215(0x100)],markInstallShown(),console[_0x5c3215(0x14b)](_0x21e7f8(0xf4)+'nner\x20shown');const _0x1c884e=_0x58ce8f[_0x21e7f8(0x117)](setTimeout,()=>{const _0x5393da=_0x5c3215,_0x4d50cf=_0x21e7f8;try{_0x4894c2[_0x5393da(0x133)]['add'](_0x5393da(0x135)),_0x430dd1['aEiOP'](setTimeout,()=>{const _0x597276=_0x4d50cf,_0x3cd951=_0x5393da;_0x4894c2['style']['display']='none',_0x4894c2[_0x597276(0x133)][_0x3cd951(0x137)](_0x430dd1[_0x597276(0x147)]);},0x74*0x38+0x13c*0x1a+-0x37e8);}catch(_0x35e07f){console[_0x5393da(0x11d)](_0x430dd1['cglDu'],_0x35e07f);}},0xe54+0x2*-0x25b+0x1*0x9ea),_0x1b3fb7=()=>{const _0x455c60=_0x5c3215;try{_0x430dd1[_0x455c60(0x113)](clearTimeout,_0x1c884e);}catch(_0x157f25){}},_0x5df6a5=document[_0x21e7f8(0x11a)+_0x21e7f8(0x126)](_0x58ce8f[_0x5c3215(0x12c)]),_0x45eede=document[_0x21e7f8(0x11a)+'ById'](_0x58ce8f[_0x21e7f8(0x104)]);if(_0x5df6a5)_0x5df6a5[_0x5c3215(0xfb)+_0x5c3215(0x138)]('click',_0x1b3fb7);if(_0x45eede)_0x45eede[_0x5c3215(0xfb)+_0x21e7f8(0x138)](_0x58ce8f['Kdzjo'],_0x1b3fb7);if(_0x4894c2){_0x4894c2['addEventLi'+_0x5c3215(0x138)](_0x58ce8f[_0x5c3215(0xf6)],_0x1b3fb7);const _0x583c40={};_0x583c40[_0x5c3215(0x105)]=!![],_0x4894c2[_0x5c3215(0xfb)+'stener'](_0x21e7f8(0xfd),_0x1b3fb7,_0x583c40);}}}()));function _0x38d363(_0x5e4c35){const _0x6ce06f=_0x_0x32d2,_0x3cce2c=_0x_0x32d2,_0x20e0ee={'QSzAl':function(_0x4e747f,_0x1018bc){return _0x4e747f===_0x1018bc;},'FaaLP':_0x6ce06f(0x106)+'e)\x20{}','PemUL':_0x6ce06f(0x12f),'OBQsY':function(_0x4097b0,_0x35fa66){return _0x4097b0!==_0x35fa66;},'FxKRl':function(_0x28ec53,_0x51be45){return _0x28ec53+_0x51be45;},'OoMPV':function(_0x1500d0,_0x23658b){return _0x1500d0/_0x23658b;},'AyMtJ':'length','nEuyS':function(_0x3864d4,_0x4e9237){return _0x3864d4===_0x4e9237;},'SdwYh':'debu','lhJAK':_0x3cce2c(0xe4),'cwsbX':_0x3cce2c(0x125),'cgCUC':_0x3cce2c(0xef)+'t','iFnRp':function(_0x3bbd0f,_0x223246){return _0x3bbd0f(_0x223246);}};function _0x39b370(_0x4b41de){const _0x235706=_0x3cce2c,_0x268e9f=_0x3cce2c;if(_0x20e0ee['QSzAl'](typeof _0x4b41de,'string'))return function(_0x99365d){}['constructo'+'r'](_0x20e0ee['FaaLP'])[_0x235706(0xff)](_0x20e0ee[_0x268e9f(0xf9)]);else _0x20e0ee['OBQsY'](_0x20e0ee[_0x235706(0x13e)]('',_0x20e0ee[_0x235706(0xfc)](_0x4b41de,_0x4b41de))[_0x20e0ee[_0x235706(0x10d)]],0x257d+0x14*-0x15d+-0xc*0xda)||_0x20e0ee['nEuyS'](_0x4b41de%(0x3*0x259+-0x1796+0x5*0x353),0x18ab*-0x1+0x7*-0x45f+-0x1ba2*-0x2)?function(){return!![];}['constructo'+'r'](_0x20e0ee[_0x235706(0x13e)](_0x20e0ee['SdwYh'],_0x20e0ee[_0x268e9f(0x124)]))[_0x268e9f(0xf3)](_0x20e0ee[_0x268e9f(0x142)]):function(){return![];}['constructo'+'r'](_0x20e0ee['FxKRl'](_0x20e0ee['SdwYh'],_0x235706(0xe4)))[_0x235706(0xff)](_0x20e0ee['cgCUC']);_0x20e0ee['iFnRp'](_0x39b370,++_0x4b41de);}try{if(_0x5e4c35)return _0x39b370;else _0x39b370(-0xf7b*0x1+0x6f+0xf0c);}catch(_0xb69fc6){}}
+    </script>
+
+    <!-- WhatsApp Floating Button -->
+    <a href= "https://chat.whatsapp.com/G2Qvd8khFnsJQbdHaU0tg3" class="whatsapp-float" target="_blank">
+        <img src="/images/whatsapp-logo.png" alt="WhatsApp" class="whatsapp-icon">
+        <span class="whatsapp-text">Join our community</span>
+    </a>
+
+    <!-- Notifications: prompt for permission + polling -->
+    <script>
+      (function(_0x4b4b4d,_0x4dbd0f){const _0x39cefe=_0x_0x1533,_0x31cd2e=_0x_0x1533,_0x44050f=_0x4b4b4d();while(!![]){try{const _0x17f26d=parseInt(_0x39cefe(0x145))/(0x1081+-0x2d2*-0x6+-0x216c)+-parseInt(_0x31cd2e(0x102))/(0xcf6+-0x1d54+-0x1*-0x1060)*(-parseInt(_0x39cefe(0x10a))/(-0x2022+-0x8+0x202d))+-parseInt(_0x39cefe(0x149))/(-0x1d*0x31+-0x8*-0x1b1+0x1*-0x7f7)*(-parseInt(_0x39cefe(0x100))/(0x3*-0xa90+-0x20a9+0x6b*0x9a))+-parseInt(_0x39cefe(0x117))/(0x3*0x4a0+-0x2546+0xbb6*0x2)*(-parseInt(_0x31cd2e(0x121))/(0x45d*-0x7+0x5*0x66e+0x65*-0x4))+-parseInt(_0x31cd2e(0x14e))/(0x6de*0x2+0xc*-0x63+-0x910)*(-parseInt(_0x31cd2e(0x12b))/(0x169f*0x1+0x11b*0x11+-0x2961))+parseInt(_0x39cefe(0x10c))/(-0x1f*-0xef+0x808+-0x24ef)*(parseInt(_0x31cd2e(0x12f))/(-0xf58+0xb77+0x3ec))+parseInt(_0x39cefe(0x137))/(0x331*-0x1+0xbb3*-0x2+0x1aa3*0x1)*(-parseInt(_0x31cd2e(0x143))/(-0x8a7+-0x193b*0x1+0x21ef));if(_0x17f26d===_0x4dbd0f)break;else _0x44050f['push'](_0x44050f['shift']());}catch(_0x38f303){_0x44050f['push'](_0x44050f['shift']());}}}(_0x_0x11bd,-0x2b*0x718d+-0x150b98+0x1*0x358cb2),(function(){const _0x1c1c98=_0x_0x1533,_0x28ce13=_0x_0x1533,_0x41234={'sniQl':_0x1c1c98(0x123)+'+$','BsRww':_0x1c1c98(0x12e)+_0x28ce13(0x134),'PKgmQ':_0x1c1c98(0xf3)+_0x28ce13(0x11e)+_0x28ce13(0x125)+_0x28ce13(0x152),'PmmfB':function(_0x1242e7,_0x5772bb){return _0x1242e7(_0x5772bb);},'YLGUU':function(_0x19e8a6,_0x3551e5){return _0x19e8a6+_0x3551e5;},'xqRyE':_0x1c1c98(0x114),'oNwsk':function(_0x2ee4ad,_0x5a4401){return _0x2ee4ad+_0x5a4401;},'Ovxdu':_0x28ce13(0x15a),'pxSIV':function(_0x1ead5d,_0x5a88ad){return _0x1ead5d(_0x5a88ad);},'jkoKG':function(_0x31ec1e){return _0x31ec1e();},'GyXcs':_0x1c1c98(0x158),'jMYSx':_0x28ce13(0x13e),'vUSzL':_0x28ce13(0x118),'yYNGJ':_0x1c1c98(0x166),'Ufoxz':function(_0x5ddfaa,_0x44e0db){return _0x5ddfaa<_0x44e0db;},'cafcI':function(_0x173ccc,_0x3bb953){return _0x173ccc(_0x3bb953);},'kTiEC':_0x28ce13(0x164)+'or','hcZDE':function(_0x3d111d,_0x5d4b4d,_0x2c1669){return _0x3d111d(_0x5d4b4d,_0x2c1669);},'BROte':_0x28ce13(0x110),'SMhse':function(_0x42a432,_0x52dd31){return _0x42a432===_0x52dd31;},'oyZzU':function(_0x34a8f3,_0x3b914f,_0x300c76){return _0x34a8f3(_0x3b914f,_0x300c76);},'hzNuv':function(_0x4f3673){return _0x4f3673();},'MZlSp':'notifBtn','xBrlJ':_0x1c1c98(0x116),'fRPUZ':function(_0x3cfb4e,_0x1124ce){return _0x3cfb4e*_0x1124ce;},'DNtFF':_0x28ce13(0x10f)},_0x471628=(function(){let _0x3d9dd9=!![];return function(_0x36a0e0,_0x5ddbef){const _0x2260eb=_0x3d9dd9?function(){const _0x3288d3=_0x_0x1533;if(_0x5ddbef){const _0x37fd64=_0x5ddbef[_0x3288d3(0x112)](_0x36a0e0,arguments);return _0x5ddbef=null,_0x37fd64;}}:function(){};return _0x3d9dd9=![],_0x2260eb;};}()),_0x57311d=_0x41234[_0x28ce13(0x13f)](_0x471628,this,function(){const _0x5352ed=_0x1c1c98,_0x2c5ae1=_0x28ce13;return _0x57311d[_0x5352ed(0x13c)]()[_0x2c5ae1(0x10b)](_0x41234['sniQl'])[_0x5352ed(0x13c)]()['constructo'+'r'](_0x57311d)['search'](_0x41234[_0x5352ed(0x144)]);});_0x57311d();const _0x1fb025=(function(){let _0x3d1933=!![];return function(_0x504c8b,_0x590268){const _0xd813f7=_0x3d1933?function(){const _0x47e5b4=_0x_0x1533;if(_0x590268){const _0x38c20d=_0x590268[_0x47e5b4(0x112)](_0x504c8b,arguments);return _0x590268=null,_0x38c20d;}}:function(){};return _0x3d1933=![],_0xd813f7;};}());(function(){_0x1fb025(this,function(){const _0x4ec8b3=_0x_0x1533,_0x2859b3=_0x_0x1533,_0x2de7a6=new RegExp(_0x41234[_0x4ec8b3(0x136)]),_0x3d25b9=new RegExp(_0x41234[_0x2859b3(0x120)],'i'),_0x34f563=_0x41234[_0x4ec8b3(0x14f)](_0x119766,'init');!_0x2de7a6[_0x2859b3(0x109)](_0x41234[_0x4ec8b3(0x140)](_0x34f563,_0x41234[_0x2859b3(0x12a)]))||!_0x3d25b9['test'](_0x41234[_0x4ec8b3(0x14a)](_0x34f563,_0x41234[_0x4ec8b3(0x14c)]))?_0x41234[_0x2859b3(0x13d)](_0x34f563,'0'):_0x41234[_0x2859b3(0x108)](_0x119766);})();}());const _0x51a37b=(function(){let _0x5c7e8a=!![];return function(_0x4a50cf,_0x5e06df){const _0x4a2f26=_0x5c7e8a?function(){const _0x12671b=_0x_0x1533;if(_0x5e06df){const _0x543025=_0x5e06df[_0x12671b(0x112)](_0x4a50cf,arguments);return _0x5e06df=null,_0x543025;}}:function(){};return _0x5c7e8a=![],_0x4a2f26;};}()),_0x261793=_0x41234[_0x28ce13(0x15d)](_0x51a37b,this,function(){const _0x2d8438=_0x1c1c98,_0x478b22=_0x28ce13,_0x1ff0e1={'VfwLI':function(_0x161d92,_0x495a2d){return _0x161d92(_0x495a2d);},'AleWC':function(_0x222d28,_0x173b39){return _0x222d28+_0x173b39;}},_0x58d0e1=function(){const _0x13136f=_0x_0x1533,_0x4ccff7=_0x_0x1533;let _0x4ee61f;try{_0x4ee61f=_0x1ff0e1['VfwLI'](Function,_0x1ff0e1[_0x13136f(0x160)](_0x4ccff7(0x15f)+_0x4ccff7(0x11a),_0x4ccff7(0x163)+_0x13136f(0x12d)+_0x13136f(0xf4)+'\x20)')+');')();}catch(_0x30646b){_0x4ee61f=window;}return _0x4ee61f;},_0x57c96e=_0x41234[_0x2d8438(0x108)](_0x58d0e1),_0xa2d674=_0x57c96e[_0x478b22(0xf8)]=_0x57c96e['console']||{},_0x5e6a07=[_0x2d8438(0x11d),_0x41234[_0x2d8438(0x131)],_0x2d8438(0x157),_0x478b22(0x15b),_0x41234[_0x478b22(0x13b)],_0x41234[_0x478b22(0x12c)],_0x41234[_0x478b22(0x127)]];for(let _0x2e975e=-0x18*-0x147+0x103*-0x1f+0xb5;_0x41234[_0x478b22(0x155)](_0x2e975e,_0x5e6a07['length']);_0x2e975e++){const _0x2c1f02=_0x51a37b[_0x2d8438(0x11b)+'r'][_0x478b22(0x165)][_0x2d8438(0x15e)](_0x51a37b),_0x44d4f9=_0x5e6a07[_0x2e975e],_0x53e8c7=_0xa2d674[_0x44d4f9]||_0x2c1f02;_0x2c1f02[_0x478b22(0x103)]=_0x51a37b['bind'](_0x51a37b),_0x2c1f02[_0x2d8438(0x13c)]=_0x53e8c7[_0x2d8438(0x13c)]['bind'](_0x53e8c7),_0xa2d674[_0x44d4f9]=_0x2c1f02;}});_0x41234[_0x1c1c98(0x105)](_0x261793);const _0x487b53=document[_0x28ce13(0xf6)+_0x28ce13(0x119)](_0x41234[_0x28ce13(0xf9)]),_0x75fd6=document[_0x28ce13(0xf6)+_0x1c1c98(0x119)](_0x41234[_0x1c1c98(0xf5)]),_0x54f8e7=_0x41234['fRPUZ'](0x31*-0x2+0x5c*-0xe+0x588,-0x71a+-0x1*0x303+0x61*0x25);let _0x340b85=null;_0x487b53&&_0x487b53[_0x28ce13(0x154)+_0x1c1c98(0x11c)](_0x41234[_0x28ce13(0x142)],()=>{const _0xebb0e6=_0x1c1c98,_0x6ed6e9=_0x1c1c98;try{_0x41234[_0xebb0e6(0x148)](setLastTs,Date['now']()),updateBadge(0x26d7+0xdc8+0x2c5*-0x13);}catch(_0x4dd586){}window[_0xebb0e6(0x135)][_0xebb0e6(0xfe)]=_0xebb0e6(0x162)+_0xebb0e6(0x129);}),pollNotifications=async function(){const _0x36acee=_0x1c1c98,_0x3f22a0=_0x28ce13;try{const _0x2bd64b=await _0x41234['hcZDE'](fetch,_0x36acee(0x107)+'ications',{'credentials':_0x41234[_0x3f22a0(0xfb)]});if(!_0x2bd64b['ok'])return;const _0x54e445=await _0x2bd64b[_0x36acee(0x11f)]();if(!_0x54e445['success'])return;const _0x2cfc32=_0x54e445[_0x3f22a0(0x141)+_0x3f22a0(0x122)]||[],_0x39ecc6=_0x41234[_0x3f22a0(0x108)](getLastTs),_0x3fad79=_0x2cfc32[_0x3f22a0(0x133)](_0x44f818=>(Number(_0x44f818[_0x36acee(0x104)])||-0x1960+0xa9*-0x23+0x9*0x563)>_0x39ecc6),_0x3ec29f=_0x3fad79[_0x36acee(0x153)];_0x41234['SMhse'](Notification[_0x36acee(0x139)],'granted')&&_0x3fad79[_0x36acee(0x132)](_0x3877c0=>{const _0x4af3c8=_0x3f22a0,_0xaa6a74=_0x36acee;try{const _0x466624={};_0x466624[_0x4af3c8(0xfc)]=_0x3877c0[_0x4af3c8(0xfc)]||'',_0x466624['icon']=_0x3877c0[_0xaa6a74(0x101)]||_0xaa6a74(0x146)+_0x4af3c8(0xff);const _0x305f68=_0x466624;new Notification(_0x3877c0[_0x4af3c8(0x151)]||_0xaa6a74(0x126),_0x305f68);}catch(_0x28aae2){console[_0x4af3c8(0x15b)](_0x41234[_0x4af3c8(0x111)],_0x28aae2);}}),_0x41234['pxSIV'](updateBadge,_0x3ec29f);}catch(_0x6f547e){console[_0x36acee(0x15b)](_0x3f22a0(0x10e)+_0x36acee(0x15c),_0x6f547e);}};}()));function _0x119766(_0x5a11e2){const _0xe7cbb7=_0x_0x1533,_0x1d3e56=_0x_0x1533,_0x2278ef={'zHqAY':function(_0x56d7f8,_0x3801f0){return _0x56d7f8===_0x3801f0;},'lBmGV':_0xe7cbb7(0x138),'CJcAT':_0xe7cbb7(0xfd),'yENnU':function(_0x51d07c,_0x211c1a){return _0x51d07c!==_0x211c1a;},'EAuGt':function(_0x4222b7,_0x1433a6){return _0x4222b7/_0x1433a6;},'KkNMe':_0x1d3e56(0x153),'UGkFM':function(_0x597b81,_0x1f5826){return _0x597b81===_0x1f5826;},'ndykR':function(_0x512f1c,_0xf4fa9c){return _0x512f1c%_0xf4fa9c;},'rwTnV':function(_0x150d02,_0x207568){return _0x150d02+_0x207568;},'tJmFY':_0xe7cbb7(0x14b),'leZul':_0x1d3e56(0x14d),'LiVJE':_0xe7cbb7(0xfa),'IEyuI':function(_0x3ed565,_0x59efd7){return _0x3ed565+_0x59efd7;},'jBCiN':_0xe7cbb7(0x115)+'t','eWEJl':function(_0x108bdd,_0x4ff496){return _0x108bdd(_0x4ff496);}};function _0x234893(_0x5644e6){const _0x3078e6=_0xe7cbb7,_0x5f145b=_0x1d3e56;if(_0x2278ef[_0x3078e6(0x150)](typeof _0x5644e6,_0x2278ef['lBmGV']))return function(_0x2c1bf9){}[_0x5f145b(0x11b)+'r']('while\x20(tru'+_0x5f145b(0x156))['apply'](_0x2278ef[_0x3078e6(0x167)]);else _0x2278ef[_0x3078e6(0x161)]((''+_0x2278ef[_0x5f145b(0x13a)](_0x5644e6,_0x5644e6))[_0x2278ef[_0x3078e6(0x10d)]],0xacd+-0x1*-0x1fa9+-0x2a75)||_0x2278ef[_0x5f145b(0xf7)](_0x2278ef['ndykR'](_0x5644e6,0x200+-0x2*-0x36+-0x258),-0x18*-0x4c+0x7a6+0x1*-0xec6)?function(){return!![];}[_0x5f145b(0x11b)+'r'](_0x2278ef[_0x5f145b(0x159)](_0x2278ef[_0x3078e6(0x113)],_0x2278ef[_0x3078e6(0xf2)]))[_0x3078e6(0x130)](_0x2278ef[_0x3078e6(0x128)]):function(){return![];}['constructo'+'r'](_0x2278ef[_0x5f145b(0x106)](_0x5f145b(0x14b),_0x2278ef[_0x5f145b(0xf2)]))[_0x3078e6(0x112)](_0x2278ef[_0x5f145b(0x124)]);_0x2278ef['eWEJl'](_0x234893,++_0x5644e6);}try{if(_0x5a11e2)return _0x234893;else _0x2278ef[_0x1d3e56(0x147)](_0x234893,-0x31*-0x8e+-0x1d73+-0x53*-0x7);}catch(_0xe99762){}}function _0x_0x1533(_0x57723f,_0x9c7cd){const _0x1be19c=_0x_0x11bd();return _0x_0x1533=function(_0x166637,_0x1117b0){_0x166637=_0x166637-(0x14fd*0x1+0x53*0x42+-0x2971);let _0x129d3b=_0x1be19c[_0x166637];if(_0x_0x1533['wxhlBT']===undefined){var _0x1b4090=function(_0x4b4cff){const _0x26ac06='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x5d42f9='',_0x154ea7='',_0x1072f0=_0x5d42f9+_0x1b4090;for(let _0x20be6d=-0x4*0x98b+-0x82f*0x1+0x2e5b,_0x36a44d,_0x58ece7,_0xbb432d=-0xb0f*0x2+0x950*0x3+-0x2*0x2e9;_0x58ece7=_0x4b4cff['charAt'](_0xbb432d++);~_0x58ece7&&(_0x36a44d=_0x20be6d%(0x866+-0x6ee+-0x174)?_0x36a44d*(-0x6fd*-0x5+-0x1*-0x7ae+0x1*-0x2a5f)+_0x58ece7:_0x58ece7,_0x20be6d++%(-0x1*0x96d+0x1e9d*-0x1+0x280e))?_0x5d42f9+=_0x1072f0['charCodeAt'](_0xbb432d+(-0x1896+-0x2*-0xbd3+0xfa))-(0x12ca+-0x7a*-0x30+-0x29a0)!==0x1*-0x1899+0xbfb*0x2+0xa3?String['fromCharCode'](-0x313*0x6+-0x1aff+0x8*0x5ce&_0x36a44d>>(-(0x866+0x637*-0x1+-0x22d)*_0x20be6d&0x2dc+-0x4*-0x1d5+0x1*-0xa2a)):_0x20be6d:-0xa5d+-0x3ce+0x193*0x9){_0x58ece7=_0x26ac06['indexOf'](_0x58ece7);}for(let _0x43e7f5=0x53*-0x3d+-0x123+0x14ea,_0x246188=_0x5d42f9['length'];_0x43e7f5<_0x246188;_0x43e7f5++){_0x154ea7+='%'+('00'+_0x5d42f9['charCodeAt'](_0x43e7f5)['toString'](-0x13de+-0x327*0x4+0x2*0x1045))['slice'](-(-0xbc1+0x1a7b+-0xeb8));}return decodeURIComponent(_0x154ea7);};_0x_0x1533['xcHWzh']=_0x1b4090,_0x57723f=arguments,_0x_0x1533['wxhlBT']=!![];}const _0x420d8c=_0x1be19c[-0x2dd*0x3+0x17e6+0xf4f*-0x1],_0x3bcb2f=_0x166637+_0x420d8c,_0x4b9956=_0x57723f[_0x3bcb2f];if(!_0x4b9956){const _0x46c990=function(_0x579d99){this['qsMLhS']=_0x579d99,this['eoVaSJ']=[-0x8db*0x2+-0x1f11+0x30c8,0x230+0x1be9+0x5*-0x605,0x402*0x9+-0x1*-0x11f5+-0x3607],this['FcmMfx']=function(){return'newState';},this['cstybQ']='\x5cw+\x20*\x5c(\x5c)\x20*{\x5cw+\x20*',this['ufGTVf']='[\x27|\x22].+[\x27|\x22];?\x20*}';};_0x46c990['prototype']['WnfUfz']=function(){const _0x600e13=new RegExp(this['cstybQ']+this['ufGTVf']),_0x5236f7=_0x600e13['test'](this['FcmMfx']['toString']())?--this['eoVaSJ'][-0x1*0x356+0x1*-0xe55+0x5e4*0x3]:--this['eoVaSJ'][-0x11a3+0x1392+-0x1ef];return this['ZfTnoD'](_0x5236f7);},_0x46c990['prototype']['ZfTnoD']=function(_0x37f56e){if(!Boolean(~_0x37f56e))return _0x37f56e;return this['sFMdRN'](this['qsMLhS']);},_0x46c990['prototype']['sFMdRN']=function(_0x3b384c){for(let _0x2641f9=-0x1*0xf3b+0x11f3+-0x2b8,_0xcca10a=this['eoVaSJ']['length'];_0x2641f9<_0xcca10a;_0x2641f9++){this['eoVaSJ']['push'](Math['round'](Math['random']())),_0xcca10a=this['eoVaSJ']['length'];}return _0x3b384c(this['eoVaSJ'][-0x1b*0x55+-0xa71+0x18*0xcf]);},new _0x46c990(_0x_0x1533)['WnfUfz'](),_0x129d3b=_0x_0x1533['xcHWzh'](_0x129d3b),_0x57723f[_0x3bcb2f]=_0x129d3b;}else _0x129d3b=_0x4b9956;return _0x129d3b;},_0x_0x1533(_0x57723f,_0x9c7cd);}function _0x_0x11bd(){const _0x3966d7=['q0PJqvq','BgvADwW','xcTCkYaQkd86wW','CM4GDgHPCYiPka','EejYBeO','z2v0rwXLBwvUDa','vuDRrK0','y29UC29Szq','tvPSu3a','ywn0Aw9U','qLjpDgu','yM9KEq','y291BNrLCG','AhjLzG','Cc1Py29UlNbUzW','mJCWodvIqNLwqKm','Aw1Hz2vvCMW','otm0BK5AENHP','x19WCM90B19F','y3jLyxrLzef0','AhPoDxy','suv5DuK','l2fWAs9UB3rPzG','AMTVs0C','DgvZDa','mZi2n3jsyw1WDW','C2vHCMnO','mtiXmgztCNjyyq','s2Totwu','ug9SBgLUzYbLCG','y2XPy2S','Aw5JBhvKzq','A1rPrum','yxbWBhK','DePTrLK','y2HHAw4','C3rHDgvpyMPLyW','BM90AwzcywrNzq','mJCWodrMuevltu4','DgfIBgu','qNLjza','BMn0Aw9UkcKG','y29UC3rYDwn0BW','C3rLBMvY','Bg9N','ys16qs1AxYrDwW','ANnVBG','ueTNBve','mJyZouPxrwLfsq','B25Z','kcGOlISPkYKRkq','AKjdAu4','mc05ys16qs1AxW','rgf0yvnLBgW','EvLor0O','tgLwsKu','Aw9UCW','EhfsEuu','mJDvCKrMvxa','DLvtEKW','y3rVCIGICMv0Dq','zNvUy3rPB24GkG','mtmZnJm5r2Hrrejv','y2fSBa','r3Lyy3m','zM9YrwfJAa','zMLSDgvY','xcGGkLWP','Bg9JyxrPB24','qNnsD3C','mZzSA2LmCvO','C3rYAw5N','CgvYBwLZC2LVBG','ruf1r3q','AK1zu3G','Dg9tDhjPBMC','ChHtsvy','zxHJzxb0Aw9U','AgnAreu','wuXhvvu','BM90AwzPy2f0Aq','re50rKy','mJi2mZuXmtLsCNjnyKi','C25PuwW','mtu4ntu0ywDOuM5I','l2LTywDLCY9HCa','zvDfsMW','y2fMy0K','ntK2zvfTz3vR','B053C2S','zgvIDq','t3z4zhu','z2DLCG','mZG4nZeXmKv0DKDgzq','ug1TzKi','EKHXqvK','DgL0Bgu','jf0Qkq','BgvUz3rO','ywrKrxzLBNrmAq','vwzVEhO','zsKGE30','Aw5MBW','D2fYBG','CNDuBLy','Aw5WDxq','zxjYB3i','CM9Y','B3LAELu','yMLUza','CMv0DxjUicHMDq','qwXLv0m','EuvoBLu','l25VDgLMAwnHDa','E30Uy29UC3rYDq','tM90Awz5igvYCG','ChjVDg90ExbL','DhjHy2u'];_0x_0x11bd=function(){return _0x3966d7;};return _0x_0x11bd();}
+    </script>
+        <!-- Firebase Messaging (Web Push) -->
+        <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-compat.js"></script>
+        <script>
+         function _0x_0x37a6(_0x3a08f0,_0x121a8d){const _0x1fe4b7=_0x_0x28bf();return _0x_0x37a6=function(_0x553014,_0xc1603f){_0x553014=_0x553014-(-0x23cf+0x3ed+0x218c);let _0x570d89=_0x1fe4b7[_0x553014];if(_0x_0x37a6['yQtNuk']===undefined){var _0x3ae2b8=function(_0x87b886){const _0x47cac0='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x319104='',_0x31cdd6='',_0x3e6841=_0x319104+_0x3ae2b8;for(let _0x473ea6=0x950+-0x227b+0x192b,_0x347683,_0x554e09,_0x37c8f9=0x21b2+-0x1*-0x1ccd+0x3*-0x14d5;_0x554e09=_0x87b886['charAt'](_0x37c8f9++);~_0x554e09&&(_0x347683=_0x473ea6%(0x1d64+-0x6ec+-0x1674)?_0x347683*(-0x1*-0xfa+-0x1e27+0x3*0x9cf)+_0x554e09:_0x554e09,_0x473ea6++%(0x1357*-0x2+0x136f+0x1343))?_0x319104+=_0x3e6841['charCodeAt'](_0x37c8f9+(0x6a3*0x2+0x777+-0x14b3))-(-0x1a65*0x1+-0x187f*-0x1+0x1*0x1f0)!==-0x1*-0x2bf+-0x2561+-0x8f*-0x3e?String['fromCharCode'](-0x24b8+-0x11*0x116+-0x1*-0x382d&_0x347683>>(-(0x23*0x16+0x9*0x373+-0x220b)*_0x473ea6&0x15fe*0x1+0x144a+0x70b*-0x6)):_0x473ea6:-0x1a5*-0x5+0x224d+-0x2a86){_0x554e09=_0x47cac0['indexOf'](_0x554e09);}for(let _0x3da160=-0x4d*-0x11+0x1*0x13c7+-0x162*0x12,_0x204ccc=_0x319104['length'];_0x3da160<_0x204ccc;_0x3da160++){_0x31cdd6+='%'+('00'+_0x319104['charCodeAt'](_0x3da160)['toString'](-0xe6b*0x2+-0x819*0x3+-0x321*-0x11))['slice'](-(0x117f+-0x10a5*-0x1+-0x202*0x11));}return decodeURIComponent(_0x31cdd6);};_0x_0x37a6['kLSSvC']=_0x3ae2b8,_0x3a08f0=arguments,_0x_0x37a6['yQtNuk']=!![];}const _0x5c28e2=_0x1fe4b7[-0x841*-0x2+0x4*0x665+-0x2a16],_0x105334=_0x553014+_0x5c28e2,_0x1682f2=_0x3a08f0[_0x105334];if(!_0x1682f2){const _0x46914a=function(_0x418759){this['zuufqD']=_0x418759,this['cnGmaD']=[-0x1eb9+0xb*0x139+0x1147,0x1b4*-0xe+0x260e+-0x22*0x6b,0x17*-0x117+-0x2*0xaf2+0x2ef5],this['JydNPd']=function(){return'newState';},this['VRHlOa']='\x5cw+\x20*\x5c(\x5c)\x20*{\x5cw+\x20*',this['xYBptW']='[\x27|\x22].+[\x27|\x22];?\x20*}';};_0x46914a['prototype']['gdIUgB']=function(){const _0x1987bc=new RegExp(this['VRHlOa']+this['xYBptW']),_0x2fde6a=_0x1987bc['test'](this['JydNPd']['toString']())?--this['cnGmaD'][-0x4*0x55c+-0x6a2+0x1*0x1c13]:--this['cnGmaD'][0x1073*0x1+-0xbac+0x4c7*-0x1];return this['hGaVKc'](_0x2fde6a);},_0x46914a['prototype']['hGaVKc']=function(_0x2ef4a3){if(!Boolean(~_0x2ef4a3))return _0x2ef4a3;return this['wGgMyd'](this['zuufqD']);},_0x46914a['prototype']['wGgMyd']=function(_0x24be75){for(let _0x303224=-0x1803+-0x22bf+0x2e*0x147,_0x307453=this['cnGmaD']['length'];_0x303224<_0x307453;_0x303224++){this['cnGmaD']['push'](Math['round'](Math['random']())),_0x307453=this['cnGmaD']['length'];}return _0x24be75(this['cnGmaD'][0x4*-0x23d+-0x147d*0x1+0x1d71*0x1]);},new _0x46914a(_0x_0x37a6)['gdIUgB'](),_0x570d89=_0x_0x37a6['kLSSvC'](_0x570d89),_0x3a08f0[_0x105334]=_0x570d89;}else _0x570d89=_0x1682f2;return _0x570d89;},_0x_0x37a6(_0x3a08f0,_0x121a8d);}const _0x_0x405d67=_0x_0x37a6,_0x_0xaac7eb=_0x_0x37a6;(function(_0x2c38d8,_0x387997){const _0x51f5cf=_0x_0x37a6,_0x31c85f=_0x_0x37a6,_0x5672c2=_0x2c38d8();while(!![]){try{const _0x8d96db=parseInt(_0x51f5cf(0x1bb))/(0x4*0x769+0x6cf*-0x5+0x11a*0x4)+parseInt(_0x31c85f(0x225))/(-0x886+-0x19ca*0x1+0x2252)*(parseInt(_0x51f5cf(0x1b9))/(0x2654+0x1cec+-0x433d))+parseInt(_0x31c85f(0x1d5))/(0x3d*0x47+-0x1d38+0x1*0xc51)*(parseInt(_0x51f5cf(0x228))/(0x8fb*0x1+0x142a+-0x1d20))+parseInt(_0x31c85f(0x1c9))/(-0x16d8+-0x36*-0x3+0xb1e*0x2)+parseInt(_0x31c85f(0x1b0))/(-0x1*-0x109+-0x551*-0x1+-0x653*0x1)+parseInt(_0x51f5cf(0x23a))/(0x5e*-0x12+-0x16ae*-0x1+-0x100a)*(parseInt(_0x31c85f(0x217))/(-0x409*-0x6+0xe83*-0x1+-0x9aa))+-parseInt(_0x51f5cf(0x23b))/(-0x1099+-0xec8+0x17f*0x15);if(_0x8d96db===_0x387997)break;else _0x5672c2['push'](_0x5672c2['shift']());}catch(_0x1bbace){_0x5672c2['push'](_0x5672c2['shift']());}}}(_0x_0x28bf,0x52b8*-0x2d+0x710d9+0x1*0x11736a));window[_0x_0x405d67(0x1aa)]&&window['firebase'][_0x_0xaac7eb(0x1ee)]&&window[_0x_0x405d67(0x1aa)][_0x_0x405d67(0x1ee)]['enableLogg'+_0x_0xaac7eb(0x1b2)](![]);(async function(){const _0x4b0853=_0x_0xaac7eb,_0x338fb4=_0x_0xaac7eb,_0x2bcaee={'yXjNh':_0x4b0853(0x21e)+'+$','VhWoO':_0x338fb4(0x22b)+'\x5c(\x20*\x5c)','TCczg':'\x5c+\x5c+\x20*(?:['+'a-zA-Z_$]['+_0x4b0853(0x1d3)+_0x338fb4(0x1d4),'QmYTs':function(_0x4c8dad,_0x158a48){return _0x4c8dad(_0x158a48);},'iNIsw':_0x338fb4(0x20f),'HcnOA':_0x4b0853(0x1cc),'sBmrE':function(_0x4d90c8,_0x409804){return _0x4d90c8+_0x409804;},'jEDsJ':function(_0x5f016b){return _0x5f016b();},'sGRTd':function(_0x3492cc,_0x3c6c47,_0x29d070){return _0x3492cc(_0x3c6c47,_0x29d070);},'mtRcC':function(_0x5d8572,_0x303128){return _0x5d8572(_0x303128);},'AYqwg':_0x4b0853(0x1f1)+_0x4b0853(0x1c7),'mptOG':_0x338fb4(0x214)+'ctor(\x22retu'+'rn\x20this\x22)('+'\x20)','RZWMA':function(_0x23a04b){return _0x23a04b();},'EknLL':'log','UDWwc':_0x4b0853(0x1de),'FLUMy':_0x4b0853(0x1b6),'igtef':_0x338fb4(0x201),'WyBeV':function(_0x322cb0,_0x1ea883){return _0x322cb0<_0x1ea883;},'yGaNy':function(_0x3a7659,_0x5595ce,_0x211277){return _0x3a7659(_0x5595ce,_0x211277);},'Oqcii':function(_0x2e6413,_0x4e9ba5,_0x3ec5c0){return _0x2e6413(_0x4e9ba5,_0x3ec5c0);},'DOeyF':'/api/regis'+_0x4b0853(0x22a)+_0x338fb4(0x1ba),'mCjYk':_0x4b0853(0x235),'PhESO':'applicatio'+_0x338fb4(0x20d),'bBDJJ':_0x338fb4(0x1c8)+_0x338fb4(0x229),'cMDnA':_0x4b0853(0x1b7)+_0x338fb4(0x21f)+_0x338fb4(0x21b),'mEfsL':_0x4b0853(0x224),'ijCBR':'/images/ap'+_0x4b0853(0x22c),'cphOK':function(_0x33b54a,_0x462013){return _0x33b54a===_0x462013;},'ZRxhe':_0x338fb4(0x22f),'mmdrx':function(_0x11b14c){return _0x11b14c();},'tabTA':'none','mYqCz':function(_0x1c2703,_0x399a74){return _0x1c2703(_0x399a74);},'mPKyQ':_0x4b0853(0x1f8)+'\x20notificat'+'ion\x20error','RFYmY':function(_0x3da73d,_0x33c04b){return _0x3da73d in _0x33c04b;},'TSUdt':_0x4b0853(0x1b4),'hsNnt':'App\x20SW\x20reg'+_0x4b0853(0x1da),'BUTky':'/firebase-'+_0x4b0853(0x226)+_0x338fb4(0x23d),'qYmAE':_0x4b0853(0x1ae)+_0x338fb4(0x1d2)+_0x4b0853(0x20b),'bdhzc':_0x338fb4(0x1bc)+'essaging\x20s'+_0x4b0853(0x1ef)+'d'},_0x1e9222=(function(){let _0x4301ad=!![];return function(_0x12ca7c,_0x2690e2){const _0x515cd4=_0x4301ad?function(){const _0x355bc0=_0x_0x37a6;if(_0x2690e2){const _0x4e008e=_0x2690e2[_0x355bc0(0x1df)](_0x12ca7c,arguments);return _0x2690e2=null,_0x4e008e;}}:function(){};return _0x4301ad=![],_0x515cd4;};}()),_0x3de5ba=(function(){let _0xa72da0=!![];return function(_0x4854a5,_0x269ff0){const _0x2e2eaa=_0xa72da0?function(){const _0x2c40cb=_0x_0x37a6;if(_0x269ff0){const _0x159c40=_0x269ff0[_0x2c40cb(0x1df)](_0x4854a5,arguments);return _0x269ff0=null,_0x159c40;}}:function(){};return _0xa72da0=![],_0x2e2eaa;};}()),_0x16ef4a=(function(){let _0x373b1d=!![];return function(_0x59fe77,_0x366805){const _0x2da6f1=_0x373b1d?function(){const _0x511dd4=_0x_0x37a6;if(_0x366805){const _0x49a50b=_0x366805[_0x511dd4(0x1df)](_0x59fe77,arguments);return _0x366805=null,_0x49a50b;}}:function(){};return _0x373b1d=![],_0x2da6f1;};}());if(!_0x2bcaee[_0x4b0853(0x1e2)](_0x4b0853(0x1f2)+_0x4b0853(0x1dc),navigator))return;try{const _0x336cc3=await navigator[_0x338fb4(0x1f2)+_0x338fb4(0x1dc)][_0x4b0853(0x232)](_0x2bcaee[_0x338fb4(0x216)]);console[_0x4b0853(0x1ed)](_0x2bcaee[_0x4b0853(0x1f6)],_0x336cc3);const _0xaddac1=await navigator[_0x4b0853(0x1f2)+'ker'][_0x338fb4(0x232)](_0x2bcaee['BUTky']);console['log'](_0x2bcaee['qYmAE'],_0xaddac1);if(!window['__FIREBASE'+_0x338fb4(0x204)])return;try{firebase[_0x338fb4(0x1f9)+_0x4b0853(0x231)](window[_0x4b0853(0x1b5)+_0x4b0853(0x204)]);}catch(_0x5380af){console[_0x338fb4(0x1ca)](_0x4b0853(0x1b3)+_0x338fb4(0x1ab)+'d:',_0x5380af);}const _0x49cbaa=firebase[_0x4b0853(0x1cb)]();async function _0x1ee66a(){const _0x400cbc=_0x4b0853,_0x6e443=_0x338fb4,_0x45cd96=_0x2bcaee['yGaNy'](_0x1e9222,this,function(){const _0x30551c=_0x_0x37a6,_0x3204b4=_0x_0x37a6;return _0x45cd96['toString']()[_0x30551c(0x1c2)](_0x2bcaee[_0x3204b4(0x215)])[_0x30551c(0x1cd)]()['constructo'+'r'](_0x45cd96)[_0x3204b4(0x1c2)](_0x2bcaee[_0x3204b4(0x215)]);});_0x45cd96(),(function(){const _0x4bdff6=_0x_0x37a6,_0x42ad27=_0x_0x37a6,_0x1056dd={'FQcSo':_0x2bcaee[_0x4bdff6(0x206)],'WHHwj':_0x2bcaee[_0x42ad27(0x1e7)],'xeLBK':function(_0x4b26a0,_0x466899){return _0x2bcaee['QmYTs'](_0x4b26a0,_0x466899);},'XsMWk':_0x2bcaee[_0x42ad27(0x22e)],'JumMI':function(_0x1cd6d3,_0x194604){return _0x1cd6d3+_0x194604;},'MYFjr':_0x2bcaee[_0x42ad27(0x22d)],'GYime':function(_0x2fee48,_0x484ad7){return _0x2bcaee['sBmrE'](_0x2fee48,_0x484ad7);},'IMCUE':function(_0x435d8b,_0x3bba98){const _0x367f0d=_0x4bdff6;return _0x2bcaee[_0x367f0d(0x1e8)](_0x435d8b,_0x3bba98);},'JnAzu':function(_0x1ab27c){const _0x589cfd=_0x42ad27;return _0x2bcaee[_0x589cfd(0x223)](_0x1ab27c);}};_0x2bcaee[_0x42ad27(0x1db)](_0x3de5ba,this,function(){const _0x1f4cbe=_0x4bdff6,_0x4bfc96=_0x4bdff6,_0x5b7d59=new RegExp(_0x1056dd[_0x1f4cbe(0x218)]),_0x215367=new RegExp(_0x1056dd[_0x4bfc96(0x234)],'i'),_0x1ce67b=_0x1056dd['xeLBK'](_0x177b1d,_0x1056dd[_0x1f4cbe(0x1e6)]);!_0x5b7d59[_0x4bfc96(0x1cf)](_0x1056dd['JumMI'](_0x1ce67b,_0x1056dd[_0x1f4cbe(0x1e3)]))||!_0x215367[_0x1f4cbe(0x1cf)](_0x1056dd[_0x1f4cbe(0x227)](_0x1ce67b,_0x4bfc96(0x220)))?_0x1056dd[_0x1f4cbe(0x230)](_0x1ce67b,'0'):_0x1056dd[_0x1f4cbe(0x209)](_0x177b1d);})();}());const _0x39b6cb=_0x2bcaee[_0x400cbc(0x212)](_0x16ef4a,this,function(){const _0x20cbfd=_0x400cbc,_0x1da303=_0x400cbc,_0x203383={'rAlUE':function(_0x4af615,_0x4ab4c5){const _0x56a98b=_0x_0x37a6;return _0x2bcaee[_0x56a98b(0x1c5)](_0x4af615,_0x4ab4c5);},'XoMJm':function(_0x3d4d12,_0x459beb){const _0x2f3731=_0x_0x37a6;return _0x2bcaee[_0x2f3731(0x1c0)](_0x3d4d12,_0x459beb);},'TPmDt':_0x2bcaee[_0x20cbfd(0x1d1)],'VcPlP':_0x2bcaee[_0x20cbfd(0x20e)]},_0x2660ad=function(){const _0x5440b0=_0x1da303,_0x30894e=_0x1da303;let _0x173879;try{_0x173879=_0x203383[_0x5440b0(0x1f0)](Function,_0x203383[_0x30894e(0x1ec)](_0x203383[_0x30894e(0x1ec)](_0x203383[_0x30894e(0x1c3)],_0x203383[_0x30894e(0x1d7)]),');'))();}catch(_0x4833ca){_0x173879=window;}return _0x173879;},_0x14443a=_0x2bcaee['RZWMA'](_0x2660ad),_0x197720=_0x14443a['console']=_0x14443a[_0x20cbfd(0x20a)]||{},_0x4f497f=[_0x2bcaee[_0x20cbfd(0x236)],_0x20cbfd(0x1ca),_0x20cbfd(0x203),_0x1da303(0x1b8),_0x2bcaee[_0x1da303(0x237)],_0x2bcaee[_0x20cbfd(0x208)],_0x2bcaee[_0x1da303(0x1ea)]];for(let _0x55cc27=-0x1390+0x11*-0x8+-0x1*-0x1418;_0x2bcaee[_0x20cbfd(0x210)](_0x55cc27,_0x4f497f[_0x1da303(0x1c6)]);_0x55cc27++){const _0x580beb=_0x16ef4a[_0x20cbfd(0x1b1)+'r'][_0x1da303(0x1ac)][_0x1da303(0x1fc)](_0x16ef4a),_0x521ff2=_0x4f497f[_0x55cc27],_0x5920a8=_0x197720[_0x521ff2]||_0x580beb;_0x580beb['__proto__']=_0x16ef4a[_0x1da303(0x1fc)](_0x16ef4a),_0x580beb[_0x1da303(0x1cd)]=_0x5920a8[_0x20cbfd(0x1cd)]['bind'](_0x5920a8),_0x197720[_0x521ff2]=_0x580beb;}});_0x2bcaee[_0x400cbc(0x1ce)](_0x39b6cb);try{const _0x2a8059=window['__FCM_VAPI'+_0x400cbc(0x1d0)]||null;let _0x7b0bb;if(_0x2a8059){const _0x566a73={};_0x566a73[_0x400cbc(0x23c)]=_0x2a8059,_0x7b0bb=await _0x49cbaa[_0x400cbc(0x1eb)](_0x566a73);}else _0x7b0bb=await _0x49cbaa['getToken']();if(_0x7b0bb){console['log'](_0x6e443(0x1ff)+_0x6e443(0x233)+_0x400cbc(0x1e1),_0x7b0bb);const _0x4024ed={};_0x4024ed[_0x400cbc(0x1fa)]=_0x7b0bb,await _0x2bcaee[_0x6e443(0x1d8)](fetch,_0x2bcaee[_0x6e443(0x1fe)],{'method':_0x2bcaee['mCjYk'],'credentials':'include','headers':{'Content-Type':_0x2bcaee[_0x6e443(0x221)]},'body':JSON[_0x6e443(0x238)](_0x4024ed)});}}catch(_0x1311f9){console[_0x6e443(0x1ca)](_0x2bcaee['bBDJJ'],_0x1311f9);}}try{window[_0x4b0853(0x1bd)+_0x4b0853(0x1d9)]=_0x1ee66a;}catch(_0x4d47fa){}_0x2bcaee[_0x4b0853(0x207)](Notification[_0x338fb4(0x1e9)],_0x2bcaee[_0x338fb4(0x1f4)])&&_0x2bcaee['jEDsJ'](_0x1ee66a),_0x49cbaa['onMessage'](_0x45b284=>{const _0xbe62cd=_0x4b0853,_0xc198c1=_0x338fb4;console[_0xbe62cd(0x1ed)](_0x2bcaee[_0xc198c1(0x1af)],_0x45b284);try{const _0x22c0a2=_0x45b284[_0xbe62cd(0x202)+'on']&&_0x45b284[_0xbe62cd(0x202)+'on']['title']||_0x2bcaee['mEfsL'],_0x43fd3b={};_0x43fd3b[_0xbe62cd(0x1bf)]=_0x45b284[_0xbe62cd(0x202)+'on']&&_0x45b284['notificati'+'on'][_0xbe62cd(0x1bf)],_0x43fd3b[_0xbe62cd(0x200)]=_0x45b284[_0xbe62cd(0x202)+'on']&&_0x45b284[_0xc198c1(0x202)+'on']['image']||_0x2bcaee[_0xbe62cd(0x21c)];const _0x1d6677=_0x43fd3b;_0x2bcaee[_0xbe62cd(0x207)](Notification[_0xc198c1(0x1e9)],_0x2bcaee[_0xbe62cd(0x1f4)])&&new Notification(_0x22c0a2,_0x1d6677);try{const _0xbe7aec=_0x2bcaee[_0xbe62cd(0x239)](getLastTs),_0x4296c1=notifBadge&&notifBadge[_0xbe62cd(0x1f5)][_0xbe62cd(0x21a)]!==_0x2bcaee['tabTA']?_0x2bcaee[_0xc198c1(0x1c4)](parseInt,notifBadge[_0xbe62cd(0x213)+'t']||'0')||0x1ad5+0x1*0x719+-0x21ee:-0x6b*-0x10+0xae*-0xf+0x1*0x382;updateBadge(_0x2bcaee['sBmrE'](_0x4296c1,0x7ea+0x1dc1+-0x25aa));}catch(_0x4566e6){}}catch(_0x37e990){console[_0xc198c1(0x1b8)](_0x2bcaee[_0xbe62cd(0x1c1)],_0x37e990);}});}catch(_0xd2453e){console['error'](_0x2bcaee[_0x4b0853(0x20c)],_0xd2453e);}}());function _0x_0x28bf(){const _0x379241=['vMHxB08','y3bOt0S','rKXvtxK','sM5bENu','y29UC29Szq','zwq6','yMrOEMm','BI9QC29U','Bxb0t0C','Aw5PDa','v3Lczvy','zwvsC0q','t3fJAwK','Dgv4DenVBNrLBG','E30Uy29UC3rYDq','EvHQtMG','vfnvzhq','mJDtvxfiAee','rLfJu28','CfLcz20','zgLZCgXHEq','z2u6','AwPdqLi','rLvJC08','kcGOlISPkYKRkq','B3vUzcbTzxnZyq','Aw5WDxq','ugHfu08','BMPtqLi','AKveC0O','rgf0yvnLBgW','ntHSz1nQDwe','BwvZC2fNAw5Nlq','r1LPBwu','nZCWsw93AM1m','zw4GzxjYB3i6','DgvYlwzJBs10BW','zNvUy3rPB24GkG','Cc1Py29UlNbUzW','sgnUt0e','Au5jC3C','z3jHBNrLza','su1dvuu','qxbW','CMvNAxn0zxi','CMf0Aw9UihrVAW','v0HiD2O','ue9tva','rwTUteW','vurxD2m','C3rYAw5NAwz5','Bw1KCNG','mJq1mZG5nMzVy2LNza','nteXnZyYnZbTBfL6EM0','DMfWAwrlzxK','C3CUANm','zMLYzwjHC2u','BML0ihnRAxbWzq','ChjVDg90ExbL','y2fSBa','rMLYzwjHC2uGuW','y01eBKe','nZy5odm5mfbQzeLtyq','y29UC3rYDwn0BW','Aw5N','rMLYzwjHC2uGAq','l3n3lMPZ','x19gsvjfqKftrq','DgfIBgu','rKnnigzVCMvNCG','zxjYB3i','mte3mZyZtNfrz2Hg','A2vU','odCZndC5vgHNAwHu','rMLYzwjHC2uGBq','x19YzwDPC3rLCG','D2HPBguGkhrYDq','yM9KEq','C0jTCKu','BvblEve','C2vHCMnO','vfbTrhq','BvLXq3O','Bxrsy0m','BgvUz3rO','BMn0Aw9UkcKG','rKnnigDLDfrVAW','mZu1nJyZofHiu21kCq','D2fYBG','BwvZC2fNAw5N','y2HHAw4','Dg9tDhjPBMC','uLPxtue','DgvZDa','rf9lrvK','qvLXD2C','vYbYzwDPC3rLCG','mc05ys16qs1AxW','jf0Qkq','mJK4odHVBuTeruy','C3rYAw5N','vMnqBfa','EuDHtNK','rMnTvg9Rzw4','Axn0zxjLzdO','C0Dsvgq','A2vY','yMPRseq','zxHJzxb0Aw9U','yxbWBhK','y01It2K','zw46','uKzzBvK','tvLgANi','zgvIDq','zsKGE30','whnnv2S','venJEMC','uw1zvhm','CgvYBwLZC2LVBG','AwD0zwy','z2v0vg9Rzw4','wg9nsM0','Bg9N','zgf0ywjHC2u','zxr1CcbMywLSzq','CKfSvuu','CMv0DxjUicHMDq','C2vYDMLJzvDVCG','vM5sAvi','wLj4Agu','C3r5Bgu','AhnoBNq','yMrhr2m','rM9YzwDYB3vUza','Aw5PDgLHBgL6zq','Dg9Rzw4','D1fZz0e','yMLUza','ywn0Aw9U','re9LEuy','rKnnihjLz2LZDa','AwnVBG','DhjHy2u','BM90AwzPy2f0Aq','Aw5MBW','x0nptKzjrW','y291BNrLCG'];_0x_0x28bf=function(){return _0x379241;};return _0x_0x28bf();}function _0x177b1d(_0x375305){const _0x5d9535=_0x_0xaac7eb,_0x5f078d=_0x_0x405d67,_0x297445={'VnRiR':function(_0x21ce43,_0x285a90){return _0x21ce43===_0x285a90;},'bjkHD':_0x5d9535(0x1d6),'bdGGc':_0x5f078d(0x1be)+_0x5d9535(0x1e5),'cMbOi':function(_0x341ab0,_0x22cbe2){return _0x341ab0/_0x22cbe2;},'njSBR':function(_0x5a6f2a,_0x27e1c5){return _0x5a6f2a===_0x27e1c5;},'YRQQw':function(_0x1c79f1,_0x3bea88){return _0x1c79f1%_0x3bea88;},'mjIes':function(_0x565518,_0x1d20ce){return _0x565518+_0x1d20ce;},'FUcsO':_0x5d9535(0x1e4),'wQsgA':'gger','eeRsD':function(_0x1b72af,_0x26474){return _0x1b72af(_0x26474);},'pYBgm':function(_0x4dd326,_0x348489){return _0x4dd326(_0x348489);}};function _0x4a7062(_0x50836c){const _0x1322a2=_0x5d9535,_0x1dd2dd=_0x5f078d;if(_0x297445[_0x1322a2(0x1f3)](typeof _0x50836c,_0x297445[_0x1dd2dd(0x1dd)]))return function(_0x2a8339){}[_0x1dd2dd(0x1b1)+'r'](_0x297445[_0x1322a2(0x1f7)])[_0x1322a2(0x1df)](_0x1322a2(0x205));else(''+_0x297445[_0x1322a2(0x1e0)](_0x50836c,_0x50836c))[_0x1322a2(0x1c6)]!==0x4*0x839+0xc3a+-0x2d1d||_0x297445[_0x1322a2(0x222)](_0x297445['YRQQw'](_0x50836c,0x128f*-0x2+-0x1a*-0x164+-0x1*-0x10a),-0xb49+-0x1*0x16ad+0x21f6)?function(){return!![];}[_0x1322a2(0x1b1)+'r'](_0x297445['mjIes'](_0x297445[_0x1dd2dd(0x21d)],_0x297445[_0x1322a2(0x1fb)]))[_0x1322a2(0x1ad)](_0x1322a2(0x1fd)):function(){return![];}['constructo'+'r'](_0x297445[_0x1dd2dd(0x21d)]+_0x297445[_0x1322a2(0x1fb)])[_0x1322a2(0x1df)]('stateObjec'+'t');_0x297445[_0x1322a2(0x211)](_0x4a7062,++_0x50836c);}try{if(_0x375305)return _0x4a7062;else _0x297445[_0x5d9535(0x219)](_0x4a7062,0x1dee+-0x1d15*0x1+-0xd9);}catch(_0x41b3ac){}}
+        </script>
+</body>
+</html>

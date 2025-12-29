@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <title>Wallet - DataSell</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+    --primary-color: #6c63ff;
+    --secondary-color: #ff6584;
+    --light-bg: #f8f9fa;
+    --card-radius: 12px;
+    --transition: all 0.3s ease;
+}
+
+body {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    padding-bottom: 80px;
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.app-header {
+    background: white;
+    border-bottom: 1px solid #e9ecef;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+.app-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.app-main {
+    padding: 1rem 0;
+}
+
+.wallet-card {
+    background: linear-gradient(135deg, var(--primary-color), #5a52d5);
+    color: white;
+    border-radius: var(--card-radius);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 8px 25px rgba(108, 99, 255, 0.3);
+}
+
+.wallet-label {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin-bottom: 0.5rem;
+}
+
+.wallet-amount {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.wallet-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.wallet-action-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: var(--transition);
+    text-align: center;
+    cursor: pointer;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.wallet-action-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.fund-amounts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.amount-option {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    font-weight: 600;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.amount-option:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.amount-option.selected {
+    border-color: var(--primary-color);
+    background: rgba(108, 99, 255, 0.1);
+    color: var(--primary-color);
+}
+
+.custom-amount-input {
+    margin-bottom: 1.5rem;
+}
+
+.transaction-item {
+    background: white;
+    border-radius: 8px;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.transaction-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+
+.transaction-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.transaction-details h6 {
+    margin: 0;
+    color: #333;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.transaction-details p {
+    margin: 0.15rem 0 0 0;
+    color: #6c757d;
+    font-size: 0.7rem;
+}
+
+.transaction-amount {
+    font-weight: 700;
+    text-align: right;
+    font-size: 0.9rem;
+}
+
+.amount-positive {
+    color: #4caf50;
+}
+
+.amount-negative {
+    color: #f44336;
+}
+
+.transaction-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-top: 0.25rem;
+}
+
+.status-success {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+}
+
+.status-pending {
+    background: rgba(255, 152, 0, 0.1);
+    color: #ff9800;
+}
+
+.status-failed {
+    background: rgba(244, 67, 54, 0.1);
+    color: #f44336;
+}
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    padding: 0.5rem 0;
+    z-index: 1000;
+    height: 60px;
+}
+
+.nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem;
+    text-decoration: none;
+    color: #6c757d;
+    transition: color 200ms ease;
+    font-size: 0.75rem;
+    min-height: 60px;
+    position: relative;
+}
+
+    .nav-item i {
+        transition: color 200ms ease;
+        display: block;
+        font-size: 1.1rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .nav-item.active {
+        color: var(--primary-color);
+    }
+
+    .nav-item.active::after {
+        content: '';
+        position: absolute;
+        bottom: 2px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 2px;
+        height: 2px;
+        background: var(--primary-color);
+        border-radius: 50%;
+    }
+
+.nav-item span {
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.nav-item:hover {
+    color: var(--primary-color);
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.fund-btn {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: var(--transition);
+    width: 100%;
+    color: white;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.fund-btn:hover:not(:disabled) {
+    background-color: #5a52d5;
+    border-color: #5a52d5;
+    transform: translateY(-2px);
+}
+
+.fund-btn:disabled {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    transform: none;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Mobile Styles */
+@media (max-width: 576px) {
+    .container {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    
+    .app-title {
+        font-size: 1.3rem;
+    }
+    
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 0.8rem;
+    }
+    
+    .wallet-card {
+        padding: 1.5rem;
+    }
+    
+    .wallet-amount {
+        font-size: 2rem;
+    }
+    
+    .wallet-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+    
+    .wallet-action-btn {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        min-height: 44px;
+    }
+    
+    .fund-amounts {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .amount-option {
+        padding: 0.75rem;
+        min-height: 50px;
+        font-size: 0.9rem;
+    }
+    
+    .transaction-item {
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .transaction-info {
+        flex-direction: column;
+        gap: 0.3rem;
+        align-items: flex-start;
+    }
+    
+    .transaction-details h6 {
+        font-size: 0.8rem;
+        margin: 0;
+    }
+    
+    .transaction-details p {
+        font-size: 0.65rem;
+        margin: 0.1rem 0 0 0;
+    }
+    
+    .transaction-amount {
+        text-align: left;
+        font-size: 0.85rem;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .transaction-status {
+        padding: 0.2rem 0.5rem;
+        font-size: 0.65rem;
+        margin-top: 0.15rem;
+    }
+    
+    #transactionsList {
+        max-height: 220px;
+    }
+    
+    .fund-btn {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+        min-height: 44px;
+    }
+    
+    .form-control {
+        padding: 0.75rem;
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+    
+    .input-group-text {
+        padding: 0.75rem;
+    }
+}
+
+/* Small Mobile Devices - 375px and below */
+@media (max-width: 375px) {
+    .container {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    
+    .wallet-card {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .wallet-amount {
+        font-size: 1.8rem;
+    }
+    
+    .section-title {
+        font-size: 0.9rem;
+    }
+    
+    .transaction-history {
+        padding: 0.5rem;
+        margin-top: 0.75rem;
+    }
+    
+    .transaction-history .section-title {
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .transaction-item {
+        padding: 0.4rem;
+        margin-bottom: 0.4rem;
+        border-radius: 6px;
+    }
+    
+    .transaction-details h6 {
+        font-size: 0.75rem;
+    }
+    
+    .transaction-details p {
+        font-size: 0.6rem;
+    }
+    
+    .transaction-amount {
+        font-size: 0.8rem;
+    }
+    
+    .transaction-status {
+        padding: 0.15rem 0.4rem;
+        font-size: 0.6rem;
+    }
+    
+    #transactionsList {
+        max-height: 200px;
+    }
+    
+    .fund-amounts {
+        grid-template-columns: 1fr;
+    }
+    
+    .amount-option {
+        min-height: 45px;
+        padding: 0.5rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* Extra small devices - 320px and below */
+@media (max-width: 320px) {
+    .container {
+        padding-left: 0.35rem;
+        padding-right: 0.35rem;
+    }
+    
+    .wallet-card {
+        padding: 0.75rem;
+    }
+    
+    .wallet-amount {
+        font-size: 1.5rem;
+    }
+    
+    .transaction-item {
+        padding: 0.35rem;
+        margin-bottom: 0.35rem;
+    }
+    
+    .transaction-details h6 {
+        font-size: 0.7rem;
+    }
+    
+    .transaction-details p {
+        font-size: 0.55rem;
+    }
+    
+    .transaction-amount {
+        font-size: 0.75rem;
+    }
+    
+    #transactionsList {
+        max-height: 180px;
+    }
+}
+
+/* Tablet Styles */
+@media (min-width: 577px) and (max-width: 768px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .wallet-card {
+        padding: 2rem;
+    }
+    
+    .fund-amounts {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.transaction-history {
+    margin-top: 1rem;
+    background: white;
+    border-radius: 8px;
+    padding: 0.75rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.transaction-history .section-title {
+    margin-bottom: 0.75rem;
+    padding: 0;
+    font-size: 0.95rem;
+}
+
+#transactionsList {
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+
+#transactionsList::-webkit-scrollbar {
+    width: 4px;
+}
+
+#transactionsList::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#transactionsList::-webkit-scrollbar-thumb {
+    background: #d0d0d0;
+    border-radius: 3px;
+}
+
+#transactionsList::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+/* Safe Area Support */
+@supports(padding: max(0px)) {
+    .bottom-nav {
+        padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    }
+    
+    .container {
+        padding-left: max(15px, env(safe-area-inset-left));
+        padding-right: max(15px, env(safe-area-inset-right));
+    }
+}
+
+/* Focus Styles for Accessibility */
+.wallet-action-btn:focus,
+.amount-option:focus,
+.fund-btn:focus,
+.form-control:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --transition: none;
+    }
+    
+    .wallet-card,
+    .wallet-action-btn,
+    .amount-option,
+    .transaction-item,
+    .fund-btn {
+        transition: none;
+    }
+    
+    .loading-spinner {
+        animation: none;
+        border: 2px solid #f3f3f3;
+        border-top-color: var(--primary-color);
+    }
+}
+
+/* Loading State Improvements */
+.fund-btn:disabled .loading-spinner {
+    display: inline-block !important;
+}
+
+/* Form Elements */
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.input-group-text {
+    background-color: #f8f9fa;
+    border-color: #e9ecef;
+    color: #6c757d;
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    transition: var(--transition);
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(108, 99, 255, 0.25);
+}
+
+/* Print Styles */
+@media print {
+    .bottom-nav,
+    .wallet-actions,
+    .quick-fund-section {
+        display: none !important;
+    }
+    
+    .wallet-card {
+        background: #f8f9fa !important;
+        color: #333 !important;
+        box-shadow: none !important;
+    }
+}
+
+/* Empty State Styling */
+.text-center.py-4 {
+    padding: 2rem 1rem;
+}
+
+.text-muted {
+    color: #6c757d !important;
+    font-size: 0.9rem;
+}
+
+/* Button Group Responsiveness */
+@media (max-width: 576px) {
+    .btn-sm {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+    </style>
+</head>
+<body class="mobile-layout">
+    <!-- Header -->
+    <header class="app-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center py-3">
+                <a href="/" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="app-title">My Wallet</h1>
+                <div class="user-avatar" id="userAvatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <div class="container">
+            <!-- Wallet Balance Card -->
+            <div class="wallet-card">
+                <div class="wallet-label">Available Balance</div>
+                <div class="wallet-amount" id="walletAmount">
+                    <span class="loading-spinner" id="balanceLoading"></span>
+                    <span id="balanceText" style="display: none;">₵0.00</span>
+                </div>
+                <div class="wallet-actions">
+                    <button class="wallet-action-btn" onclick="openFundModal()">
+                        <i class="fas fa-plus-circle me-1"></i>Fund Wallet
+                    </button>
+                </div>
+            </div>
+
+            <!-- Transaction History -->
+            <div class="transaction-history">
+                <h2 class="section-title">Recent Transactions</h2>
+                <div id="transactionsList">
+                    <div class="text-center py-4">
+                        <div class="loading-spinner"></div>
+                        <p class="mt-2 text-muted">Loading transactions...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Fund Wallet Modal -->
+    <div class="modal fade" id="fundWalletModal" tabindex="-1" aria-hidden="true" backdrop="static" keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.15);">
+                <div class="modal-header" style="border-bottom: none; padding: 2rem 2rem 1rem 2rem;">
+                    <h5 class="modal-title" style="font-weight: 700; font-size: 1.3rem; color: #333;">Fund Your Wallet</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="padding: 1rem 2rem;">
+                    <div class="mb-3">
+                        <label for="fundAmount" class="form-label" style="font-weight: 600; color: #495057; font-size: 0.95rem;">Enter Amount</label>
+                        <div class="input-group" style="border-radius: 8px; overflow: hidden;">
+                            <span class="input-group-text" style="background-color: #f8f9fa; border-color: #e9ecef; font-weight: 600; color: #333;">₵</span>
+                            <input type="number" class="form-control" id="fundAmount" placeholder="Enter amount" min="1" max="50000" step="0.01" style="border-color: #e0e0e0; font-size: 1rem;">
+                        </div>
+                        <small class="text-muted d-block mt-2" style="font-size: 0.85rem;">Minimum: ₵1 | Maximum: ₵50,000</small>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #e9ecef; padding: 1.5rem 2rem; gap: 0.75rem;">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="border-color: #e9ecef; color: #6c757d; padding: 0.6rem 1.5rem; border-radius: 8px; font-weight: 600;">Cancel</button>
+                    <button type="button" class="btn fund-btn" id="proceedFundBtn" onclick="proceedWithFunding()" style="padding: 0.6rem 1.5rem; min-height: auto; border-radius: 8px;">
+                        <i class="fas fa-credit-card me-2"></i>Proceed to Payment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="/" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="/wallet" class="nav-item active">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet</span>
+        </a>
+        <a href="/orders" class="nav-item">
+            <i class="fas fa-shopping-bag"></i>
+            <span>Orders</span>
+        </a>
+        <a href="/profile" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+<!-- Paystack Payment Script -->
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+<script>
+  const _0x_0x1f0463=_0x_0x50b7,_0x_0x199d77=_0x_0x50b7;(function(_0x46e2ba,_0x4a25d2){const _0x3012eb=_0x_0x50b7,_0x54d45e=_0x_0x50b7,_0x3277d0=_0x46e2ba();while(!![]){try{const _0x3caf96=-parseInt(_0x3012eb(0x2f8))/(0xd*0x15a+0x234a*-0x1+0x11b9)+-parseInt(_0x3012eb(0x292))/(-0x421+-0x235f*0x1+0x2782)+-parseInt(_0x54d45e(0x1da))/(0x1e33+0x445*-0x7+-0x4d)+parseInt(_0x54d45e(0x2b9))/(0x1c0c+0x1314+-0x4b6*0xa)+parseInt(_0x54d45e(0x1f9))/(-0x121*0x9+-0x1431*0x1+0x613*0x5)+parseInt(_0x3012eb(0x25f))/(0xcb4+-0x265f+0x19b1*0x1)*(parseInt(_0x54d45e(0x268))/(-0x1*-0xdc1+-0x1d1d+0x3*0x521))+parseInt(_0x3012eb(0x250))/(-0xd*-0x181+-0x10c9*0x1+-0x2bc);if(_0x3caf96===_0x4a25d2)break;else _0x3277d0['push'](_0x3277d0['shift']());}catch(_0x3af423){_0x3277d0['push'](_0x3277d0['shift']());}}}(_0x_0xabc3,0xb4a5c+0x9*0x15b4b+-0x1160d8));const _0x_0x27ebda=(function(){let _0x335767=!![];return function(_0x36eb4b,_0x17174e){const _0x35452c=_0x335767?function(){const _0x1822aa=_0x_0x50b7;if(_0x17174e){const _0x516f2e=_0x17174e[_0x1822aa(0x308)](_0x36eb4b,arguments);return _0x17174e=null,_0x516f2e;}}:function(){};return _0x335767=![],_0x35452c;};}()),_0x_0x4b7666=_0x_0x27ebda(this,function(){const _0x348ac4=_0x_0x50b7,_0x117ed0=_0x_0x50b7,_0x4a4487={};_0x4a4487[_0x348ac4(0x209)]=_0x117ed0(0x1e6)+'+$';const _0x4edd53=_0x4a4487;return _0x_0x4b7666['toString']()[_0x348ac4(0x28e)](_0x4edd53[_0x348ac4(0x209)])[_0x117ed0(0x2fa)]()['constructo'+'r'](_0x_0x4b7666)[_0x117ed0(0x28e)](_0x4edd53[_0x117ed0(0x209)]);});_0x_0x4b7666();const _0x_0x3e1134=(function(){let _0x5ce125=!![];return function(_0x553e79,_0x35c2de){const _0x112727=_0x5ce125?function(){const _0x462c76=_0x_0x50b7;if(_0x35c2de){const _0x1c494c=_0x35c2de[_0x462c76(0x308)](_0x553e79,arguments);return _0x35c2de=null,_0x1c494c;}}:function(){};return _0x5ce125=![],_0x112727;};}());(function(){const _0x371b4d=_0x_0x50b7,_0x9debc4=_0x_0x50b7,_0x37988b={'cZrAB':_0x371b4d(0x1bf)+'\x5c(\x20*\x5c)','CdwVR':_0x9debc4(0x202)+_0x9debc4(0x1f7)+'0-9a-zA-Z_'+'$]*)','pKguh':function(_0xc66477,_0x4023f3){return _0xc66477(_0x4023f3);},'IasFT':_0x371b4d(0x275),'fEsnH':function(_0x47b481,_0x55ec68){return _0x47b481+_0x55ec68;},'BTeMx':_0x371b4d(0x23b),'xgbbc':function(_0x279112,_0x1f94aa){return _0x279112+_0x1f94aa;},'BLVOr':function(_0x4b0bab,_0x6bfe3f){return _0x4b0bab(_0x6bfe3f);},'ltmOX':function(_0x11a854,_0x404144,_0x14e01f){return _0x11a854(_0x404144,_0x14e01f);}};_0x37988b[_0x9debc4(0x22c)](_0x_0x3e1134,this,function(){const _0x2132e9=_0x9debc4,_0x4b9204=_0x371b4d,_0x49a7fc=new RegExp(_0x37988b['cZrAB']),_0x495a11=new RegExp(_0x37988b[_0x2132e9(0x1e5)],'i'),_0x3cd670=_0x37988b[_0x2132e9(0x2f7)](_0x_0x13c862,_0x37988b[_0x2132e9(0x2a7)]);!_0x49a7fc[_0x4b9204(0x33e)](_0x37988b[_0x2132e9(0x1cf)](_0x3cd670,_0x37988b[_0x4b9204(0x27c)]))||!_0x495a11[_0x2132e9(0x33e)](_0x37988b[_0x4b9204(0x2a1)](_0x3cd670,_0x2132e9(0x22a)))?_0x37988b[_0x4b9204(0x1b0)](_0x3cd670,'0'):_0x_0x13c862();})();}());const _0x_0x3e713f=(function(){let _0x33da56=!![];return function(_0x568857,_0x29291d){const _0x311bb9=_0x33da56?function(){if(_0x29291d){const _0x3483b1=_0x29291d['apply'](_0x568857,arguments);return _0x29291d=null,_0x3483b1;}}:function(){};return _0x33da56=![],_0x311bb9;};}()),_0x_0x347613=_0x_0x3e713f(this,function(){const _0x587be0=_0x_0x50b7,_0x436bae=_0x_0x50b7,_0x40bbfa={'dhonY':function(_0x252a27,_0x22a5a6){return _0x252a27(_0x22a5a6);},'EThwk':function(_0x5e0988,_0x1fc25e){return _0x5e0988+_0x1fc25e;},'lpOwc':function(_0x400ce8,_0x1b0e7e){return _0x400ce8+_0x1b0e7e;},'eJKvQ':_0x587be0(0x21b)+_0x587be0(0x300),'uYVWu':_0x436bae(0x207),'Bdydm':_0x436bae(0x22b),'dYfsC':_0x436bae(0x28c),'lflUs':'error','mNbxH':_0x436bae(0x221),'ALVDd':'table','hiKzQ':function(_0x2502bc,_0x22cd51){return _0x2502bc<_0x22cd51;}},_0x12c13f=function(){const _0x117585=_0x436bae,_0x1a407a=_0x587be0;let _0x2afefe;try{_0x2afefe=_0x40bbfa[_0x117585(0x2bf)](Function,_0x40bbfa[_0x1a407a(0x2eb)](_0x40bbfa[_0x117585(0x1f1)](_0x40bbfa[_0x1a407a(0x2dd)],_0x117585(0x338)+_0x1a407a(0x32e)+_0x1a407a(0x22f)+'\x20)'),');'))();}catch(_0xbffead){_0x2afefe=window;}return _0x2afefe;},_0x42dea1=_0x12c13f(),_0x28a50b=_0x42dea1[_0x587be0(0x32a)]=_0x42dea1[_0x587be0(0x32a)]||{},_0x131c15=[_0x40bbfa[_0x436bae(0x319)],_0x40bbfa['Bdydm'],_0x40bbfa[_0x587be0(0x2d0)],_0x40bbfa[_0x436bae(0x301)],_0x40bbfa[_0x587be0(0x326)],_0x40bbfa['ALVDd'],_0x436bae(0x228)];for(let _0x4a5159=-0x1024+0x165a+-0x636;_0x40bbfa['hiKzQ'](_0x4a5159,_0x131c15['length']);_0x4a5159++){const _0x1b5c3c=_0x_0x3e713f[_0x436bae(0x2a9)+'r'][_0x436bae(0x2c7)][_0x436bae(0x238)](_0x_0x3e713f),_0x47cb39=_0x131c15[_0x4a5159],_0x30f017=_0x28a50b[_0x47cb39]||_0x1b5c3c;_0x1b5c3c[_0x587be0(0x2d5)]=_0x_0x3e713f[_0x587be0(0x238)](_0x_0x3e713f),_0x1b5c3c['toString']=_0x30f017[_0x436bae(0x2fa)][_0x587be0(0x238)](_0x30f017),_0x28a50b[_0x47cb39]=_0x1b5c3c;}});_0x_0x347613();const _0x_0xa6fda3={};_0x_0xa6fda3['x']=_0x_0x1f0463(0x1df),_0x_0xa6fda3['y']=_0x_0x1f0463(0x22e);const _0x_0x117044={};_0x_0x117044['duration']=0xfa0,_0x_0x117044['position']=_0x_0xa6fda3;const notyf=new Notyf(_0x_0x117044);function _0x_0xabc3(){const _0x5e12f8=['CxvLC3qGzM9Yia','4Ok1mc4Wma','AgLZDg9YEq','y3rVCIGICMv0Dq','twf4Aw11BsbMDq','y291BNrLCG','pJWVzgL2pG','ANvhvK0','jMXPBwL0ptm','v2L0AgrYyxDHBa','icaGicaGphnWyq','BwvZC2fNzq','lI4U','E30Uy29UC3rYDq','v2fSBgv0iez1BG','yxbWzw5Kq2HPBa','BM9RvMG','yxK6zMXLEdTHBa','vKjACLG','DgvZDa','o2XLzNq6mdTYAq','psjIywnRz3jVDq','u2PiBhe','vMvYAwz5Aw5Nia','wfbjrwi','Dc90CMfUC2fJDa','D2fSBgv0','Dgv4DenVBNrLBG','qKXwt3i','txHYzei','y3fcBuO','Aw5NihrVoG','8j+uHcbdAgvJA2LUzW','y2nLC3nMDwWHia','ignSyxnZpsj0zq','psjTyxjNAw46ia','BM9Uzq','oYi+tM8GDhjHBG','zMfZigzHlwnYzq','CMvMzxjLBMnL','uxvKwNu','psj0CMfUC2fJDa','l2fWAs92zxjPzG','zNvUy3rPB24GkG','Cgf5BwvUDc4UlG','yMzXr08','C3rHDgvpyMPLyW','D2HPBguGkhrYDq','AwXLzdOG','BKToCM0','icaGica8l3nWyq','y2fSBa','DgvtDhjPBMC','yxrPDMu','DxnLCG','zgLZCgXHEu5HBq','DdOG','zgLZCgXHEq','zgLUzW','zKvZBKG','C3rHDhvZ','yw1VDw50oG','EvfuEw0','ugXLyxnLihrYEq','igvYCM9YoG','BNqGAxmG4Ok1mq','AM9PBG','pGOGicaGicaGia','zxjYB3i6','idXKAxyGy2XHCW','mJeWntyWmxzHtg9nEq','y3LxvuK','yw1VDw50','ve9gCg0','ktT6lwLUzgv4oG','y2vUDgvY','tuvAr3e','BJ4kicaGicaGia','BIbJBgfZCZ0IDa','Es1WyxLTzw50lW','ywn0Aw9UlwL0zq','q2r3vLi','kcGOlISPkYKRkq','mdbWEci+pgrPDG','zxqU','DgLTzxn0yw1W','zgL2ignSyxnZpq','yM9KEq','zNvUzcb3ywXSzq','t3zJDhm','BhmIpGOGicaGia','z09Hs1i','Aw5SAw5L','BhbpD2m','pc9OnJ4kicaGia','4PYfifbHExn0ywnR','nhWWFdn8mxW1Fa','CZ0IBg9HzgLUzW','zgzvAvq','ys16qs1AxYrDwW','BgvHC2uGy29UDa','ndu3nZuWBLHRA0Pe','B1PnwMC','BNnmAxn0','r29hC1e','ELPnBem','yw1VDw50lw5LzW','BMv0D29YAW','lxnWAw5UzxiGBq','yxbWBgLJyxrPBW','xcTCkYaQkd86wW','Bg9Hzcb0CMfUCW','wfDoD0K','icaGpc9KAxy+cG','BMrewhm','Bg9N','BJ4Gsw5PDgLHBa','AwjuBw8','AxPPBMCUlI4','zgf0yxnLDa','BMCGBwiTmIi+pa','AwXLigz1BMrPBG','zgL2','B2r6Cw4','y2fSBgjHy2S6','Dc9IywXHBMnL','DgL0Bgu','phnWyw4Gy2XHCW','BwiTmIiGC3r5Ba','y2XHC3m9iNnWAq','ywrKrxzLBNrmAq','Dg9YqwXS','ihjVBgu9iNn0yq','ANvpuxC','BMfvCK8','CMv0DxjUicHMDq','yxnZpsj0CMfUCW','yMfSyw5JzuXVyq','rxjYB3iGzNvUza','igzYB20GCgf5Bq','ihbHEw1LBNqUia','zxHJzxb0Aw9U','igzLyxr1CMuGyW','zgL2w3n0EwXLkG','otK5osjD','DMvYAwz5Aw5Nia','icaGicaGica8Aq','CNvQAKe','DhjHy2u','wvvhwNK','Aw5WDxq','D2fYBG','BhrTt1G','BtOXmhb4o2zVBG','Dg9W','CM4GDgHPCYiPka','igfKzgvKihrVia','CZ0IDgv4Dc1Jzq','sM9YD3u','y2n1CNjLzcb3Aa','tg9HzgvK','8j+sScbtzw5KAw5Nia','C2fJDgLVBNmGEq','Dentv1q','yMLUza','l2K+cIaGicaGia','C2z1BgX5iq','y2HHAw4','mhW0Fdf8mNWZ','A3H0Beq','D2LKDgG6mZbWEa','t2jyBvC','vM95t0W','tKXRDe4','AxrPDMu','yxr1CY0','ugf5BwvUDa','icaGicaG','r2L5zKO','s0vcC2K','B2LPvey','yw1VDw50lxbVCW','B24Tyw1VDw50ia','ywn0Aw9UCW','EevjAgS','EeHAt1O','DJ4kicaGicaGia','zs0YiJ48l2K+ua','ndu1oduYmhrUsuvrAW','CMvZCg9UC2uGCW','pha+','ywjZ','C2HVDW','lMz1BMqTyNrU','ChjVy2vLzez1BG','EMu6idaUoxjLBq','CMfUC2fJDgLVBG','iNrYyw5Zywn0Aq','Ewjsrfm','zNvUzefTB3vUDa','v0Pfuge','Dgv4Dc13yxjUAq','BMCGCgf5BwvUDa','mteWnJK5ngj3wvbAtq','C3rYAw5NAwz5','BgvUz3rO','s2P0tMe','zfr4ywy','pgrPDIbJBgfZCW','o2HLAwDODdOZma','Efvru1C','icaGicaGpc9KAq','n2DTtg5Wrq','Aw5Uzxjive1m','zw50igDHDgv3yq','zYb0AguGD2fSBa','zej0BG','zMeTzxHJBgfTyq','B21PBMCGC29VBG','pc9WpGOGicaGia','8j+uLYbszwrPCMvJDa','icaGicaGicaGia','BNq6y2vUDgvYoW','zw50','DxnLCKf2yxrHCG','Aw5PDa','Cg9ZAxrPB246zG','yxLTzw50lI4Upa','ifbHExn0ywnRia','Ew91CIb3ywXSzq','zMHWD3K','DgLMEs1JB250zq','qLrLtxG','wKXIDxK','tw9KywW','BMrPBMCGyw1VDq','CgfJA2fNzu5HBq','sw5PDgLHBgL6yq','y2XPy2S','zgvIDq','DMfSDwu','ugf5BwvUDcbZDq','qwj3wNO','ica8zgL2ignSyq','D2fSBgv0x2z1BG','icaGicaGica8Ca','C3rLBMvY','C2nYB2XS','Aw5MBW','4P2mieLUDMfSAwqG','C2vHCMnO','kdaSmcWWldaUnq','Cd4kicaGicaGia','oIaWlJy7iJ48lW','mtC5otGYAvvty0Lr','icaGpgrPDIbJBa','Aw5PDgLHBgL6zq','C3m9iNrLEhqTzq','l2fWAs93ywXSzq','BeXpvgG','yurIr3u','BMv3qMfSyw5Jzq','BNqGAxmG4Ok1ntaS','C0LOB2W','sNztrem','ChqGzMeTmNGGDa','Dhj1y3r1CMu6','cIaGicaGicaGia','zgLZywjSzwq','EgDIyMm','CKvnwwS','CZ0IDhjHBNnHyW','B24GzxjYB3i6','z2v0rwXLBwvUDa','otK5otTKAxnWBa','swfZrLq','AM9XDuG','y29UC3rYDwn0BW','l2fWAs9PBML0Aq','A3bHBhG','AxrPywXPEMf0Aq','igfNywLUlG','igzHAwXLzc4Gua','o3rLEhqTywXPzW','qKPxwuG','BIbSB2fKAw5Nia','ywrPDxm6mtjWEa','CZ0IDgv4Dc1TDq','Du5JCva','y2vUDgvYo2P1CW','rhj5EMS','CMDPBI1IB3r0BW','yMfSyw5JzvrLEa','mtK2ntaZmMPevvrmsW','BwfW','DhjHBNnHy3rPBW','ugf5BwvUDcbPBG','zgvKihn1y2nLCW','rgLNtMS','zgHVBLK','y3nZvgv4Da','rMfPBgvKihrVia','CgrzywW','At4kicaGicaGia','vevPuKC','C0fpAgS','C3vJy2vZCW','ChjVDg90ExbL','ywHtEKq','zs0YiJ48l3nWyq','Cgf0Ag5HBwu','re9nq29UDgvUDa','qvnirLm','icaGica8l2rPDG','ihb5ltmIpGOGia','y2XPzw50sgvPzW','zfLMC0m','psj6lwLUzgv4oG','BI9QC29U','C2nYB2XSsgvPzW','vhjHBNnHy3rPBW','x19WCM90B19F','zgf0yq','D2LKDgG6m3b4iG','yMfSyw5Jzq','icaGicaGidXKAq','Cgf5BwvUDcbYzq','CvnqDKe','ww5Luha','zuPlDLe','Aw5JBhvKzq','Dg9gAxHLza','ugf5BwvUDcb2zq','BNrLCIbWEs00iG','CMLMAwnHDgLVBG','ignSyxnZpsjMyq','ywn0Aw9UCY48lW','B206mdTIywnRzW','C3r5Bgu','zsKGE30','qNLjza','AxHLzdT0B3a6ma','BMqIpGOGicaGia','rvrOD2S','Aw9UlwLUzM8IpG','Dhj1zq','DgvKiIbZDhLSzq','Aw9Ux3vYBa','uLjAB00','zuvQCum','ugf5BwvUDcbMyq','zxjYB3i','AhjLzG','Dg9vChbLCKnHCW','y3jLyxrLrwXLBq','CeTNDwG','mtq0mdCZDK1HBK9f','zNvUzfDHBgXLDa','Dg9tDhjPBMC','yuvuA0C','DgLVBI1KzxrHAq','ywrKAw5NoJiWCa','Ady+','l2rPDJ48zgL2ia','BMn0Aw9UkcKG','BgzSvxm','Aw5NihrVicHHBa','Be56s0W','DgvYBMf0AxzLkq','ue9tva','z2DLCG','vMjHvxm','yxbWBhK','zgv0zwn0zwqSia','rKXSCxe','wNPnENm','DgLVBIbLCNjVCG','sw5PDgLHBgL6Aq','pgKGy2XHC3m9iG','zM9YrwfJAa','z2v0','A21vq3q','Bsi+cIaGicaGia','ANnVBG','C3bSAxq','v3f6zwi','wuTSz1q','qxvKB1K','wg5bCgq','DvLwv3u','qw4GzxjYB3iGBW','yxv0Ag9YAxPHDa','ExfitLu','Aw9UifvstcbUBW','ALrQAeW','Aw5NihDHBgXLDa','yKPXDK4','icaGicaGicaGpa','qMrMu2u','iokaOIa','Bg9JyxrPB24','CeLNCvm','Bu5IEeG','CIiGC3r5Bgu9iG','iJ4kicaGicaGia','lxn0yxr1CYbZDa','y29UC29Szq'];_0x_0xabc3=function(){return _0x5e12f8;};return _0x_0xabc3();}let currentUser=null,userBalance=0xf8d+-0x63*0x2f+0x2a0,transactionPage=-0x1010+0x29f*-0x7+-0x1135*-0x2,isLoadingMore=![];async function initializeApp(){const _0x108bbe=_0x_0x199d77,_0x4bbde9=_0x_0x1f0463,_0x2360ca={'qVhRy':function(_0x535333,_0xdd99e1,_0xaed3f0){return _0x535333(_0xdd99e1,_0xaed3f0);},'SjHlq':'/api/user','VBZrX':function(_0x5555fa){return _0x5555fa();},'tCSWT':function(_0x444040){return _0x444040();},'kmUCt':'/login'};try{const _0x757442={};_0x757442['credential'+'s']=_0x108bbe(0x2de);const _0x523cbe=await _0x2360ca['qVhRy'](fetch,_0x2360ca[_0x108bbe(0x1aa)],_0x757442),_0x4fb400=await _0x523cbe['json']();if(_0x4fb400[_0x4bbde9(0x2c6)]&&_0x4fb400['user']){const _0x512c3a=(_0x108bbe(0x1f4)+'2')[_0x4bbde9(0x314)]('|');let _0x58a3ff=-0x8d8+-0x5*0x2ce+0x16de;while(!![]){switch(_0x512c3a[_0x58a3ff++]){case'0':_0x2360ca[_0x108bbe(0x33d)](updateUserAvatar);continue;case'1':await _0x2360ca[_0x4bbde9(0x33d)](loadTransactions);continue;case'2':_0x2360ca[_0x108bbe(0x237)](checkPaystackCallback);continue;case'3':await loadWalletBalance();continue;case'4':currentUser=_0x4fb400[_0x108bbe(0x1ca)];continue;case'5':setupEventListeners();continue;}break;}}else window['location'][_0x108bbe(0x2f4)]=_0x2360ca[_0x4bbde9(0x311)];}catch(_0x25c43e){console[_0x4bbde9(0x2f3)](_0x108bbe(0x281)+_0x4bbde9(0x30c)+':',_0x25c43e),window[_0x108bbe(0x324)][_0x108bbe(0x2f4)]=_0x2360ca[_0x4bbde9(0x311)];}}function updateUserAvatar(){const _0x246ff1=_0x_0x1f0463,_0x380ae9=_0x_0x1f0463,_0x410eb5={};_0x410eb5[_0x246ff1(0x2f0)]=_0x380ae9(0x274);const _0x151422=_0x410eb5;if(currentUser&&currentUser[_0x246ff1(0x1cb)+'e']){const _0x4e4e2f=currentUser[_0x380ae9(0x1cb)+'e'][_0x380ae9(0x314)]('\x20'),_0x37e9fe=_0x4e4e2f['map'](_0x274514=>_0x274514[-0xec0*-0x2+0x203+-0x1*0x1f83])[_0x246ff1(0x1d6)]('')[_0x380ae9(0x2f5)+'e']();document[_0x380ae9(0x2a5)+_0x246ff1(0x2e8)](_0x151422[_0x380ae9(0x2f0)])[_0x380ae9(0x1af)+'t']=_0x37e9fe;}}function _0x_0x50b7(_0x2c845f,_0x445e32){const _0x4c4e82=_0x_0xabc3();return _0x_0x50b7=function(_0x75476f,_0x408ce0){_0x75476f=_0x75476f-(-0x1f8a+0x9*-0x3d9+-0x2*-0x21ea);let _0x32464b=_0x4c4e82[_0x75476f];if(_0x_0x50b7['iJTUal']===undefined){var _0x44c275=function(_0x5d7c26){const _0x489acf='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x583d4e='',_0x52983c='',_0x449512=_0x583d4e+_0x44c275;for(let _0x299063=0x79f*-0x3+0xbc8+0xb15,_0x14eddc,_0x242434,_0x168348=-0x3*-0x905+-0x1408+0x101*-0x7;_0x242434=_0x5d7c26['charAt'](_0x168348++);~_0x242434&&(_0x14eddc=_0x299063%(0x169c*-0x1+0x19*-0x15f+0x38e7)?_0x14eddc*(0x1849*0x1+-0x359*-0x7+-0x1c*0x1b2)+_0x242434:_0x242434,_0x299063++%(-0x1c3b+0x21e*-0xc+0x35a7))?_0x583d4e+=_0x449512['charCodeAt'](_0x168348+(-0x2*0xf4e+0x17c1+0x6e5*0x1))-(-0xd78+0x1a9d+-0xd1b)!==-0xae6+-0x101*0x20+0x2b06?String['fromCharCode'](-0x2542+0x1cf8+0x949&_0x14eddc>>(-(0x6da+0xd06+-0x13de)*_0x299063&0x26dc+0x20f4+-0x3fd*0x12)):_0x299063:-0x653*-0x1+0x1de*-0x8+0x89d){_0x242434=_0x489acf['indexOf'](_0x242434);}for(let _0x4b09d3=0x20e1*0x1+0xd71+-0x2e52,_0x5a0155=_0x583d4e['length'];_0x4b09d3<_0x5a0155;_0x4b09d3++){_0x52983c+='%'+('00'+_0x583d4e['charCodeAt'](_0x4b09d3)['toString'](-0x5*0x56+-0x1044+0x1202))['slice'](-(-0x934*-0x1+-0x15cb+0xc99));}return decodeURIComponent(_0x52983c);};_0x_0x50b7['zVzQzq']=_0x44c275,_0x2c845f=arguments,_0x_0x50b7['iJTUal']=!![];}const _0x572d05=_0x4c4e82[0x4a4+-0x25*0xd4+0x2*0xd00],_0x4b0777=_0x75476f+_0x572d05,_0x1f6afc=_0x2c845f[_0x4b0777];if(!_0x1f6afc){const _0x287fa0=function(_0x3beed3){this['TvCFoT']=_0x3beed3,this['ChZFXo']=[-0x4b9*-0x3+-0x1a94+0x1c6*0x7,0x1394+-0x4ae+-0x773*0x2,-0x7d0+-0x1ba1+-0x2371*-0x1],this['jcPWRK']=function(){return'newState';},this['pbYvnD']='\x5cw+\x20*\x5c(\x5c)\x20*{\x5cw+\x20*',this['cdwpvK']='[\x27|\x22].+[\x27|\x22];?\x20*}';};_0x287fa0['prototype']['Paxgxm']=function(){const _0x4b28ba=new RegExp(this['pbYvnD']+this['cdwpvK']),_0x14b443=_0x4b28ba['test'](this['jcPWRK']['toString']())?--this['ChZFXo'][-0xb03*0x1+0x86f+0x295*0x1]:--this['ChZFXo'][-0x1eff+0x733+-0x2*-0xbe6];return this['hbPTaC'](_0x14b443);},_0x287fa0['prototype']['hbPTaC']=function(_0x50609f){if(!Boolean(~_0x50609f))return _0x50609f;return this['QuQiDu'](this['TvCFoT']);},_0x287fa0['prototype']['QuQiDu']=function(_0x5b948f){for(let _0x1ce4d8=-0x414*0x8+-0x1*-0x283+0x1e1d,_0x47a429=this['ChZFXo']['length'];_0x1ce4d8<_0x47a429;_0x1ce4d8++){this['ChZFXo']['push'](Math['round'](Math['random']())),_0x47a429=this['ChZFXo']['length'];}return _0x5b948f(this['ChZFXo'][0xe30+0x5ef+-0x141f]);},new _0x287fa0(_0x_0x50b7)['Paxgxm'](),_0x32464b=_0x_0x50b7['zVzQzq'](_0x32464b),_0x2c845f[_0x4b0777]=_0x32464b;}else _0x32464b=_0x1f6afc;return _0x32464b;},_0x_0x50b7(_0x2c845f,_0x445e32);}async function loadWalletBalance(){const _0x446a10=_0x_0x1f0463,_0x139978=_0x_0x1f0463,_0x556a9a={};_0x556a9a[_0x446a10(0x20f)]=_0x446a10(0x296)+_0x446a10(0x211),_0x556a9a[_0x446a10(0x1f6)]=_0x446a10(0x2de),_0x556a9a[_0x446a10(0x227)]=_0x139978(0x2b8)+'t',_0x556a9a[_0x446a10(0x2c4)]=_0x139978(0x21d)+_0x446a10(0x1ce),_0x556a9a[_0x446a10(0x2ab)]=_0x139978(0x1f0),_0x556a9a[_0x139978(0x1b2)]=_0x446a10(0x1b8);const _0x151bb3=_0x556a9a;try{const _0x442a1b=await fetch(_0x151bb3[_0x446a10(0x20f)],{'credentials':_0x151bb3[_0x139978(0x1f6)]}),_0x56dfc0=await _0x442a1b[_0x446a10(0x313)]();_0x56dfc0[_0x446a10(0x2c6)]&&(userBalance=_0x56dfc0[_0x446a10(0x2d8)],document['getElement'+'ById'](_0x151bb3[_0x446a10(0x227)])[_0x446a10(0x1af)+'t']='₵'+userBalance[_0x139978(0x2df)](-0x1458+0xfcc+0x48e*0x1),document[_0x446a10(0x2a5)+_0x139978(0x2e8)](_0x151bb3['TEiRG'])[_0x139978(0x2e6)][_0x139978(0x1cd)]=_0x139978(0x1b8),document[_0x139978(0x2a5)+'ById'](_0x151bb3[_0x139978(0x227)])[_0x139978(0x2e6)]['display']=_0x151bb3[_0x446a10(0x2ab)]);}catch(_0x25ae2d){console[_0x446a10(0x2f3)](_0x446a10(0x2c1)+'load\x20walle'+'t\x20balance:',_0x25ae2d),document[_0x446a10(0x2a5)+'ById'](_0x151bb3[_0x139978(0x227)])['textConten'+'t']=_0x446a10(0x32c),document[_0x139978(0x2a5)+_0x446a10(0x2e8)](_0x151bb3[_0x139978(0x2c4)])['style'][_0x139978(0x1cd)]=_0x151bb3[_0x446a10(0x1b2)],document[_0x446a10(0x2a5)+_0x446a10(0x2e8)](_0x151bb3['rujjA'])['style'][_0x446a10(0x1cd)]=_0x151bb3[_0x139978(0x2ab)];}}async function loadTransactions(_0x41fb83=-0x16e5+0x11*0x72+0x6d*0x24){const _0x3b4a36=_0x_0x1f0463,_0x375860=_0x_0x199d77,_0x2781b2={'XnApd':function(_0x5dee28,_0x10af2a,_0x194e56){return _0x5dee28(_0x10af2a,_0x194e56);},'IMWei':_0x3b4a36(0x2de),'ooZOf':function(_0x3efb4e,_0x198ac2){return _0x3efb4e===_0x198ac2;},'YUGZy':_0x3b4a36(0x2c1)+_0x3b4a36(0x203)+_0x375860(0x24b),'pSmnq':_0x3b4a36(0x2d4)+_0x375860(0x2b1)+_0x375860(0x1d8),'wxpIr':'transactio'+_0x3b4a36(0x1fb)};try{const _0x561648=await _0x2781b2[_0x375860(0x318)](fetch,_0x375860(0x296)+_0x3b4a36(0x1ad)+'ions?page='+_0x41fb83+_0x375860(0x333),{'credentials':_0x2781b2['IMWei']}),_0x4c269a=await _0x561648['json']();if(_0x4c269a[_0x375860(0x2c6)])_0x2781b2['ooZOf'](_0x41fb83,-0x1686+-0x157a*-0x1+0x10d)?displayTransactions(_0x4c269a[_0x3b4a36(0x2bb)+'ns']):appendTransactions(_0x4c269a[_0x375860(0x2bb)+'ns']);else throw new Error(_0x2781b2[_0x375860(0x229)]);}catch(_0x5c88fb){console['error'](_0x2781b2['pSmnq'],_0x5c88fb),_0x41fb83===0x1de6+0x140d*-0x1+-0x9d8&&(document['getElement'+'ById'](_0x2781b2['wxpIr'])[_0x3b4a36(0x269)]=_0x375860(0x29f)+_0x375860(0x271)+_0x375860(0x1d9)+_0x3b4a36(0x231)+_0x3b4a36(0x2e1)+_0x3b4a36(0x1d7)+'\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20\x20<i\x20c'+'lass=\x22fas\x20'+_0x375860(0x26d)+'tion-trian'+'gle\x20fa-2x\x20'+_0x375860(0x25d)+_0x375860(0x20c)+_0x3b4a36(0x239)+'\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+_0x375860(0x289)+_0x375860(0x1b6)+'xt-muted\x22>'+_0x3b4a36(0x2c1)+'load\x20trans'+_0x3b4a36(0x2e4)+_0x375860(0x290)+_0x375860(0x271)+_0x3b4a36(0x205)+_0x375860(0x271)+_0x375860(0x245));}}function displayTransactions(_0x382404){const _0x39ff3e=_0x_0x1f0463,_0x143a1e=_0x_0x199d77,_0x2112b9={'BdfSe':_0x39ff3e(0x2bb)+_0x39ff3e(0x1fb),'XPIEb':function(_0x1d2cc5,_0x30e8d5){return _0x1d2cc5===_0x30e8d5;},'nokVh':function(_0x5bf37c){return _0x5bf37c();}},_0x1fb796=document[_0x143a1e(0x2a5)+_0x143a1e(0x2e8)](_0x2112b9[_0x143a1e(0x322)]);if(!_0x382404||_0x2112b9[_0x143a1e(0x1ac)](_0x382404[_0x39ff3e(0x261)],-0x16d0+-0xb8+0x1788)){_0x1fb796[_0x39ff3e(0x269)]=_0x39ff3e(0x29f)+_0x143a1e(0x2d9)+'v\x20class=\x22t'+'ext-center'+_0x39ff3e(0x2ce)+_0x143a1e(0x271)+_0x143a1e(0x226)+_0x143a1e(0x2e3)+'s\x20fa-recei'+_0x39ff3e(0x29d)+'ext-muted\x20'+_0x143a1e(0x214)+'e=\x22opacity'+_0x39ff3e(0x291)+_0x143a1e(0x2c3)+'\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+'\x20\x20\x20<p\x20clas'+_0x143a1e(0x2b3)+_0x143a1e(0x2ee)+_0x39ff3e(0x1b7)+'0;\x20font-si'+_0x39ff3e(0x257)+_0x143a1e(0x1b9)+_0x143a1e(0x236)+'et</p>\x0a\x20\x20\x20'+_0x39ff3e(0x271)+_0x143a1e(0x205)+_0x143a1e(0x271)+'\x20\x20';return;}_0x1fb796[_0x143a1e(0x269)]=_0x382404[_0x39ff3e(0x2ba)](_0x3cbe12=>_0x143a1e(0x29f)+_0x39ff3e(0x293)+_0x143a1e(0x21c)+'action-ite'+'m\x22>\x0a\x20\x20\x20\x20\x20\x20'+_0x143a1e(0x271)+_0x39ff3e(0x264)+'=\x22transact'+_0x143a1e(0x2ec)+_0x39ff3e(0x29f)+'\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+_0x39ff3e(0x1d9)+_0x39ff3e(0x2a3)+_0x143a1e(0x2fc)+_0x39ff3e(0x1ee)+'\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+_0x143a1e(0x321)+_0x143a1e(0x2fe)+getTransactionDescription(_0x3cbe12)+(_0x39ff3e(0x1f2)+'\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+'<p>')+formatDate(_0x3cbe12['timestamp'])+_0x39ff3e(0x323)+(_0x3cbe12['reference']||'')+(_0x39ff3e(0x26f)+_0x39ff3e(0x271)+_0x143a1e(0x2cd)+'>\x0a\x20\x20\x20\x20\x20\x20\x20\x20'+_0x143a1e(0x271)+_0x39ff3e(0x287)+'ss=\x22text-e'+_0x39ff3e(0x2ea)+'\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+_0x143a1e(0x321)+'div\x20class='+'\x22transacti'+_0x39ff3e(0x24a))+(_0x3cbe12[_0x39ff3e(0x1dc)]>-0x1*0x291+-0x8a*-0x13+-0x7ad*0x1?_0x39ff3e(0x249)+_0x143a1e(0x242):_0x143a1e(0x1fe)+_0x39ff3e(0x1c9))+(_0x39ff3e(0x328)+'\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+_0x143a1e(0x271)+'\x20')+(_0x3cbe12[_0x39ff3e(0x1dc)]>0xa*-0x2e4+-0x9*0x175+0x2a05?'+':'')+'₵'+Math[_0x39ff3e(0x253)](_0x3cbe12[_0x39ff3e(0x1dc)])[_0x39ff3e(0x2df)](-0x2415+0xac4+0x1953)+(_0x39ff3e(0x29f)+'\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+_0x39ff3e(0x2cd)+_0x39ff3e(0x1d7)+_0x143a1e(0x271)+_0x39ff3e(0x335)+_0x143a1e(0x1e2)+_0x39ff3e(0x258)+_0x39ff3e(0x329)+_0x39ff3e(0x243))+(_0x3cbe12[_0x143a1e(0x1d0)]||'success')+('\x22>\x0a\x20\x20\x20\x20\x20\x20\x20'+_0x143a1e(0x271)+'\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+'\x20')+(_0x3cbe12[_0x39ff3e(0x1d0)]||_0x39ff3e(0x2c6))[_0x39ff3e(0x2f5)+'e']()+(_0x39ff3e(0x29f)+'\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+_0x39ff3e(0x1c6)+_0x143a1e(0x1e1)+_0x143a1e(0x271)+'\x20\x20\x20</div>\x0a'+_0x39ff3e(0x271)+_0x143a1e(0x267)+_0x39ff3e(0x24e)+_0x143a1e(0x2cd)+_0x39ff3e(0x1d7)))['join'](''),_0x2112b9[_0x143a1e(0x33b)](setupInfiniteScroll);}function appendTransactions(_0x18687a){const _0x1d75d4=_0x_0x199d77,_0x363e43=_0x_0x1f0463,_0x3e3968={};_0x3e3968[_0x1d75d4(0x316)]=_0x1d75d4(0x2bb)+'nsList',_0x3e3968[_0x363e43(0x315)]=function(_0x73bd04,_0x25d818){return _0x73bd04===_0x25d818;};const _0x3eeab2=_0x3e3968,_0x277e01=document[_0x1d75d4(0x2a5)+_0x363e43(0x2e8)](_0x3eeab2['YKlgT']);if(!_0x18687a||_0x3eeab2[_0x363e43(0x315)](_0x18687a[_0x363e43(0x261)],-0x8b3+0x94d*-0x2+0x1b4d)){isLoadingMore=![];return;}const _0x29aa06=_0x18687a[_0x1d75d4(0x2ba)](_0x159077=>_0x363e43(0x29f)+_0x1d75d4(0x293)+_0x1d75d4(0x21c)+_0x1d75d4(0x1e4)+_0x1d75d4(0x312)+_0x363e43(0x271)+_0x1d75d4(0x264)+_0x363e43(0x1bd)+_0x1d75d4(0x2ec)+_0x1d75d4(0x29f)+_0x363e43(0x271)+_0x363e43(0x1d9)+_0x1d75d4(0x2a3)+'tion-detai'+_0x1d75d4(0x1ee)+_0x363e43(0x271)+_0x1d75d4(0x321)+_0x1d75d4(0x2fe)+getTransactionDescription(_0x159077)+(_0x1d75d4(0x1f2)+'\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+_0x363e43(0x271)+_0x363e43(0x252))+formatDate(_0x159077[_0x1d75d4(0x1e9)])+'\x20•\x20'+(_0x159077[_0x1d75d4(0x1bb)]||'')+('</p>\x0a\x20\x20\x20\x20\x20'+_0x363e43(0x271)+_0x363e43(0x2cd)+_0x1d75d4(0x1d7)+_0x363e43(0x271)+_0x1d75d4(0x287)+_0x363e43(0x295)+_0x363e43(0x2ea)+_0x363e43(0x271)+_0x363e43(0x321)+_0x1d75d4(0x1ea)+_0x1d75d4(0x259)+_0x1d75d4(0x24a))+(_0x159077['amount']>0xaca+-0x197b+-0x1*-0xeb1?_0x1d75d4(0x249)+'itive':'amount-neg'+_0x363e43(0x1c9))+('\x22>\x0a\x20\x20\x20\x20\x20\x20\x20'+_0x363e43(0x271)+_0x1d75d4(0x271)+'\x20')+(_0x159077[_0x1d75d4(0x1dc)]>-0x1*0x6b7+-0x3*0xcbf+0x2cf4?'+':'')+'₵'+Math['abs'](_0x159077[_0x363e43(0x1dc)])[_0x1d75d4(0x2df)](0x37*-0x16+0x88f*-0x2+0x15da)+(_0x1d75d4(0x29f)+'\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+'\x20\x20\x20\x20\x20</div'+'>\x0a\x20\x20\x20\x20\x20\x20\x20\x20'+_0x1d75d4(0x271)+_0x1d75d4(0x335)+_0x1d75d4(0x1e2)+_0x1d75d4(0x258)+_0x1d75d4(0x329)+_0x1d75d4(0x243))+(_0x159077[_0x363e43(0x1d0)]||_0x363e43(0x2c6))+(_0x363e43(0x328)+_0x1d75d4(0x271)+_0x363e43(0x271)+'\x20')+(_0x159077[_0x1d75d4(0x1d0)]||_0x363e43(0x2c6))[_0x363e43(0x2f5)+'e']()+(_0x363e43(0x29f)+'\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+_0x1d75d4(0x1c6)+_0x1d75d4(0x1e1)+'\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+'\x20\x20\x20</div>\x0a'+'\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+_0x363e43(0x267)+_0x1d75d4(0x24e)+_0x1d75d4(0x2cd)+_0x363e43(0x1d7)))[_0x1d75d4(0x1d6)]('');_0x277e01[_0x363e43(0x269)]+=_0x29aa06,isLoadingMore=![];}function setupInfiniteScroll(){const _0x544c1f=_0x_0x199d77,_0x1864c9=_0x_0x199d77,_0x288f10={'lLOTh':function(_0x5c53c4,_0xfdec1a){return _0x5c53c4>=_0xfdec1a;},'XTGhE':function(_0x36e898,_0x2883a7){return _0x36e898-_0x2883a7;},'BJWYH':function(_0xf28a3c,_0x4d709d){return _0xf28a3c(_0x4d709d);},'NLktN':_0x544c1f(0x28b)},_0x3ee278=document['getElement'+_0x544c1f(0x2e8)](_0x544c1f(0x2bb)+_0x1864c9(0x1fb));_0x3ee278[_0x1864c9(0x216)+_0x1864c9(0x28a)](_0x288f10[_0x1864c9(0x241)],function(){const _0x178fde=_0x544c1f,_0x1ad7bb=_0x544c1f;if(isLoadingMore)return;_0x288f10[_0x178fde(0x297)](_0x3ee278['scrollTop']+_0x3ee278[_0x1ad7bb(0x2cf)+'ht'],_0x288f10['XTGhE'](_0x3ee278[_0x178fde(0x2d3)+'ht'],-0x655+-0x47*-0x23+-0x2fc))&&(isLoadingMore=!![],transactionPage++,_0x288f10[_0x178fde(0x2b0)](loadTransactions,transactionPage));});}function getTransactionDescription(_0xbee465){const _0x5587a6=_0x_0x1f0463,_0x3d41cc=_0x_0x199d77,_0x39eb05={};_0x39eb05[_0x5587a6(0x219)]=function(_0x2f8a9b,_0x1a2114){return _0x2f8a9b===_0x1a2114;},_0x39eb05[_0x3d41cc(0x31c)]=_0x5587a6(0x288)+'ding',_0x39eb05[_0x3d41cc(0x23f)]=_0x3d41cc(0x2d4)+'n';const _0x50c683=_0x39eb05;if(_0x50c683[_0x5587a6(0x219)](_0xbee465['purpose'],_0x50c683[_0x5587a6(0x31c)]))return _0x3d41cc(0x339)+_0x3d41cc(0x1ce);else return _0xbee465[_0x3d41cc(0x280)+'e']?_0xbee465[_0x5587a6(0x280)+'e']+'\x20-\x20'+_0xbee465[_0x5587a6(0x1ff)]?.['toUpperCas'+'e']():_0x50c683['ObXmW'];}function formatDate(_0x35bfec){const _0x2fc14=_0x_0x1f0463,_0x307eb7=_0x_0x1f0463,_0x3affa5={};_0x3affa5[_0x2fc14(0x27d)]=function(_0x467709,_0x18fea1){return _0x467709+_0x18fea1;},_0x3affa5['ndDXs']='2-digit';const _0xfda598=_0x3affa5,_0x236b71=new Date(_0x35bfec);return _0xfda598['ZLbuy'](_0x236b71['toLocaleDa'+_0x307eb7(0x1c8)](),'\x20')+_0x236b71['toLocaleTi'+'meString']([],{'hour':_0xfda598[_0x307eb7(0x206)],'minute':_0xfda598['ndDXs']});}function setupEventListeners(){const _0x1650ec=_0x_0x1f0463,_0x319a83=_0x_0x199d77,_0x36170b={'sAOhk':function(_0x2bb3c4,_0x7118da){return _0x2bb3c4(_0x7118da);},'vOIZm':'proceedFun'+_0x1650ec(0x26c),'YINES':function(_0xec4b0b,_0x664d05){return _0xec4b0b>=_0x664d05;},'KEBsi':function(_0x4dcdb0,_0x121a88){return _0x4dcdb0<=_0x121a88;},'cyWUI':_0x319a83(0x25b),'lNzKL':_0x319a83(0x22a)};document[_0x1650ec(0x2a5)+_0x319a83(0x2e8)](_0x36170b[_0x1650ec(0x1db)])['addEventLi'+_0x1650ec(0x28a)](_0x36170b[_0x319a83(0x303)],function(){const _0x1c3048=_0x319a83,_0x4346c1=_0x1650ec,_0xad6904=_0x36170b[_0x1c3048(0x2c5)](parseFloat,this[_0x1c3048(0x284)])||-0x2402+0x43f+-0x2f*-0xad,_0x4e9fe9=document[_0x1c3048(0x2a5)+'ById'](_0x36170b['vOIZm']);_0x36170b['YINES'](_0xad6904,0x10b1*-0x1+0x1fb9+-0xf07)&&_0x36170b[_0x1c3048(0x247)](_0xad6904,0x2401*-0x1+0x952a+-0x5227*-0x1)?_0x4e9fe9[_0x4346c1(0x2a0)]=![]:_0x4e9fe9['disabled']=!![];});}function openFundModal(){const _0x31a4a3=_0x_0x199d77,_0x2a84b9=_0x_0x1f0463,_0x3e5fe5={};_0x3e5fe5['sIhol']='fundAmount',_0x3e5fe5[_0x31a4a3(0x1c1)]=_0x2a84b9(0x2f9)+_0x2a84b9(0x27e);const _0x478752=_0x3e5fe5;document[_0x2a84b9(0x2a5)+'ById'](_0x478752[_0x31a4a3(0x29b)])[_0x31a4a3(0x284)]='';const _0x333261=new bootstrap[(_0x31a4a3(0x27e))](document[_0x31a4a3(0x2a5)+_0x2a84b9(0x2e8)](_0x478752[_0x2a84b9(0x1c1)]));_0x333261[_0x2a84b9(0x254)]();}async function proceedWithFunding(){const _0x527f7a=_0x_0x199d77,_0x50861b=_0x_0x1f0463,_0x232144={'WJEPa':function(_0x59bb29,_0x1411ec){return _0x59bb29<_0x1411ec;},'mcepm':'Minimum\x20fu'+_0x527f7a(0x27f)+_0x527f7a(0x1d5),'OHKhV':function(_0x4cd299,_0x3d9e99){return _0x4cd299>_0x3d9e99;},'zZMlC':_0x50861b(0x32f)+'nding\x20amou'+_0x527f7a(0x29a)+'000','ukpdc':_0x50861b(0x213)+_0x50861b(0x1f5)+_0x50861b(0x200)+_0x527f7a(0x2c9)+_0x50861b(0x208)+_0x50861b(0x20a),'TOFpm':_0x527f7a(0x30d)+_0x50861b(0x25e)+_0x527f7a(0x337),'JvSDC':_0x527f7a(0x20e),'aDbGu':_0x527f7a(0x276)+_0x50861b(0x2e9)+_0x50861b(0x33f)+'ght:0;bott'+_0x50861b(0x2e5)+'round:rgba'+_0x50861b(0x28f)+_0x50861b(0x1de)+_0x50861b(0x2a6)+_0x50861b(0x33c)+'ign-items:'+_0x527f7a(0x2b5)+_0x527f7a(0x27b)+_0x50861b(0x272)+'font-famil'+'y:poppins','rDoWC':'<div\x20style'+_0x50861b(0x1a9)+'nd:white;p'+_0x50861b(0x2fd)+'x;border-r'+_0x50861b(0x2b2)+_0x527f7a(0x2af)+'n:center;m'+'ax-width:3'+_0x50861b(0x1e7)+'\x20style=\x22ma'+_0x50861b(0x2b7)+_0x50861b(0x22d)+'t-weight:6'+'00\x22>Redire'+'cting\x20to\x20P'+_0x527f7a(0x277)+_0x50861b(0x2ff)+_0x50861b(0x215)+'nner-borde'+_0x527f7a(0x327)+_0x50861b(0x23e)+_0x527f7a(0x265)+'px;border-'+_0x50861b(0x2d7)+_0x50861b(0x218)+'tus\x22></div'+_0x50861b(0x331),'ZzMzs':function(_0xb4904e,_0x1130ac,_0x4df31b){return _0xb4904e(_0x1130ac,_0x4df31b);},'fhpwy':_0x527f7a(0x2aa)+'alize-paym'+_0x50861b(0x273),'GiyfJ':_0x50861b(0x201)+'n/json','rZgee':'📡\x20Paystack'+'\x20initializ'+'ation\x20resp'+'onse:','qSPvA':function(_0x2da9bc,_0x2963a5){return _0x2da9bc===_0x2963a5;},'naUrO':'🔗\x20Redirect'+_0x50861b(0x1b3),'jTjhL':'Authorizat'+_0x527f7a(0x31d)+'t\x20received'+_0x527f7a(0x21f)+_0x527f7a(0x26a)+'y','oZMZg':_0x527f7a(0x270)+_0x527f7a(0x302)+_0x527f7a(0x304)+':','joquH':function(_0x1c0580,_0x52396a){return _0x1c0580+_0x52396a;},'nKNrm':_0x50861b(0x2f2)+_0x50861b(0x1c4),'AbwZz':_0x50861b(0x256)+_0x527f7a(0x26c),'XWNwI':_0x50861b(0x30e)+_0x50861b(0x1ba)+'dit-card\x20m'+_0x527f7a(0x24f)+'roceed\x20to\x20'+_0x527f7a(0x244)},_0x2d6bec=parseFloat(document[_0x50861b(0x2a5)+_0x50861b(0x2e8)](_0x50861b(0x25b))[_0x527f7a(0x284)])||0x1c3e+-0x180f+-0x42f;if(_0x232144[_0x50861b(0x25c)](_0x2d6bec,0xd52+-0x56a*0x2+-0x27d)){notyf[_0x50861b(0x2f3)](_0x232144['mcepm']);return;}if(_0x232144['OHKhV'](_0x2d6bec,-0xfeaa+-0x2*0x839+0x1d26c)){notyf[_0x527f7a(0x2f3)](_0x232144[_0x527f7a(0x1fd)]);return;}try{const _0x29a33c=document[_0x50861b(0x2a5)+'ById'](_0x527f7a(0x256)+_0x527f7a(0x26c)),_0x532c10=_0x29a33c['innerHTML'];_0x29a33c[_0x527f7a(0x2a0)]=!![],_0x29a33c[_0x527f7a(0x269)]=_0x232144['ukpdc'],notyf[_0x527f7a(0x2c6)](_0x232144[_0x50861b(0x1dd)]);const _0x38e448=document[_0x50861b(0x2f6)+_0x50861b(0x273)](_0x232144[_0x527f7a(0x29c)]);_0x38e448['style'][_0x50861b(0x2c0)]=_0x232144[_0x50861b(0x298)],_0x38e448[_0x50861b(0x269)]=_0x232144['rDoWC'],document[_0x50861b(0x1eb)][_0x527f7a(0x33a)+'d'](_0x38e448),console['log'](_0x527f7a(0x235)+_0x527f7a(0x2da)+_0x50861b(0x32b)+_0x50861b(0x1d1),_0x2d6bec);const _0x508d2c={};_0x508d2c[_0x50861b(0x1dc)]=_0x2d6bec;const _0x152c02=await _0x232144[_0x50861b(0x30b)](fetch,_0x232144[_0x527f7a(0x27a)],{'method':_0x527f7a(0x305),'headers':{'Content-Type':_0x232144[_0x527f7a(0x246)]},'body':JSON[_0x50861b(0x260)](_0x508d2c)}),_0x5367a6=await _0x152c02[_0x527f7a(0x313)]();console[_0x527f7a(0x207)](_0x232144['rZgee'],_0x5367a6);if(_0x232144[_0x50861b(0x2db)](_0x5367a6['status'],!![])&&_0x5367a6[_0x527f7a(0x2d6)]){const _0x35b186=_0x5367a6[_0x527f7a(0x2d6)];if(_0x35b186[_0x50861b(0x31b)+_0x527f7a(0x2ef)])console[_0x50861b(0x207)](_0x232144[_0x50861b(0x21a)],_0x35b186[_0x50861b(0x31b)+_0x50861b(0x2ef)]),window['location'][_0x50861b(0x2f4)]=_0x35b186['authorizat'+_0x527f7a(0x2ef)];else throw new Error(_0x232144[_0x527f7a(0x31e)]);}else{if(_0x5367a6['data']&&_0x5367a6[_0x527f7a(0x2d6)][_0x527f7a(0x31b)+'ion_url'])console['log'](_0x232144[_0x527f7a(0x1fa)],_0x5367a6['data'][_0x527f7a(0x31b)+_0x527f7a(0x2ef)]),window[_0x527f7a(0x324)]['href']=_0x5367a6[_0x527f7a(0x2d6)][_0x50861b(0x31b)+_0x527f7a(0x2ef)];else{console[_0x527f7a(0x2f3)](_0x527f7a(0x28d)+_0x527f7a(0x251)+_0x527f7a(0x29e),_0x5367a6);throw new Error(_0x5367a6['message']||_0x5367a6[_0x50861b(0x2f3)]||_0x527f7a(0x2c1)+_0x50861b(0x294)+_0x50861b(0x220)+_0x50861b(0x1d3)+_0x50861b(0x2ad));}}}catch(_0x15e242){console['error'](_0x527f7a(0x2bc)+_0x50861b(0x2ac)+_0x50861b(0x2a4),_0x15e242),notyf[_0x527f7a(0x2f3)](_0x232144[_0x50861b(0x2a8)](_0x232144[_0x527f7a(0x1c5)],_0x15e242[_0x50861b(0x336)]));const _0x25d746=document['querySelec'+'tor'](_0x50861b(0x223)+_0x50861b(0x2d1)+_0x50861b(0x224));if(_0x25d746)_0x25d746['remove']();const _0x58c67f=document[_0x527f7a(0x2a5)+_0x50861b(0x2e8)](_0x232144[_0x527f7a(0x286)]);_0x58c67f[_0x527f7a(0x2a0)]=![],_0x58c67f[_0x527f7a(0x269)]=_0x232144[_0x527f7a(0x204)];}}async function verifyPayment(_0xdb37d4){const _0x50b2cf=_0x_0x199d77,_0x4f5201=_0x_0x1f0463,_0x1ebf18={'dTxaf':_0x50b2cf(0x1ab)+_0x50b2cf(0x1c0),'juGVM':_0x4f5201(0x23c),'KjtNa':_0x4f5201(0x2b8)+'t','IraMw':function(_0x345494){return _0x345494();},'ZXcVR':_0x50b2cf(0x2e0)+_0x4f5201(0x2e2)+_0x4f5201(0x2ae)+_0x4f5201(0x1f8)+'act\x20suppor'+'t.','YnePp':_0x50b2cf(0x2e0)+'rification'+_0x50b2cf(0x1d4),'ZFbeq':function(_0x26add4,_0x2e042c){return _0x26add4+_0x2e042c;},'DigNk':_0x50b2cf(0x2e0)+'rification'+'\x20failed:\x20'};try{notyf[_0x50b2cf(0x2c6)](_0x1ebf18[_0x4f5201(0x263)]);const _0x395bab=await fetch(_0x4f5201(0x1be)+_0x50b2cf(0x1e3)+_0xdb37d4),_0x5a6624=await _0x395bab[_0x50b2cf(0x313)]();if(_0x5a6624[_0x4f5201(0x2c6)]){const _0x5f2c84=_0x1ebf18[_0x4f5201(0x332)][_0x50b2cf(0x314)]('|');let _0x441b95=0x15*0x1d3+-0x1*0x6ed+-0x1a*0x135;while(!![]){switch(_0x5f2c84[_0x441b95++]){case'0':notyf[_0x4f5201(0x2c6)](_0x4f5201(0x285)+_0x50b2cf(0x1b5)+'₵'+_0x5a6624['amount']+(_0x50b2cf(0x230)+_0x50b2cf(0x279)+'t.'));continue;case'1':document['getElement'+_0x4f5201(0x2e8)](_0x1ebf18[_0x50b2cf(0x262)])['textConten'+'t']='₵'+userBalance[_0x4f5201(0x2df)](0x1be3+-0x5fa+0x26f*-0x9);continue;case'2':transactionPage=0x200*-0xf+0xef3*-0x1+0x2cf4;continue;case'3':await _0x1ebf18['IraMw'](loadTransactions);continue;case'4':userBalance=_0x5a6624[_0x4f5201(0x299)];continue;}break;}}else throw new Error(_0x5a6624[_0x4f5201(0x2f3)]||_0x1ebf18['ZXcVR']);}catch(_0x35dd75){console[_0x50b2cf(0x2f3)](_0x1ebf18[_0x4f5201(0x2dc)],_0x35dd75),notyf[_0x4f5201(0x2f3)](_0x1ebf18['ZFbeq'](_0x1ebf18[_0x4f5201(0x2be)],_0x35dd75[_0x50b2cf(0x336)]));}}function checkPaystackCallback(){const _0x24b259=_0x_0x199d77,_0x12c9f1=_0x_0x199d77,_0x564596={};_0x564596[_0x24b259(0x1d2)]='trxref',_0x564596[_0x24b259(0x248)]=_0x12c9f1(0x1bb),_0x564596[_0x24b259(0x307)]=_0x24b259(0x1b4)+_0x24b259(0x278)+_0x24b259(0x210),_0x564596[_0x24b259(0x1ed)]=function(_0x5c1654,_0x351be9){return _0x5c1654===_0x351be9;},_0x564596[_0x12c9f1(0x24c)]=_0x24b259(0x1f3)+'\x20callback\x20'+_0x24b259(0x309)+_0x12c9f1(0x225)+_0x24b259(0x1c0);const _0x17af3d=_0x564596,_0x5cfc56=new URLSearchParams(window[_0x24b259(0x324)]['search']),_0x33ed32=_0x5cfc56[_0x24b259(0x310)](_0x17af3d['yQTym'])||_0x5cfc56[_0x12c9f1(0x310)](_0x17af3d[_0x24b259(0x248)]),_0x38d760=_0x5cfc56[_0x24b259(0x310)](_0x12c9f1(0x2c6)),_0x3ec837={};_0x3ec837[_0x24b259(0x1bb)]=_0x33ed32,_0x3ec837[_0x24b259(0x2c6)]=_0x38d760,console[_0x24b259(0x207)](_0x17af3d[_0x12c9f1(0x307)],_0x3ec837);if(_0x33ed32&&_0x17af3d[_0x12c9f1(0x1ed)](_0x38d760,_0x12c9f1(0x2ed))){console[_0x24b259(0x207)](_0x17af3d['xEIhk']),verifyPayment(_0x33ed32);const _0x4aa080=window[_0x12c9f1(0x324)][_0x12c9f1(0x2ca)];window[_0x24b259(0x32d)]['replaceSta'+'te']({},document[_0x12c9f1(0x212)],_0x4aa080);}}function showWithdrawModal(){const _0x524a9b=_0x_0x1f0463,_0x4cfe4a=_0x_0x1f0463,_0x293c96={};_0x293c96[_0x524a9b(0x25a)]=_0x524a9b(0x334)+_0x524a9b(0x222)+_0x524a9b(0x26e)+'!';const _0x216616=_0x293c96;notyf[_0x524a9b(0x28c)](_0x216616[_0x4cfe4a(0x25a)]);}document[_0x_0x1f0463(0x216)+_0x_0x1f0463(0x28a)](_0x_0x1f0463(0x2cb)+_0x_0x199d77(0x234),initializeApp);async function fundWallet(_0x49088b){const _0x330026=_0x_0x1f0463,_0x1afc15=_0x_0x199d77,_0x24f7e8={'eEjqC':function(_0x14656d,_0x4b945f,_0x307917){return _0x14656d(_0x4b945f,_0x307917);},'FLlqq':'/api/fund-'+_0x330026(0x1ae),'Jorwu':_0x1afc15(0x305),'VoyOL':_0x330026(0x201)+_0x1afc15(0x2d2),'MxrdB':function(_0x49017c,_0x4e196c){return _0x49017c(_0x4e196c);},'xHZOZ':'Wallet\x20fun'+_0x330026(0x2bd)+_0x330026(0x23a),'kxtlD':function(_0x25f8c4,_0x172001){return _0x25f8c4+_0x172001;},'GoGsQ':_0x330026(0x2c1)+_0x1afc15(0x1ec)+_0x330026(0x1cc),'jXYdS':_0x330026(0x21e)+_0x1afc15(0x31f)+':','uNcqP':function(_0x54c058,_0x4f9526){return _0x54c058(_0x4f9526);},'RbJWY':_0x1afc15(0x31a)+_0x1afc15(0x233)+_0x1afc15(0x20d)+_0x1afc15(0x26b)+_0x330026(0x1e8)};try{const _0x260660={};_0x260660[_0x1afc15(0x1dc)]=_0x49088b;const _0x17bfc6=await _0x24f7e8[_0x1afc15(0x2f1)](fetch,_0x24f7e8[_0x330026(0x30a)],{'method':_0x24f7e8[_0x330026(0x232)],'headers':{'Content-Type':_0x24f7e8[_0x1afc15(0x240)]},'body':JSON[_0x1afc15(0x260)](_0x260660)}),_0x42b029=await _0x17bfc6[_0x330026(0x313)]();_0x42b029['success']?(_0x24f7e8['MxrdB'](alert,_0x24f7e8[_0x330026(0x24d)]),location['reload']()):_0x24f7e8[_0x330026(0x1b1)](alert,_0x24f7e8[_0x330026(0x23d)](_0x24f7e8[_0x1afc15(0x1fc)],_0x42b029[_0x1afc15(0x2f3)]));}catch(_0x4210db){console[_0x1afc15(0x2f3)](_0x24f7e8['jXYdS'],_0x4210db),_0x24f7e8[_0x1afc15(0x2b4)](alert,_0x24f7e8['RbJWY']);}}document['querySelec'+_0x_0x199d77(0x217)](_0x_0x1f0463(0x255))[_0x_0x199d77(0x30f)](_0x34abe6=>{const _0x2dbb98=_0x_0x1f0463,_0x3b0904=_0x_0x199d77,_0x408212={'ahSzD':function(_0xb55960,_0x1b45f3){return _0xb55960(_0x1b45f3);},'Dryzk':function(_0x5e2de9,_0x3de7f1){return _0x5e2de9>_0x3de7f1;},'xUQSW':function(_0x531f3d,_0x59f7b6){return _0x531f3d(_0x59f7b6);},'AudoY':_0x2dbb98(0x282)};_0x34abe6['addEventLi'+_0x2dbb98(0x28a)](_0x408212[_0x2dbb98(0x317)],()=>{const _0x4759bd=_0x2dbb98,_0x41585d=_0x2dbb98,_0x587e61=_0x408212[_0x4759bd(0x2c8)](parseFloat,_0x34abe6[_0x41585d(0x20b)][_0x41585d(0x1dc)]);_0x408212[_0x4759bd(0x2b6)](_0x587e61,-0x18af+0x12d3+0x5dc)&&_0x408212[_0x41585d(0x266)](fundWallet,_0x587e61);});});function _0x_0x13c862(_0x560876){const _0x180d00=_0x_0x1f0463,_0x3ab097=_0x_0x199d77,_0xfd403e={'MEZGq':'string','aETkG':_0x180d00(0x1c3)+_0x3ab097(0x2e7),'pIgqS':function(_0x40c459,_0x77139b){return _0x40c459/_0x77139b;},'QudZu':_0x180d00(0x261),'qxFEx':function(_0x2dea2f,_0x813e49){return _0x2dea2f===_0x813e49;},'ASHFS':function(_0x4a2c2f,_0x16c823){return _0x4a2c2f+_0x16c823;},'bJqvN':_0x180d00(0x283),'gOaKR':'action','rEMYk':_0x180d00(0x306),'pdYal':function(_0x1a5e36,_0x41c800){return _0x1a5e36(_0x41c800);}};function _0x4bdd7b(_0x59da70){const _0x575ca9=_0x180d00,_0x8accca=_0x3ab097;if(typeof _0x59da70===_0xfd403e[_0x575ca9(0x1e0)])return function(_0x3f582d){}[_0x575ca9(0x2a9)+'r'](_0xfd403e[_0x8accca(0x2fb)])[_0x8accca(0x308)](_0x8accca(0x330));else(''+_0xfd403e[_0x575ca9(0x325)](_0x59da70,_0x59da70))[_0xfd403e[_0x8accca(0x1bc)]]!==0x1416+-0x1386+-0x8f||_0xfd403e['qxFEx'](_0x59da70%(-0x3f*0x26+0x17*-0x59+-0x5cf*-0x3),0x1a2*0xb+-0x8*0x20+-0x10f6)?function(){return!![];}[_0x8accca(0x2a9)+'r'](_0xfd403e[_0x8accca(0x2cc)](_0xfd403e[_0x8accca(0x320)],_0x8accca(0x306)))[_0x575ca9(0x1c7)](_0xfd403e[_0x8accca(0x1ef)]):function(){return![];}['constructo'+'r'](_0xfd403e[_0x8accca(0x320)]+_0xfd403e[_0x575ca9(0x2a2)])[_0x575ca9(0x308)](_0x575ca9(0x1c2)+'t');_0xfd403e[_0x575ca9(0x2c2)](_0x4bdd7b,++_0x59da70);}try{if(_0x560876)return _0x4bdd7b;else _0xfd403e['pdYal'](_0x4bdd7b,-0x2638+-0xfba+0x35f2);}catch(_0x404ca4){}}
+</script>
+</body>
+</html>

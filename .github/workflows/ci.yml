@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run build (if present)
+        run: npm run build --if-present
+
+      - name: Run linter (if present)
+        run: npm run lint --if-present
+
+      - name: Run tests (if present)
+        run: npm test --if-present
+
+      - name: Run public ↔ wrapper sync check
+        run: node scripts/check-sync.js
+
+      - name: Quick environment info
+        run: |
+          echo "node: $(node -v)"
+          echo "npm: $(npm -v)"

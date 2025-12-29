@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <title>Orders - DataSell</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+    :root {
+        --primary-color: #6c63ff;
+        --light-bg: #f8f9fa;
+        --card-radius: 12px;
+        --transition: all 0.3s ease;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        background-color: var(--light-bg);
+        min-height: 100vh;
+        padding-bottom: 80px;
+        font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .app-header {
+        background: white;
+        border-bottom: 1px solid #e9ecef;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .app-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #333;
+        margin: 0;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .app-main {
+        padding: 1rem 0;
+    }
+
+    /* Search Bar */
+    .search-section {
+        background: white;
+        padding: 0.75rem;
+        border-radius: var(--card-radius);
+        margin-bottom: 1rem;
+    }
+
+    .search-row {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .search-input-group {
+        flex: 1;
+        min-width: 150px;
+        display: flex;
+        align-items: center;
+        background: #f5f5f5;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 0 0.5rem;
+        transition: var(--transition);
+    }
+
+    .search-input-group:focus-within {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+    }
+
+    .search-input-group.reference {
+        flex: 0 0 auto;
+        min-width: auto;
+        max-width: 160px;
+    }
+
+    .search-icon {
+        color: #999;
+        margin-right: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 0.5rem 0;
+        border: none;
+        background: transparent;
+        font-size: 0.85rem;
+        transition: var(--transition);
+    }
+
+    .search-input::placeholder {
+        color: #999;
+    }
+
+    .search-input:focus {
+        outline: none;
+    }
+
+    /* Order Cards - Expanded */
+    .order-item {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        transition: var(--transition);
+        cursor: pointer;
+        border-left: 4px solid transparent;
+    }
+
+    .order-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    .order-item.accepted { border-left-color: #2196f3; }
+    .order-item.processing { border-left-color: #ff9800; }
+    .order-item.delivered { border-left-color: #4caf50; }
+    .order-item.failed { border-left-color: #f44336; }
+
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .order-package {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #333;
+    }
+
+    .order-id {
+        font-size: 0.75rem;
+        color: #6c757d;
+        background: #f5f5f5;
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+    }
+
+    .order-details {
+        margin-bottom: 0.65rem;
+    }
+
+    .order-details-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.4rem;
+        flex-wrap: wrap;
+    }
+
+    .detail-item {
+        flex: 1;
+    }
+
+    .detail-label {
+        font-size: 0.65rem;
+        color: #999;
+        text-transform: uppercase;
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+    }
+
+    .detail-value {
+        font-size: 0.85rem;
+        color: #333;
+        font-weight: 500;
+    }
+
+    .order-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 0.65rem;
+        border-top: 1px solid #f0f0f0;
+    }
+
+    .order-amount {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: var(--primary-color);
+    }
+
+    .order-status {
+        padding: 0.35rem 0.85rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .order-status {
+        padding: 0.2rem 0.6rem;
+        border-radius: 10px;
+        font-size: 0.6rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-top: 0.15rem;
+    }
+
+    .status-accepted {
+        background: rgba(33, 150, 243, 0.1);
+        color: #2196f3;
+    }
+
+    .status-processing {
+        background: rgba(255, 152, 0, 0.1);
+        color: #ff9800;
+    }
+
+    .status-delivered {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+    }
+
+    .status-failed {
+        background: rgba(244, 67, 54, 0.1);
+        color: #f44336;
+    }
+
+    .status-pending {
+        background: rgba(255, 152, 0, 0.1);
+        color: #ff9800;
+    }
+
+    .status-success {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+    }
+
+    .orders-history {
+        background: white;
+        border-radius: var(--card-radius);
+        padding: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1rem;
+        margin-top: 0;
+    }
+
+    #ordersList {
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+
+    #ordersList::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #ordersList::-webkit-scrollbar-track {
+        background: var(--light-bg);
+    }
+
+    #ordersList::-webkit-scrollbar-thumb {
+        background: #cbd5e0;
+        border-radius: 3px;
+    }
+
+    #ordersList::-webkit-scrollbar-thumb:hover {
+        background: #a0aec0;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 2rem 1rem;
+        color: #6c757d;
+    }
+
+    /* Tracking Section */
+    .tracking-box {
+        background: white;
+        padding: 1.5rem;
+        border-radius: var(--card-radius);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+    }
+
+    .tracking-form {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .tracking-input {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: var(--transition);
+    }
+
+    .tracking-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+    }
+
+    .tracking-btn {
+        padding: 0.75rem 1.5rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        white-space: nowrap;
+    }
+
+    .tracking-btn:hover {
+        background: #5a52d5;
+    }
+
+    .tracking-result {
+        background: white;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+        display: none;
+    }
+
+    .tracking-result.show {
+        display: block;
+    }
+
+    .tracking-timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+
+    .tracking-step {
+        position: relative;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+    }
+
+    .tracking-step:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .tracking-step::before {
+        content: '';
+        position: absolute;
+        left: -1.75rem;
+        top: 24px;
+        width: 2px;
+        height: calc(100% - 24px);
+        background: #e9ecef;
+    }
+
+    .tracking-step:last-child::before {
+        display: none;
+    }
+
+    .step-dot {
+        position: absolute;
+        left: -2.25rem;
+        top: 0;
+        width: 16px;
+        height: 16px;
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        z-index: 1;
+    }
+
+    .tracking-step.completed .step-dot {
+        background: #4caf50;
+        border-color: #4caf50;
+        color: white;
+    }
+
+    .tracking-step.current .step-dot {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.3); }
+    }
+
+    .step-label {
+        font-weight: 600;
+        color: #333;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .step-time {
+        font-size: 0.8rem;
+        color: #6c757d;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem 1rem;
+        background: white;
+        border-radius: var(--card-radius);
+    }
+
+    .empty-icon {
+        font-size: 2.5rem;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-text {
+        color: #6c757d;
+        margin: 0;
+    }
+
+    /* Bottom navigation and nav-item styling moved to `/css/responsive.css` */
+
+    @media (max-width: 576px) {
+        .container { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .app-title { font-size: 1.3rem; }
+        .search-section { padding: 0.5rem; }
+        .search-row { gap: 0.4rem; }
+        .search-input-group {
+            min-width: 120px;
+            padding: 0 0.4rem;
+        }
+        .search-input-group.reference {
+            max-width: 130px;
+        }
+        .search-input {
+            padding: 0.4rem 0;
+            font-size: 0.8rem;
+        }
+        .search-icon {
+            font-size: 0.75rem;
+            margin-right: 0.3rem;
+        }
+        .order-item { padding: 0.75rem; }
+        .order-package { font-size: 0.9rem; }
+        .order-id { font-size: 0.7rem; }
+        .detail-label { font-size: 0.6rem; }
+        .detail-value { font-size: 0.8rem; }
+        .order-amount { font-size: 0.9rem; }
+        .order-status { font-size: 0.6rem; padding: 0.25rem 0.5rem; }
+        /* Stack detail columns vertically on small screens */
+        .order-details-row { flex-direction: column; }
+        .order-details-row .detail-item { width: 100%; margin-bottom: 0.5rem; }
+        /* Allow orders list to use more vertical space on small devices */
+        #ordersList { max-height: calc(100vh - 220px); }
+    }
+
+    @media (max-width: 375px) {
+        .container { padding-left: 0.5rem; padding-right: 0.5rem; }
+        .search-section { padding: 0.4rem; margin-bottom: 0.75rem; }
+        .search-row { gap: 0.3rem; }
+        .search-input-group {
+            min-width: 100px;
+            padding: 0 0.35rem;
+        }
+        .search-input-group.reference {
+            max-width: 110px;
+        }
+        .search-input {
+            padding: 0.35rem 0;
+            font-size: 0.75rem;
+        }
+        .search-icon {
+            font-size: 0.7rem;
+            margin-right: 0.25rem;
+        }
+        .order-item {
+            padding: 0.65rem;
+            margin-bottom: 0.5rem;
+        }
+        .order-package { font-size: 0.85rem; }
+        .order-id { font-size: 0.65rem; }
+        .detail-label { font-size: 0.55rem; }
+        .detail-value { font-size: 0.75rem; }
+        .order-amount { font-size: 0.85rem; }
+    }
+
+    @media (min-width: 577px) and (max-width: 768px) {
+        .container { padding-left: 1rem; padding-right: 1rem; }
+        .search-input-group {
+            min-width: 140px;
+        }
+        .search-input-group.reference {
+            max-width: 150px;
+        }
+    }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center py-3">
+                <a href="/" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="app-title">Orders</h1>
+                <div class="user-avatar" id="userAvatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <div class="container">
+            <!-- Search Section -->
+            <div class="search-section">
+                <div class="search-row">
+                    <div class="search-input-group">
+                        <i class="fas fa-search search-icon"></i>
+                        <input 
+                            type="text" 
+                            id="searchPhone" 
+                            class="search-input" 
+                            placeholder="Phone"
+                            onkeyup="filterOrders()"
+                        >
+                    </div>
+                    <div class="search-input-group reference">
+                        <i class="fas fa-hashtag search-icon"></i>
+                        <input 
+                            type="text" 
+                            id="searchReference" 
+                            class="search-input" 
+                            placeholder="Ref"
+                            onkeyup="filterOrders()"
+                        >
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders History -->
+            <div class="orders-history">
+                <h2 class="section-title">Your Orders</h2>
+                <div id="ordersList">
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status" style="width: 2rem; height: 2rem;">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Loading orders...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- (Order tracking modal and floating button removed per request) -->
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="/" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="/wallet" class="nav-item">
+            <i class="fas fa-wallet"></i>
+            <span>Wallet</span>
+        </a>
+        <a href="/orders" class="nav-item active">
+            <i class="fas fa-shopping-bag"></i>
+            <span>Orders</span>
+        </a>
+        <a href="/profile" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+
+    <script>
+        const notyf = new Notyf({ duration: 4000, position: { x: 'center', y: 'top' } });
+        let currentUser = null, allOrders = [];
+
+        async function initializeApp() {
+            try {
+                const userRes = await fetch('/api/user');
+                if (userRes.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+                if (!userRes.ok) throw new Error('User not authenticated');
+                const userData = await userRes.json();
+                if (!userData.success) throw new Error('Not authenticated');
+                currentUser = userData.user;
+                updateUserAvatar();
+                const ordersRes = await fetch('/api/orders');
+                if (ordersRes.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+                const ordersData = await ordersRes.json();
+                if (ordersData.success) {
+                    allOrders = ordersData.orders.map(o => ({ ...o, id: o.id }));
+                    displayOrders(allOrders);
+                } else {
+                    throw new Error('Failed to load orders');
+                }
+            } catch (error) {
+                console.error('Init error:', error);
+                document.getElementById('ordersList').innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-exclamation-triangle fa-2x text-warning mb-2"></i>
+                        <p class="text-muted">${error.message || 'Failed to load orders'}</p>
+                        <button class="btn btn-sm btn-primary mt-2" onclick="location.reload()">Retry</button>
+                    </div>
+                `;
+            }
+        }
+
+        function updateUserAvatar() {
+            if (currentUser?.displayName) {
+                const initials = currentUser.displayName.split(' ').map(n => n[0]).join('').toUpperCase();
+                document.getElementById('userAvatar').textContent = initials;
+            }
+        }
+
+        function getNetworkDisplay(network) {
+            const networkMap = {
+                'mtn': 'MTN',
+                'at': 'AirtelTigo',
+                'airtel': 'Airtel',
+                'tigo': 'Tigo'
+            };
+            return networkMap[network?.toLowerCase()] || network || 'Network';
+        }
+
+        function formatDate(timestamp) {
+            try {
+                const date = new Date(timestamp);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            } catch {
+                return 'Unknown date';
+            }
+        }
+
+        function getStatusClass(status) {
+            const statusLower = status?.toLowerCase() || 'processing';
+            // Map webhook statuses to display classes
+            if (statusLower === 'success' || statusLower === 'delivered') return 'delivered';
+            if (statusLower === 'accepted') return 'accepted';
+            if (statusLower === 'processing') return 'processing';
+            if (statusLower === 'failed') return 'failed';
+            return 'pending';
+        }
+
+        function getStatusDisplay(status) {
+            const statusLower = status?.toLowerCase() || 'processing';
+            // Map webhook statuses to display text
+            if (statusLower === 'success' || statusLower === 'delivered') return 'Delivered';
+            if (statusLower === 'accepted') return 'Accepted';
+            if (statusLower === 'processing') return 'Processing';
+            if (statusLower === 'failed') return 'Failed';
+            return 'Pending';
+        }
+
+        function filterOrders() {
+            const phoneSearch = document.getElementById('searchPhone').value.trim().toLowerCase();
+            const referenceSearch = document.getElementById('searchReference').value.trim().toLowerCase();
+
+            let filtered = allOrders;
+
+            if (phoneSearch) {
+                filtered = filtered.filter(order => 
+                    order.phoneNumber && String(order.phoneNumber).toLowerCase().includes(phoneSearch)
+                );
+            }
+
+            if (referenceSearch) {
+                filtered = filtered.filter(order => 
+                    (order.reference && String(order.reference).toLowerCase().includes(referenceSearch)) ||
+                    (order.id && String(order.id).toLowerCase().includes(referenceSearch))
+                );
+            }
+
+            displayOrders(filtered);
+        }
+
+        function displayOrders(orders) {
+            if (orders.length === 0) {
+                document.getElementById('ordersList').innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-search fa-2x mb-2" style="opacity: 0.6;"></i>
+                        <p>${allOrders.length === 0 ? 'No orders yet' : 'No matching orders found'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const ordersHTML = orders.map(order => {
+                const statusClass = getStatusClass(order.status);
+                const statusDisplay = getStatusDisplay(order.status);
+                const network = getNetworkDisplay(order.network);
+                const date = formatDate(order.timestamp);
+                const transactionId = order.transactionId || order.hubnetTransactionId || 'N/A';
+
+                return `
+                    <div class="order-item ${statusClass}">
+                        <div class="order-header">
+                            <span class="order-package">${order.packageName}</span>
+                            <span class="order-id">ID: ${(String(order.id || '')).substring(0, 8)}</span>
+                        </div>
+                        <div class="order-details">
+                            <div class="order-details-row">
+                                <div class="detail-item">
+                                    <div class="detail-label">Network</div>
+                                    <div class="detail-value">${network}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Phone</div>
+                                    <div class="detail-value">${order.phoneNumber}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Volume</div>
+                                    <div class="detail-value">${order.volume}</div>
+                                </div>
+                            </div>
+                            <div class="order-details-row">
+                                <div class="detail-item">
+                                    <div class="detail-label">Date</div>
+                                    <div class="detail-value">${date}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Reference</div>
+                                    <div class="detail-value">${order.reference || 'Pending'}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Transaction ID</div>
+                                    <div class="detail-value">${transactionId}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="order-footer">
+                            <div class="order-amount">₵${order.amount != null ? Number(order.amount).toLocaleString() : '0'}</div>
+                            <div class="order-status status-${statusClass}">
+                                ${statusDisplay}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('ordersList').innerHTML = ordersHTML;
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>

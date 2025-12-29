@@ -1,0 +1,60 @@
+{
+  "name": "DataSell - Online Data Store",
+  "short_name": "DataSell",
+  "description": "Your favourite online store for affordable data bundles",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#6c63ff",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/images/app-icon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/app-icon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/images/app-icon.png",
+      "sizes": "540x720",
+      "form_factor": "narrow"
+    }
+  ],
+  "categories": ["shopping", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Buy Data",
+      "short_name": "Buy",
+      "description": "Quick access to buy data bundles",
+      "url": "/purchase",
+      "icons": [
+        {
+          "src": "/images/app-icon.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "My Wallet",
+      "short_name": "Wallet",
+      "description": "View and manage your wallet",
+      "url": "/wallet",
+      "icons": [
+        {
+          "src": "/images/app-icon.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
+}

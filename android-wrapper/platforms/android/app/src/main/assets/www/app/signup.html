@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/responsive.css">
+    <title>Sign Up - DataSell</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+:root {
+    --primary-color: #6c63ff;
+    --secondary-color: #ff6584;
+    --light-bg: #f8f9fa;
+    --card-radius: 12px;
+    --transition: all 0.2s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body.auth-page {
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-card {
+    background: white;
+    border-radius: var(--card-radius);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    padding: 2.5rem 2rem;
+    transition: var(--transition);
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    margin: 0;
+}
+
+.auth-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.auth-logo {
+    height: 48px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-title {
+    color: #2d3748;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+    letter-spacing: -0.5px;
+}
+
+.auth-subtitle {
+    color: #718096;
+    font-size: 0.95rem;
+    font-weight: 400;
+}
+
+.auth-form .form-label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.6rem;
+    font-size: 0.85rem;
+    display: block;
+}
+
+.auth-form .input-group {
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+.auth-form .input-group-text {
+    background-color: transparent;
+    border: none;
+    color: #6c63ff;
+    padding: 0;
+    font-size: 1rem;
+    min-width: 24px;
+    margin-right: 12px;
+    border-radius: 0;
+    flex-shrink: 0;
+}
+
+.auth-form .form-control {
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #e2e8f0;
+    transition: var(--transition);
+    font-size: 0.95rem;
+    height: auto;
+    flex: 1;
+    background-color: #f7fafc;
+}
+
+.auth-form .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.1rem rgba(108, 99, 255, 0.18);
+    outline: none;
+    background-color: white;
+}
+
+.auth-btn {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    padding: 0.85rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: var(--transition);
+    width: 100%;
+    margin-bottom: 1rem;
+    color: white;
+    font-size: 0.95rem;
+    min-height: auto;
+    height: auto;
+    border: none;
+}
+
+.auth-btn:hover:not(:disabled) {
+    background-color: #5a52d5;
+    border-color: #5a52d5;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(108, 99, 255, 0.3);
+}
+
+.auth-btn:disabled {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    transform: none;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.auth-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: var(--transition);
+    font-size: 0.85rem;
+}
+
+.auth-link:hover {
+    color: #5a52d5;
+    text-decoration: underline;
+}
+
+.toggle-password {
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: #6c757d;
+    transition: var(--transition);
+    padding: 0;
+    margin-left: 8px;
+    min-width: auto;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+
+.toggle-password:hover {
+    color: var(--primary-color);
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 4px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.form-text {
+    font-size: 0.65rem;
+    color: #6c757d;
+    margin-top: 0.15rem;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-check-label {
+    font-size: 0.85rem;
+    color: #2d3748;
+    line-height: 1.2;
+}
+
+/* Mobile Styles */
+@media (max-width: 576px) {
+    body.auth-page {
+        padding: 1rem;
+        align-items: center;
+        background: #f8f9fa;
+    }
+    .auth-container {
+        max-width: 100%;
+    }
+    .auth-card {
+        padding: 2rem 1.5rem;
+        margin: 0;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+    .auth-title {
+        font-size: 1.25rem;
+    }
+    .auth-subtitle {
+        font-size: 0.9rem;
+    }
+    .auth-form .form-control {
+        padding: 0.65rem 0.85rem;
+        font-size: 0.9rem;
+        height: auto;
+    }
+    .auth-btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+        min-height: auto;
+    }
+    .input-group-text {
+        padding: 0;
+        font-size: 0.9rem;
+    }
+    .toggle-password {
+        padding: 0;
+        min-width: auto;
+        font-size: 0.9rem;
+    }
+    .auth-header {
+        margin-bottom: 1.5rem;
+    }
+    .row .col-md-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    .form-check-label {
+        font-size: 0.8rem;
+    }
+}
+
+/* Small Mobile Devices */
+@media (max-width: 375px) {
+    .auth-card {
+        padding: 1.5rem 1rem;
+    }
+    .auth-title {
+        font-size: 1.1rem;
+    }
+    .auth-form .form-control {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.85rem;
+    }
+    .auth-btn {
+        padding: 0.65rem 1rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* Tablet Styles */
+@media (min-width: 577px) and (max-width: 768px) {
+    .auth-container {
+        max-width: 420px;
+    }
+    .auth-card {
+        padding: 2.2rem 1.8rem;
+    }
+}
+
+/* Desktop Styles */
+@media (min-width: 769px) {
+    .auth-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.10);
+    }
+    .row .col-md-6 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+/* Safe Area Support for Notches */
+@supports(padding: max(0px)) {
+    body.auth-page {
+        padding-left: max(20px, env(safe-area-inset-left));
+        padding-right: max(20px, env(safe-area-inset-right));
+        padding-top: max(20px, env(safe-area-inset-top));
+        padding-bottom: max(20px, env(safe-area-inset-bottom));
+    }
+}
+
+/* High Contrast Support */
+@media (prefers-contrast: high) {
+    .auth-card {
+        border: 2px solid #333;
+    }
+    
+    .auth-form .form-control {
+        border: 2px solid #333;
+    }
+    
+    .auth-btn {
+        border: 2px solid var(--primary-color);
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --transition: none;
+    }
+    
+    .auth-card,
+    .auth-btn {
+        transition: none;
+    }
+    
+    .loading-spinner {
+        animation: none;
+        border: 2px solid #ffffff;
+        border-top-color: transparent;
+    }
+}
+
+/* Focus Styles for Accessibility */
+.auth-btn:focus,
+.form-control:focus,
+.toggle-password:focus,
+.form-check-input:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Form Validation Styles */
+.form-control:invalid:not(:focus):not(:placeholder-shown) {
+    border-color: #dc3545;
+}
+
+.form-control:valid:not(:focus):not(:placeholder-shown) {
+    border-color: #198754;
+}
+
+/* Password Strength Indicator */
+.password-strength {
+    height: 4px;
+    border-radius: 2px;
+    margin-top: 0.25rem;
+    transition: var(--transition);
+}
+
+.password-strength.weak {
+    background-color: #dc3545;
+    width: 33%;
+}
+
+.password-strength.medium {
+    background-color: #ffc107;
+    width: 66%;
+}
+
+.password-strength.strong {
+    background-color: #198754;
+    width: 100%;
+}
+
+/* Print Styles */
+@media print {
+    body.auth-page {
+        background: white !important;
+    }
+    
+    .auth-card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    .auth-btn {
+        background: #f8f9fa !important;
+        color: #333 !important;
+        border: 1px solid #ddd !important;
+    }
+}
+
+/* Loading State Improvements */
+.auth-btn:disabled .loading-spinner {
+    display: inline-block !important;
+}
+
+/* Form Group Spacing */
+.mb-3 {
+    margin-bottom: 1rem !important;
+}
+
+/* Responsive Form Layout */
+@media (max-width: 576px) {
+    .row {
+        margin-left: -0.5rem;
+        margin-right: -0.5rem;
+    }
+    
+    .row > [class*="col-"] {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+}
+    </style>
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="fas fa-database fa-3x text-primary"></i>
+                </div>
+                <h2 class="auth-title">Create Account</h2>
+            </div>
+
+            <form id="signupForm" class="auth-form">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="firstName" class="form-label">First Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First name" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="lastName" class="form-label">Last Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last name" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Phone Number</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                        <input type="tel" class="form-control" id="phone" name="phone" placeholder="0241234567" pattern="[0-9]{10}" inputmode="numeric" maxlength="10" required>
+                    </div>
+                    <div class="form-text">10-digit Ghana number (e.g., 0241234567)</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Create a password" required minlength="6">
+                        <button type="button" class="input-group-text toggle-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="form-text">Password must be at least 6 characters long</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="confirmPassword" class="form-label">Confirm Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required>
+                        <button type="button" class="input-group-text toggle-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                    <label class="form-check-label" for="agreeTerms">
+                        I agree to the <a href="#" class="auth-link">Terms of Service</a> and <a href="#" class="auth-link">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn auth-btn" id="signupBtn">
+                    <span id="signupText">Create Account</span>
+                    <span id="signupLoading" class="loading-spinner" style="display: none;"></span>
+                </button>
+
+                <div class="text-center">
+                    <p>Already have an account? <a href="/login" class="auth-link">Sign in</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+    <script>
+        // Initialize Notyf
+        const notyf = new Notyf({
+            duration: 4000,
+            position: { x: 'right', y: 'top' }
+        });
+
+        // Toggle password visibility
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.addEventListener('click', function() {
+                const input = this.closest('.input-group').querySelector('input[type="password"], input[type="text"]');
+                const icon = this.querySelector('i');
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+
+        // Signup with backend API
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const phone = document.getElementById('phone').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const signupBtn = document.getElementById('signupBtn');
+            const signupText = document.getElementById('signupText');
+            const signupLoading = document.getElementById('signupLoading');
+
+            // Validation
+            if (password !== confirmPassword) {
+                notyf.error('Passwords do not match');
+                return;
+            }
+
+            if (password.length < 6) {
+                notyf.error('Password must be at least 6 characters long');
+                return;
+            }
+
+            if (!/^\d{10}$/.test(phone)) {
+                notyf.error('Phone number must be 10 digits');
+                return;
+            }
+
+            // Show loading state
+            signupBtn.disabled = true;
+            signupText.textContent = 'Creating account...';
+            signupLoading.style.display = 'inline-block';
+
+            try {
+                const acceptedTerms = document.getElementById('agreeTerms')?.checked === true;
+
+                const response = await fetch('/api/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password,
+                        firstName,
+                        lastName,
+                        phone, // Send phone as-is (10 digits), backend handles formatting
+                        acceptedTerms
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    notyf.success(result.message || 'Account created successfully!');
+                    
+                    // Auto-login after successful signup
+                    const loginResponse = await fetch('/api/login', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email,
+                            password
+                        })
+                    });
+
+                    const loginResult = await loginResponse.json();
+
+                    if (loginResult.success) {
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 2000);
+                    } else {
+                        // Redirect to login page if auto-login fails
+                        setTimeout(() => {
+                            window.location.href = '/login';
+                        }, 2000);
+                    }
+                } else {
+                    throw new Error(result.error || 'Signup failed');
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                notyf.error(error.message);
+                
+                // Reset button state
+                signupBtn.disabled = false;
+                signupText.textContent = 'Create Account';
+                signupLoading.style.display = 'none';
+            }
+        });
+
+        // Check if user is already logged in
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('/api/user');
+                const result = await response.json();
+                
+                if (result.success && result.user) {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                // User is not logged in, continue with signup page
+            }
+        }
+
+        // Check auth status on page load
+        checkAuthStatus();
+    </script>
+</body>
+</html>

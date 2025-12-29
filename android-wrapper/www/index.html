@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>DataSell App</title>
+  <meta name="description" content="DataSell Android wrapper" />
+  <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;padding:1rem;background:#fff}a{color:#2563eb}</style>
+</head>
+<body>
+  <div id="splash" style="text-align:center">
+    <div id="logoWrap" style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px">
+      <!--
+        SPLASH / OPENING IMAGE
+        Path: `app/images/web-logo2.png` (preferred) or `app/images/web-logo2.png` served from the deployed site.
+        Purpose: This image is used for the splash screen and the opening animation (the element with id="appLogo").
+        Change this file if you want a different opening animation/logo.
+      -->
+      <img id="appLogo" src="" alt="DataSell" style="width:120px;height:120px;border-radius:20px;object-fit:contain;transform-origin:center;" />
+      <div id="appTitle" style="font-weight:700;color:#153062">DataSell</div>
+    </div>
+
+    <div style="margin-top:18px;width:80%;max-width:360px;margin-left:auto;margin-right:auto">
+      <div id="progressBar" style="height:8px;background:#e6eefc;border-radius:8px;overflow:hidden">
+        <div id="progressFill" style="width:0%;height:100%;background:linear-gradient(90deg,#2563eb,#3b82f6);transition:width .3s ease"></div>
+      </div>
+      <div id="progressText" style="margin-top:8px;font-size:.9rem;color:#475569">Loading…</div>
+    </div>
+    <p style="margin-top:.8rem;color:#666;font-size:.85rem">If this screen stays, please check your network connection.</p>
+  </div>
+
+  <script>
+    // Fallback: set the deployed URL to your Render site
+    const remote = 'https://datasell.onrender.com/';
+
+    // Prefer to use the remote site's logo if reachable, otherwise use any bundled logo
+    const remoteLogo = remote.replace(/\/$/, '') + '/images/web-logo2.png';
+    const localLogo = 'app/images/web-logo2.png';
+    const logoEl = document.getElementById('appLogo');
+
+    // Helper: try to fetch a URL with timeout
+    function fetchWithTimeout(url, timeout = 2500) {
+      return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('timeout')), timeout);
+        fetch(url, { method: 'HEAD', mode: 'no-cors' }).then(res => {
+          clearTimeout(timer);
+          resolve(res);
+        }).catch(err => { clearTimeout(timer); reject(err); });
+      });
+    }
+
+    // Set local logo initially
+    logoEl.src = localLogo;
+
+    // Development: try local/emulator URLs first, then remote; fallback to bundled offline app
+    (async () => {
+      // Prioritize development on port 3000 (emulator and localhost), then fall back to deployed remote
+      const candidates = [
+        remote,
+        'http://10.0.2.2:3000/', // Android emulator -> host localhost:3000
+        'http://localhost:3000/',
+      ];
+
+      let chosen = null;
+      for (const url of candidates) {
+        try {
+          await fetchWithTimeout(url, 1500);
+          chosen = url;
+          break;
+        } catch (e) {
+          // try next
+        }
+      }
+
+      if (chosen) {
+        // Use a logo from the chosen host when available, otherwise use the remoteLogo/localLogo
+        if (chosen === remote) {
+          logoEl.src = remoteLogo;
+        } else {
+          logoEl.src = chosen.replace(/\/$/, '') + '/images/web-logo2.png';
+        }
+        runSplashAndRedirect(chosen);
+      } else {
+        // none reachable — load local bundled app
+        logoEl.src = localLogo;
+        runSplashAndLoadLocal();
+      }
+    })();
+
+    function runSplashAndRedirect(target) {
+      let progress = 0;
+      const fill = document.getElementById('progressFill');
+      const text = document.getElementById('progressText');
+      const pulse = () => {
+        const logo = document.getElementById('appLogo');
+        if (logo.animate) {
+          logo.animate([
+            { transform: 'scale(1)' },
+            { transform: 'scale(1.06)' },
+            { transform: 'scale(1)' }
+          ], { duration: 1200, iterations: 1 });
+        }
+      };
+      const ticker = setInterval(() => {
+        progress = Math.min(100, progress + Math.floor(Math.random()*18) + 8);
+        fill.style.width = progress + '%';
+        text.textContent = progress < 100 ? `Loading ${progress}%` : 'Finishing up…';
+        pulse();
+        if (progress >= 98) {
+          clearInterval(ticker);
+          setTimeout(() => { window.location.replace(target); }, 500);
+        }
+      }, 380);
+    }
+
+    function runSplashAndLoadLocal() {
+      let progress = 0;
+      const fill = document.getElementById('progressFill');
+      const text = document.getElementById('progressText');
+      const pulse = () => {
+        const logo = document.getElementById('appLogo');
+        if (logo.animate) {
+          logo.animate([
+            { transform: 'scale(1)' },
+            { transform: 'scale(1.04)' },
+            { transform: 'scale(1)' }
+          ], { duration: 1400, iterations: 1 });
+        }
+      };
+      const ticker = setInterval(() => {
+        progress = Math.min(100, progress + Math.floor(Math.random()*12) + 6);
+        fill.style.width = progress + '%';
+        text.textContent = progress < 100 ? `Loading ${progress}%` : 'Preparing offline app…';
+        pulse();
+        if (progress >= 96) {
+          clearInterval(ticker);
+          setTimeout(() => { window.location.replace('app/index.html'); }, 400);
+        }
+      }, 420);
+    }
+  </script>
+</body>
+</html>
