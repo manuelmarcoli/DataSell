@@ -1159,30 +1159,23 @@ async function loadUserProfile() {
         };
     }
 }
-        try {
-            console.log('📊 [CLEAR] Loading user stats from /api/profile/stats...');
-            const response = await fetch('/api/profile/stats');
-            const data = await response.json();
-            
-            console.log('📊 [CLEAR] Stats API response:', data);
-            
-            if (data.success && data.stats) {
-                userStats = data.stats;
-                console.log('✓ [CLEAR] Stats loaded successfully:', userStats);
-                console.log('   - totalOrders:', userStats.totalOrders);
-                console.log('   - successfulOrders:', userStats.successfulOrders);
-                console.log('   - totalSpent:', userStats.totalSpent);
-            } else {
-                console.warn('⚠ [CLEAR] Stats API returned error or no stats:', data);
-                userStats = {
-                    totalOrders: 0,
-                    successfulOrders: 0,
-                    totalSpent: 0,
-                    status: 'Active'
-                };
-            }
-        } catch (error) {
-            console.error('❌ [CLEAR] Error loading user stats:', error);
+
+async function loadUserStats() {
+    console.log('📊 [CLEAR] Loading user stats from /api/profile/stats...');
+    try {
+        const response = await fetch('/api/profile/stats');
+        const data = await response.json();
+        
+        console.log('📊 [CLEAR] Stats API response:', data);
+        
+        if (data.success && data.stats) {
+            userStats = data.stats;
+            console.log('✓ [CLEAR] Stats loaded successfully:', userStats);
+            console.log('   - totalOrders:', userStats.totalOrders);
+            console.log('   - successfulOrders:', userStats.successfulOrders);
+            console.log('   - totalSpent:', userStats.totalSpent);
+        } else {
+            console.warn('⚠ [CLEAR] Stats API returned error or no stats:', data);
             userStats = {
                 totalOrders: 0,
                 successfulOrders: 0,
@@ -1190,7 +1183,16 @@ async function loadUserProfile() {
                 status: 'Active'
             };
         }
+    } catch (error) {
+        console.error('❌ [CLEAR] Error loading user stats:', error);
+        userStats = {
+            totalOrders: 0,
+            successfulOrders: 0,
+            totalSpent: 0,
+            status: 'Active'
+        };
     }
+}
     
     function updateUI() {
         console.log('🔄 [CLEAR] Updating UI with stats:', userStats);
