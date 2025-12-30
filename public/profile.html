@@ -1168,6 +1168,40 @@ body {
             notyf.error('An error occurred while updating your profile');
         }
     }
+
+    // Override the obfuscated loadUserStats with a clear, working version
+    async function loadUserStats() {
+        try {
+            console.log('📊 Loading user stats from /api/profile/stats...');
+            const response = await fetch('/api/profile/stats');
+            const data = await response.json();
+            
+            console.log('📊 Stats API response:', data);
+            
+            if (data.success && data.stats) {
+                userStats = data.stats;
+                console.log('✓ Stats loaded successfully:', userStats);
+            } else {
+                console.warn('⚠ Stats API returned error or no stats:', data);
+                // Set default stats with zeros if API fails
+                userStats = {
+                    totalOrders: 0,
+                    successfulOrders: 0,
+                    totalSpent: 0,
+                    status: 'Active'
+                };
+            }
+        } catch (error) {
+            console.error('❌ Error loading user stats:', error);
+            // Set default stats with zeros if fetch fails
+            userStats = {
+                totalOrders: 0,
+                successfulOrders: 0,
+                totalSpent: 0,
+                status: 'Active'
+            };
+        }
+    }
     </script>
 </body>
 </html>

@@ -303,15 +303,19 @@ app.get('/api/profile/stats', requireAuth, async (req, res) => {
         const uid = req.session.user.uid;
 
         console.log(`📊 Fetching profile stats for user: ${uid}`);
+        console.log(`   Session user:`, req.session.user);
 
         // Fetch transactions with explicit value event
         const transactionsRef = admin.database().ref('transactions');
+        console.log(`   Querying transactions by userId: ${uid}`);
+        
         const transactionsSnap = await transactionsRef
             .orderByChild('userId')
             .equalTo(uid)
             .once('value');
 
         const transactions = transactionsSnap.val() || {};
+        console.log(`   Found ${Object.keys(transactions).length} transactions`);
 
         // Count totals
         const totalOrders = Object.keys(transactions).length;
@@ -328,7 +332,7 @@ app.get('/api/profile/stats', requireAuth, async (req, res) => {
         const walletBalance = userData.walletBalance || 0;
         const memberSince = userData.createdAt || null;
 
-        console.log(`   ✓ Stats: ${totalOrders} orders, ${successfulOrders} successful, GH₵${totalSpent.toFixed(2)} spent\n`);
+        console.log(`   ✓ Stats: ${totalOrders} orders, ${successfulOrders} successful, ₵${totalSpent.toFixed(2)} spent`);
 
         const stats = {
             totalOrders,
@@ -338,11 +342,13 @@ app.get('/api/profile/stats', requireAuth, async (req, res) => {
             memberSince
         };
 
+        console.log(`   📤 Sending response:`, stats);
         return res.json({ success: true, stats });
 
     } catch (error) {
         console.error(`❌ Error fetching stats:`, error.message);
-        return res.status(500).json({ success: false, error: 'Failed to fetch stats' });
+        console.error(`   Stack:`, error.stack);
+        return res.status(500).json({ success: false, message: 'Failed to fetch stats', error: error.message });
     }
 });
 
