@@ -1168,22 +1168,26 @@ body {
             notyf.error('An error occurred while updating your profile');
         }
     }
+    </script>
 
-    // Override the obfuscated loadUserStats with a clear, working version
+    <!-- CLEAR STATS OVERRIDE - Define after all obfuscated code -->
+    <script>
     async function loadUserStats() {
         try {
-            console.log('📊 Loading user stats from /api/profile/stats...');
+            console.log('📊 [CLEAR] Loading user stats from /api/profile/stats...');
             const response = await fetch('/api/profile/stats');
             const data = await response.json();
             
-            console.log('📊 Stats API response:', data);
+            console.log('📊 [CLEAR] Stats API response:', data);
             
             if (data.success && data.stats) {
                 userStats = data.stats;
-                console.log('✓ Stats loaded successfully:', userStats);
+                console.log('✓ [CLEAR] Stats loaded successfully:', userStats);
+                console.log('   - totalOrders:', userStats.totalOrders);
+                console.log('   - successfulOrders:', userStats.successfulOrders);
+                console.log('   - totalSpent:', userStats.totalSpent);
             } else {
-                console.warn('⚠ Stats API returned error or no stats:', data);
-                // Set default stats with zeros if API fails
+                console.warn('⚠ [CLEAR] Stats API returned error or no stats:', data);
                 userStats = {
                     totalOrders: 0,
                     successfulOrders: 0,
@@ -1192,8 +1196,7 @@ body {
                 };
             }
         } catch (error) {
-            console.error('❌ Error loading user stats:', error);
-            // Set default stats with zeros if fetch fails
+            console.error('❌ [CLEAR] Error loading user stats:', error);
             userStats = {
                 totalOrders: 0,
                 successfulOrders: 0,
