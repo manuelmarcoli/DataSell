@@ -1205,6 +1205,14 @@ body {
             };
         }
     }
+
+    // Force stats reload after page initializes
+    setTimeout(async function() {
+        console.log('⏱️ [FORCE] Post-init stats reload triggered');
+        await loadUserStats();
+        updateUI();
+        console.log('⏱️ [FORCE] Stats and UI updated after init');
+    }, 1500);
     </script>
 </body>
 </html>

@@ -6,6 +6,10 @@
 
 require('dotenv').config();
 
+console.log('🔍 Environment loaded. Checking ADMIN_PASSWORD:');
+console.log('   Raw value:', process.env.ADMIN_PASSWORD);
+console.log('   Length:', process.env.ADMIN_PASSWORD?.length);
+
 const express = require('express');
 const admin = require('firebase-admin');
 const path = require('path');
@@ -73,8 +77,18 @@ app.post('/api/login', async (req, res) => {
         }
 
         // Admin login
-        if (email === process.env.ADMIN_EMAIL) {
-            if (password === process.env.ADMIN_PASSWORD) {
+        const adminEmail = process.env.ADMIN_EMAIL?.trim();
+        const adminPassword = process.env.ADMIN_PASSWORD?.trim();
+        
+        console.log('🔍 Password comparison:');
+        console.log('   Received password:', password);
+        console.log('   .env password:', adminPassword);
+        console.log('   Received length:', password?.length);
+        console.log('   .env length:', adminPassword?.length);
+        console.log('   Match:', password === adminPassword);
+        
+        if (email === adminEmail) {
+            if (password === adminPassword) {
                 let userRecord;
                 try {
                     userRecord = await admin.auth().getUserByEmail(email);
@@ -120,11 +134,14 @@ app.post('/api/login', async (req, res) => {
                     user: req.session.user
                 });
             } else {
+                console.log('✗ Password does NOT match ADMIN_PASSWORD');
                 return res.status(401).json({ 
                     success: false, 
                     error: 'Invalid credentials' 
                 });
             }
+        } else {
+            console.log('✗ Email does NOT match ADMIN_EMAIL, trying regular login...');
         }
 
         // Regular user login (via Firebase REST API)
