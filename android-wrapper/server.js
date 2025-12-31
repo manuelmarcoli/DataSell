@@ -44,6 +44,35 @@ async function sendSmsToUser(userId, phoneFallback, message) {
   }
 }
 
+// Enhanced authentication middleware
+const requireAuth = (req, res, next) => {
+  // Debug: log session state
+  console.log('🔐 Session check for', req.path, ':', {
+    hasSession: !!req.session,
+    hasUser: !!req.session?.user,
+    userId: req.session?.user?.uid || 'none',
+    sessionId: req.sessionID || 'none'
+  });
+
+  if (req.session.user) {
+    next();
+  } else {
+    // Prefer JSON for API routes to avoid HTML redirects being returned to fetch()
+    if (req.path && req.path.startsWith('/api')) {
+      console.warn('Unauthorized API request (android-wrapper):', { path: req.path, cookies: req.headers.cookie, session: req.session && Object.keys(req.session).length ? '[session present]' : '[no session]' });
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+
+    // If the client accepts HTML, redirect to login page for browser navigations
+    if (req.accepts && req.accepts('html')) {
+      return res.redirect('/login');
+    }
+
+    // Fallback to JSON
+    res.status(401).json({ success: false, error: 'Authentication required' });
+  }
+};
+
 // Enhanced environment validation
 const requiredEnvVars = [
   'FIREBASE_PRIVATE_KEY',
@@ -63,7 +92,8 @@ if (missingVars.length > 0) {
   process.exit(1);
 }
 
-// Enhanced Firebase Admin initialization with better error handling
+// Enhanced Firebase Admin initialization with timing logs
+console.time('Firebase Admin Initialization');
 try {
   const serviceAccount = {
     type: "service_account",
@@ -82,13 +112,14 @@ try {
     credential: admin.credential.cert(serviceAccount),
     databaseURL: process.env.FIREBASE_DATABASE_URL
   });
+  console.timeEnd('Firebase Admin Initialization');
   console.log('✅ Firebase Admin initialized successfully');
 } catch (error) {
   console.error('❌ Firebase initialization failed:', error.message);
   process.exit(1);
 }
 
-// Enhanced Package Cache System with error recovery
+// Enhanced Package Cache System with error recovery (non-blocking)
 let packageCache = {
   mtn: [],
   at: [],
@@ -96,12 +127,14 @@ let packageCache = {
   isInitialized: false
 };
 
-function initializePackageCache() {
-  console.log('🔄 Initializing real-time package cache...');
-  
+// Start cache initialization in the background (non-blocking)
+setImmediate(() => {
+  console.time('Package Cache Initialization');
+  console.log('🔄 Initializing real-time package cache (background)...');
+
   const mtnRef = admin.database().ref('packages/mtn');
   const atRef = admin.database().ref('packages/at');
-  
+
   mtnRef.on('value', (snapshot) => {
     try {
       const packages = snapshot.val() || {};
@@ -109,18 +142,19 @@ function initializePackageCache() {
         id: key,
         ...pkg
       })).filter(pkg => pkg.active !== false);
-      
+
       packageCache.mtn = packagesArray;
       packageCache.lastUpdated = Date.now();
       packageCache.isInitialized = true;
       console.log(`✅ MTN packages cache updated (${packagesArray.length} packages)`);
+      console.timeEnd('Package Cache Initialization');
     } catch (error) {
       console.error('❌ Error updating MTN packages cache:', error);
     }
   }, (error) => {
     console.error('❌ MTN packages listener error:', error);
   });
-  
+
   atRef.on('value', (snapshot) => {
     try {
       const packages = snapshot.val() || {};
@@ -128,20 +162,19 @@ function initializePackageCache() {
         id: key,
         ...pkg
       })).filter(pkg => pkg.active !== false);
-      
+
       packageCache.at = packagesArray;
       packageCache.lastUpdated = Date.now();
       packageCache.isInitialized = true;
       console.log(`✅ AirtelTigo packages cache updated (${packagesArray.length} packages)`);
+      console.timeEnd('Package Cache Initialization');
     } catch (error) {
       console.error('❌ Error updating AirtelTigo packages cache:', error);
     }
   }, (error) => {
     console.error('❌ AirtelTigo packages listener error:', error);
   });
-}
-
-initializePackageCache();
+});
 
 // Custom Firebase Session Store (persists sessions across restarts)
 class FirebaseSessionStore extends session.Store {
@@ -222,7 +255,7 @@ class FirebaseSessionStore extends session.Store {
 }
 
 // Enhanced middleware setup
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '..', 'public')));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -240,6 +273,28 @@ app.use(session({
   },
   name: 'datasell.sid'
 }));
+
+
+// Update user profile (must be after session and json middleware)
+app.put('/api/profile', requireAuth, async (req, res) => {
+  try {
+    const uid = req.session.user.uid;
+    const { firstName, lastName, phone } = req.body;
+    if (!firstName || !lastName) {
+      return res.status(400).json({ success: false, error: 'First name and last name are required' });
+    }
+    const updates = {
+      firstName,
+      lastName,
+      phone: phone || ''
+    };
+    await admin.database().ref('users/' + uid).update(updates);
+    res.json({ success: true, message: 'Profile updated successfully', profile: updates });
+  } catch (err) {
+    console.error('Update profile error:', err);
+    res.status(500).json({ success: false, error: 'Failed to update profile' });
+  }
+});
 
 // Enhanced CORS configuration
 const allowedDomains = [
@@ -305,34 +360,7 @@ app.use((req, res, next) => {
 
 // Rate limiting removed to allow seamless login/signup access.
 
-// Enhanced authentication middleware
-const requireAuth = (req, res, next) => {
-  // Debug: log session state
-  console.log('🔐 Session check for', req.path, ':', {
-    hasSession: !!req.session,
-    hasUser: !!req.session?.user,
-    userId: req.session?.user?.uid || 'none',
-    sessionId: req.sessionID || 'none'
-  });
 
-  if (req.session.user) {
-    next();
-  } else {
-    // Prefer JSON for API routes to avoid HTML redirects being returned to fetch()
-    if (req.path && req.path.startsWith('/api')) {
-      console.warn('Unauthorized API request (android-wrapper):', { path: req.path, cookies: req.headers.cookie, session: req.session && Object.keys(req.session).length ? '[session present]' : '[no session]' });
-      return res.status(401).json({ success: false, error: 'Authentication required' });
-    }
-
-    // If the client accepts HTML, redirect to login page for browser navigations
-    if (req.accepts && req.accepts('html')) {
-      return res.redirect('/login');
-    }
-
-    // Fallback to JSON
-    res.status(401).json({ success: false, error: 'Authentication required' });
-  }
-};
 
 // Lightweight client config endpoint (serves runtime values to the browser)
 app.get('/config.js', (req, res) => {
@@ -391,43 +419,43 @@ const requireAdmin = (req, res, next) => {
 // ====================
 
 app.get('/', requireAuth, (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
 app.get('/login', (req, res) => {
   if (req.session.user) return res.redirect('/');
-  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+  res.sendFile(path.join(__dirname, '..', 'public', 'login.html'));
 });
 
 app.get('/signup', (req, res) => {
   if (req.session.user) return res.redirect('/');
-  res.sendFile(path.join(__dirname, 'public', 'signup.html'));
+  res.sendFile(path.join(__dirname, '..', 'public', 'signup.html'));
 });
 
 app.get('/purchase', requireAuth, (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'purchase.html'));
+  res.sendFile(path.join(__dirname, '..', 'public', 'purchase.html'));
 });
 
 app.get('/wallet', requireAuth, (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'wallet.html'));
+  res.sendFile(path.join(__dirname, '..', 'public', 'wallet.html'));
 });
 
 app.get('/orders', requireAuth, (req, res) => {
   // Serve the orders page (replaced with new content)
-  res.sendFile(path.join(__dirname, 'public', 'orders.html'));
+  res.sendFile(path.join(__dirname, '..', 'public', 'orders.html'));
 });
 
 app.get('/notifications', requireAuth, (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'notifications.html'));
+  res.sendFile(path.join(__dirname, '..', 'public', 'notifications.html'));
 });
 
 app.get('/profile', requireAuth, (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'profile.html'));
+  res.sendFile(path.join(__dirname, '..', 'public', 'profile.html'));
 });
 
 app.get('/admin-login', (req, res) => {
   if (req.session.user && req.session.user.isAdmin) return res.redirect('/admin');
-  res.sendFile(path.join(__dirname, 'public', 'admin-login.html'));
+  res.sendFile(path.join(__dirname, '..', 'public', 'admin-login.html'));
 });
 
 app.get('/admin', (req, res) => {
@@ -436,7 +464,7 @@ app.get('/admin', (req, res) => {
     return res.redirect('/admin-login');
   }
 
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+  res.sendFile(path.join(__dirname, '..', 'public', 'admin.html'));
 });
 
 // ====================
@@ -705,6 +733,27 @@ app.post('/api/login', async (req, res) => {
 });
 
 // Enhanced Get current user
+app.get('/api/current-user', requireAuth, async (req, res) => {
+  try {
+    const uid = req.session.user.uid;
+    const snap = await admin.database().ref('users/' + uid).once('value');
+    const userData = snap.val() || {};
+
+    // Merge session data with database fields we want the client to know
+    const user = Object.assign({}, req.session.user, {
+      phoneNumber: userData.phone || userData.phoneNumber || null,
+      walletBalance: userData.walletBalance || 0,
+      firstName: userData.firstName || null,
+      lastName: userData.lastName || null
+    });
+
+    res.json({ success: true, user });
+  } catch (err) {
+    console.error('Get user error:', err);
+    res.status(500).json({ success: false, error: 'Failed to fetch user' });
+  }
+});
+
 app.get('/api/user', requireAuth, async (req, res) => {
   try {
     const uid = req.session.user.uid;
