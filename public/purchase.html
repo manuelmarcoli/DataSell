@@ -55,6 +55,9 @@
         font-size: 0.9rem;
         background-color: var(--primary-color);
         color: white;
+        overflow: hidden;
+        background-size: cover;
+        background-position: center;
     }
 
     .app-main {
@@ -933,7 +936,6 @@
                 
                 if (userResult.success && userResult.user) {
                     currentUser = userResult.user;
-                    updateUserAvatar();
                     await loadWalletBalance();
                     
                     await initializeNetwork();
@@ -954,10 +956,13 @@
 
         // Update user avatar
         function updateUserAvatar() {
+            const avatarElement = document.getElementById('userAvatar');
+            if (!avatarElement) return;
+            
             if (currentUser && currentUser.displayName) {
                 const names = currentUser.displayName.split(' ');
                 const initials = names.map(name => name[0]).join('').toUpperCase();
-                document.getElementById('userAvatar').textContent = initials;
+                avatarElement.innerHTML = initials;
             }
         }
 

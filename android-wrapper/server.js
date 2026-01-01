@@ -7,12 +7,72 @@ const axios = require('axios');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
+const nodemailer = require('nodemailer');
 // rate limiting removed per request
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 // Do not set 'trust proxy' to avoid conflicts with express-rate-limit validation
 // (since we removed rate-limiting, this is not needed)
+
+// Email transporter configuration for password reset
+const emailTransporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD
+  }
+});
+
+// Verify email configuration on startup
+if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+  emailTransporter.verify((error, success) => {
+    if (error) {
+      console.log('⚠️ Email configuration issue:', error.message);
+    } else {
+      console.log('✅ Email service ready');
+    }
+  });
+}
+
+// Function to send password reset email
+async function sendPasswordResetEmail(email, resetLink, userName = 'User') {
+  try {
+    const mailOptions = {
+      from: `${process.env.EMAIL_FROM_NAME || 'DataSell'} <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Password Reset Request - DataSell',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 5px 5px 0 0;">
+            <h2 style="margin: 0;">Password Reset Request</h2>
+          </div>
+          <div style="background-color: #f9f9f9; padding: 20px; border: 1px solid #ddd; border-radius: 0 0 5px 5px;">
+            <p>Hello ${userName},</p>
+            <p>We received a request to reset the password for your DataSell account. If you did not make this request, please ignore this email.</p>
+            <p>To reset your password, click the button below:</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetLink}" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">Reset Password</a>
+            </div>
+            <p>Or copy and paste this link in your browser:</p>
+            <p style="word-break: break-all; color: #666; font-size: 12px;"><code>${resetLink}</code></p>
+            <p style="color: #999; font-size: 12px;">This link will expire in 1 hour.</p>
+            <hr style="border: none; border-top: 1px solid #ddd; margin: 20px 0;">
+            <p style="color: #999; font-size: 12px;">If you didn't request this, your account is still secure. The link will expire automatically.</p>
+            <p style="color: #999; font-size: 12px;">© 2026 DataSell. All rights reserved.</p>
+          </div>
+        </div>
+      `
+    };
+
+    await emailTransporter.sendMail(mailOptions);
+    console.log('📧 Password reset email sent to:', email);
+    return true;
+  } catch (error) {
+    console.error('❌ Email send error:', error.message);
+    return false;
+  }
+}
 
 // mNotify SMS configuration
 const MNOTIFY_API_KEY = process.env.MNOTIFY_API_KEY || '8QZ7zFXx1iFXvRYnDOmoyUabC';
@@ -349,7 +409,16 @@ app.get('/config.js', (req, res) => {
   };
   res.set('Content-Type', 'application/javascript');
   const vapid = process.env.FIREBASE_VAPID_KEY || null;
-  res.send(`window.__DOMAIN = ${JSON.stringify(domainEnv)}; window.__BASE_URL = ${JSON.stringify(base)}; window.__APK_URL = ${JSON.stringify(apkUrl)}; window.__FIREBASE_CONFIG = ${JSON.stringify(firebaseConfig)}; window.__FCM_VAPID_KEY = ${JSON.stringify(vapid)};`);
+  
+  // Safely serialize config to JavaScript
+  const configScript = `
+window.__DOMAIN = ${JSON.stringify(domainEnv)};
+window.__BASE_URL = ${JSON.stringify(base)};
+window.__APK_URL = ${JSON.stringify(apkUrl)};
+window.__FIREBASE_CONFIG = ${JSON.stringify(firebaseConfig)};
+window.__FCM_VAPID_KEY = ${JSON.stringify(vapid)};
+`;
+  res.send(configScript);
 });
 
 // Serve Firebase Messaging Service Worker dynamically with server-side config
@@ -404,6 +473,11 @@ app.get('/signup', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'signup.html'));
 });
 
+app.get('/forgot-password', (req, res) => {
+  if (req.session.user) return res.redirect('/');
+  res.sendFile(path.join(__dirname, 'public', 'forgot-password.html'));
+});
+
 app.get('/purchase', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'purchase.html'));
 });
@@ -444,6 +518,49 @@ app.get('/admin', (req, res) => {
 // ====================
 
 // Enhanced User Registration
+// ============ EMAIL VALIDATION FUNCTION ============
+// Validates email format and checks for common typos
+function validateEmail(email) {
+  // Basic email regex validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+  if (!emailRegex.test(email)) {
+    return { valid: false, error: 'Invalid email format' };
+  }
+
+  // Check for common domain typos
+  const commonDomains = {
+    'gmial.com': 'gmail.com',
+    'gmai.com': 'gmail.com',
+    'yahou.com': 'yahoo.com',
+    'yaho.com': 'yahoo.com',
+    'outlok.com': 'outlook.com',
+    'hotmial.com': 'hotmail.com',
+    'hotmai.com': 'hotmail.com'
+  };
+
+  const domain = email.split('@')[1]?.toLowerCase();
+  if (commonDomains[domain]) {
+    return { 
+      valid: false, 
+      error: `Did you mean ${email.split('@')[0]}@${commonDomains[domain]}? (detected typo in domain)` 
+    };
+  }
+
+  // Check email length
+  if (email.length > 254) {
+    return { valid: false, error: 'Email is too long' };
+  }
+
+  // Check for consecutive dots or invalid characters
+  if (email.includes('..') || /[<>()\\[\],;:\s]/g.test(email)) {
+    return { valid: false, error: 'Email contains invalid characters' };
+  }
+
+  // Email is valid
+  return { valid: true };
+}
+
 app.post('/api/signup', async (req, res) => {
   try {
     const { email, password, firstName, lastName, phone, acceptedTerms } = req.body;
@@ -453,6 +570,15 @@ app.post('/api/signup', async (req, res) => {
       return res.status(400).json({ 
         success: false, 
         error: 'All fields are required' 
+      });
+    }
+
+    // Email validation - NEW
+    const emailValidation = validateEmail(email.trim());
+    if (!emailValidation.valid) {
+      return res.status(400).json({ 
+        success: false, 
+        error: emailValidation.error 
       });
     }
 
@@ -704,6 +830,68 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+// Forgot Password - Handle password reset request
+app.post('/api/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ success: false, error: 'Email is required' });
+    }
+
+    console.log('🔑 Password reset request for email:', email);
+
+    // Find user by email in Firebase Auth
+    try {
+      const user = await admin.auth().getUserByEmail(email);
+      
+      // Generate password reset link
+      const resetLink = await admin.auth().generatePasswordResetLink(email);
+      
+      console.log('✅ Password reset link generated for user:', user.uid);
+      
+      // Store reset request in database with timestamp
+      const resetToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      const resetExpiresAt = Date.now() + (60 * 60 * 1000); // 1 hour expiration
+      
+      await admin.database().ref(`passwordResets/${user.uid}`).set({
+        email: email,
+        token: resetToken,
+        createdAt: new Date().toISOString(),
+        expiresAt: resetExpiresAt,
+        used: false
+      });
+
+      // Send email with password reset link
+      let emailSent = false;
+      if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+        emailSent = await sendPasswordResetEmail(email, resetLink, user.displayName || 'User');
+      } else {
+        console.log('⚠️ Email service not configured. Reset link logged for development only.');
+        console.log('📧 Password Reset Link (for development):', resetLink);
+      }
+
+      res.json({ 
+        success: true, 
+        message: 'If this email exists in our system, a password reset link has been sent to your email. Please check your inbox and spam folder.',
+        emailSent: emailSent,
+        resetLink: process.env.NODE_ENV === 'development' ? resetLink : undefined
+      });
+    } catch (authError) {
+      console.log('ℹ️ Email not found or invalid:', authError.message);
+      
+      // For security, return generic message even if user not found
+      res.json({ 
+        success: true, 
+        message: 'If this email exists in our system, a password reset link has been sent to your email. Please check your inbox and spam folder.'
+      });
+    }
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ success: false, error: 'An error occurred. Please try again later.' });
+  }
+});
+
 // Enhanced Get current user
 app.get('/api/user', requireAuth, async (req, res) => {
   try {
@@ -752,27 +940,36 @@ app.get('/api/profile', requireAuth, async (req, res) => {
     res.status(500).json({ success: false, error: 'Failed to fetch profile' });
   }
 });
-
 // Get user profile statistics
 app.get('/api/profile/stats', requireAuth, async (req, res) => {
   try {
     const uid = req.session.user.uid;
     
-    // Get total spent from orders
+    // Get total spent from orders (ONLY successful orders)
     const ordersSnap = await admin.database().ref('orders').orderByChild('userId').equalTo(uid).once('value');
-    const orders = ordersSnap.val() || {};
-    const totalOrders = Object.keys(orders).length;
-    const totalSpent = Object.values(orders).reduce((sum, order) => sum + (order.amount || 0), 0);
+    const allOrders = ordersSnap.val() || {};
+    
+    // Filter for successful orders only (status: 'delivered' or 'success')
+    const successfulOrders = Object.values(allOrders).filter(order => 
+      order.status === 'delivered' || order.status === 'success'
+    );
+    
+    const totalOrders = successfulOrders.length;
+    const totalSpent = successfulOrders.reduce((sum, order) => sum + (order.amount || 0), 0);
+    const successfulCount = totalOrders;
     
     // Get wallet info
     const userSnap = await admin.database().ref('users/' + uid).once('value');
     const userData = userSnap.val() || {};
     const walletBalance = userData.walletBalance || 0;
+    const accountStatus = userData.isDeactivated === true ? 'Deactivated' : 'Active';
 
     const stats = {
       totalOrders,
+      successfulOrders: successfulCount,
       totalSpent,
       walletBalance,
+      accountStatus,
       memberSince: userData.createdAt || null
     };
 
@@ -2548,6 +2745,135 @@ app.get('/api/firebase-config', requireAuth, (req, res) => {
   }
 
   res.json(config);
+});
+
+// ============ SEARCH ENDPOINT ============
+// Search for users by email pattern
+app.get('/api/admin/search-user/:emailPattern', requireAuth, async (req, res) => {
+  try {
+    // Only allow admin
+    if (req.session.user.email !== process.env.ADMIN_EMAIL) {
+      return res.status(403).json({ success: false, error: 'Admin only' });
+    }
+
+    const pattern = req.params.emailPattern.toLowerCase();
+    
+    // Get all users from database
+    const dbSnapshot = await admin.database().ref('users').once('value');
+    const dbUsers = dbSnapshot.val() || {};
+    
+    const matches = [];
+    for (const [uid, user] of Object.entries(dbUsers)) {
+      if (user.email.toLowerCase().includes(pattern)) {
+        matches.push({
+          uid,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          walletBalance: user.walletBalance,
+          createdAt: user.createdAt
+        });
+      }
+    }
+
+    res.json({
+      success: true,
+      pattern: pattern,
+      found: matches.length,
+      matches: matches
+    });
+  } catch (error) {
+    console.error('Search error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============ UPDATE USER EMAIL ENDPOINT ============
+// Update user email in both Auth and Database
+app.post('/api/admin/update-user-email', requireAuth, async (req, res) => {
+  try {
+    // Only allow admin
+    if (req.session.user.email !== process.env.ADMIN_EMAIL) {
+      return res.status(403).json({ success: false, error: 'Admin only' });
+    }
+
+    const { uid, newEmail } = req.body;
+
+    if (!uid || !newEmail) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'uid and newEmail are required' 
+      });
+    }
+
+    // Validate new email
+    const emailValidation = validateEmail(newEmail.trim());
+    if (!emailValidation.valid) {
+      return res.status(400).json({ 
+        success: false, 
+        error: emailValidation.error 
+      });
+    }
+
+    const trimmedEmail = newEmail.toLowerCase().trim();
+
+    // Check if new email already exists in database
+    const dbSnapshot = await admin.database().ref('users').once('value');
+    const dbUsers = dbSnapshot.val() || {};
+    const emailExists = Object.values(dbUsers).some(u => u.email === trimmedEmail);
+    
+    if (emailExists) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Email already exists in system' 
+      });
+    }
+
+    // Update Firebase Auth
+    try {
+      await admin.auth().updateUser(uid, {
+        email: trimmedEmail
+      });
+      console.log(`✅ Firebase Auth email updated for UID ${uid}`);
+    } catch (authError) {
+      console.error('❌ Auth update error:', authError.message);
+      return res.status(400).json({ 
+        success: false, 
+        error: `Auth error: ${authError.message}` 
+      });
+    }
+
+    // Update Database
+    // Find the user in database and update email
+    let userRef = null;
+    for (const [key, user] of Object.entries(dbUsers)) {
+      if (key === uid) {
+        userRef = key;
+        break;
+      }
+    }
+
+    if (!userRef) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'User not found in database' 
+      });
+    }
+
+    await admin.database().ref(`users/${userRef}/email`).set(trimmedEmail);
+    console.log(`✅ Database email updated for UID ${uid}`);
+
+    res.json({
+      success: true,
+      message: `Email updated successfully from ${dbUsers[userRef].email} to ${trimmedEmail}`,
+      uid: uid,
+      oldEmail: dbUsers[userRef].email,
+      newEmail: trimmedEmail
+    });
+  } catch (error) {
+    console.error('Email update error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
 // Enhanced Error handling middleware

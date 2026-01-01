@@ -71,6 +71,9 @@ body {
     color: white;
     border: 2px solid white;
     box-shadow: 0 2px 8px rgba(108, 99, 255, 0.2);
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
 }
 
 .app-main {
@@ -735,7 +738,6 @@ body {
                 const userData = await userRes.json();
                 if (!userData.success) throw new Error('Not authenticated');
                 currentUser = userData.user;
-                updateUserAvatar();
                 const ordersRes = await fetch('/api/orders', { credentials: 'include' });
                 if (ordersRes.status === 401) {
                     window.location.href = '/login';
@@ -760,10 +762,14 @@ body {
             }
         }
 
+        // Update user avatar
         function updateUserAvatar() {
+            const avatarElement = document.getElementById('userAvatar');
+            if (!avatarElement) return;
+            
             if (currentUser?.displayName) {
                 const initials = currentUser.displayName.split(' ').map(n => n[0]).join('').toUpperCase();
-                document.getElementById('userAvatar').textContent = initials;
+                avatarElement.innerHTML = initials;
             }
         }
 

@@ -14,8 +14,8 @@
     <meta name="apple-mobile-web-app-title" content="DataSell">
     <meta name="mobile-web-app-capable" content="yes">
     <link rel="manifest" href="/manifest.json">
-    <link rel="icon" type="image/x-icon" href="/images/app-icon.png">
-    <link rel="apple-touch-icon" href="/images/app-icon.png">
+    <link rel="icon" type="image/x-icon" href="/images/DATASELL NEW LOGO.png">
+    <link rel="apple-touch-icon" href="/images/DATASELL NEW LOGO.png">
     <script src="/config.js"></script>
     <link rel="stylesheet" href="/css/responsive.css">
     
@@ -67,6 +67,9 @@ body {
     font-size: 0.9rem;
     background-color: var(--primary-color);
     color: white;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
 }
 
 .app-main {
@@ -154,59 +157,6 @@ body {
     height: 60px;
 }
 
-.install-banner {
-    position: fixed;
-    left: 12px;
-    right: 12px;
-    bottom: 80px;
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    border: 1px solid rgba(37,99,235,0.3);
-    box-shadow: 0 8px 20px rgba(37,99,235,0.2);
-    padding: 12px 14px;
-    border-radius: 12px;
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    z-index: 1400;
-    animation: slideUpFromBottom 0.4s ease-out;
-}
-
-@keyframes slideUpFromBottom {
-    from {
-        transform: translateY(150%);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-@keyframes slideDownToBottom {
-    from {
-        transform: translateY(0);
-        opacity: 1;
-    }
-    to {
-        transform: translateY(150%);
-        opacity: 0;
-    }
-}
-
-.install-banner.hide {
-    animation: slideDownToBottom 0.4s ease-in;
-}
-
-.install-banner img{width:48px;height:48px;border-radius:8px;object-fit:contain}
-.install-banner .install-content{flex:1}
-.install-banner .install-title{font-weight:700;color:white;margin:0}
-.install-banner .install-sub{font-size:0.9rem;color:rgba(255,255,255,0.9);margin:0}
-.install-banner .install-actions{display:flex;gap:8px}
-.install-banner .btn-install{background:white;color:#2563eb;padding:.5rem .8rem;border-radius:8px;border:0;font-weight:600;cursor:pointer}
-.install-banner .btn-install:hover{opacity:0.9}
-.install-banner .btn-dismiss{background:transparent;border:0;color:rgba(255,255,255,0.8);cursor:pointer;font-weight:500}
-.install-banner .btn-dismiss:hover{color:white}
-
 /* Install modal */
 .install-modal-overlay{position:fixed;inset:0;background:rgba(2,6,23,0.5);display:none;align-items:center;justify-content:center;z-index:1300}
 .install-modal{background:white;border-radius:12px;padding:18px;max-width:420px;width:92%;box-shadow:0 20px 40px rgba(2,6,23,0.12);}
@@ -215,6 +165,16 @@ body {
 .install-modal .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
 .install-modal .btn-primary{background:#2563eb;color:#fff;padding:.5rem .9rem;border-radius:8px;border:0}
 .install-modal .btn-secondary{background:transparent;border:1px solid #e6eefc;padding:.45rem .8rem;border-radius:8px}
+
+/* Notification modal */
+.notification-modal-overlay{position:fixed;inset:0;background:rgba(2,6,23,0.5);display:none;align-items:center;justify-content:center;z-index:1400}
+.notification-modal{background:white;border-radius:12px;padding:24px;max-width:480px;width:92%;box-shadow:0 20px 40px rgba(2,6,23,0.15);text-align:center}
+.notification-modal h2{margin:0 0 16px;font-size:1.3rem;color:#1f2937;font-weight:700;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:6px}
+.notification-modal .notification-title{margin:0 0 12px;font-size:1.1rem;color:#333;font-weight:600}
+.notification-modal .notification-body{margin:12px 0 20px;color:#475569;line-height:1.5;font-size:0.95rem}
+.notification-modal .modal-actions{display:flex;gap:8px;justify-content:center;margin-top:16px}
+.notification-modal .btn-close{background:#2563eb;color:#fff;padding:0.6rem 1.2rem;border-radius:8px;border:0;cursor:pointer;font-weight:500}
+.notification-modal .btn-close:hover{background:#1d4ed8;transform:translateY(-1px)}
 
     .nav-item {
         flex: 1;
@@ -878,24 +838,12 @@ body {
         <h2 id="greetingText"></h2>
     </div>
 
-    <!-- Install banner: appears on devices promoting web app installation -->
-    <div id="installBanner" class="install-banner" style="display:none" role="dialog" aria-live="polite">
-        <img id="installLogo" src="/images/app-icon.png" alt="App logo">
-        <div class="install-content">
-            <div class="install-title">Add DataSell to Home Screen</div>
-            <div class="install-sub">Quick access to your favorite data store</div>
-        </div>
-        <div class="install-actions">
-            <button id="installBtn" class="btn-install" role="button">Install</button>
-            <button id="dismissInstall" class="btn-dismiss" aria-label="Dismiss">Later</button>
-        </div>
-    </div>
     <!-- Header -->
     <header class="app-header" style="padding: 0.5rem 0; border-bottom: 1px solid #e9ecef; background: white;">
         <div class="container px-2">
             <div class="d-flex justify-content-between align-items-center" style="min-height: 44px;">
                 <div class="d-flex align-items-center">
-                    <img src="/images/app-icon.png" alt="DataSell" style="height: 24px; width: auto; margin-right: 8px;">
+                    <img src="/images/DATASELL NEW LOGO.png" alt="DataSell" style="height: 80px; width: 80px; margin-right: 8px;">
                     <span class="app-title" style="font-size: 1.1rem; font-weight: 700; margin: 0; color: #333;">DataSell</span>
                 </div>
                 <div style="display:flex;align-items:center;gap:10px;">
@@ -1020,6 +968,18 @@ body {
         const POLL_INTERVAL = 30 * 1000;
         let pollTimer = null;
         
+        // API fetch helper with credentials included
+        async function apiFetch(url, options = {}) {
+            return fetch(url, {
+                ...options,
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                }
+            });
+        }
+        
         // Use sessionStorage to persist flags across page reloads within same session
         function hasShownGreeting() {
             return sessionStorage.getItem('ds_greeting_shown') === 'true';
@@ -1027,12 +987,15 @@ body {
         function markGreetingShown() {
             sessionStorage.setItem('ds_greeting_shown', 'true');
         }
-        function hasShownInstall() {
-            return sessionStorage.getItem('ds_install_shown') === 'true';
+
+        // Check and mark login notification as shown
+        function hasShownLoginNotification() {
+            return sessionStorage.getItem('ds_login_notification_shown') === 'true';
         }
-        function markInstallShown() {
-            sessionStorage.setItem('ds_install_shown', 'true');
+        function markLoginNotificationShown() {
+            sessionStorage.setItem('ds_login_notification_shown', 'true');
         }
+
         
         // Reset flags if user is not logged in (new session or login required)
         function resetBannerFlagsIfLoggedOut() {
@@ -1040,7 +1003,7 @@ body {
             // If no currentUser, clear the flags
             if (!currentUser || !currentUser.uid) {
                 sessionStorage.removeItem('ds_greeting_shown');
-                sessionStorage.removeItem('ds_install_shown');
+                sessionStorage.removeItem('ds_login_notification_shown');
             }
         }
 
@@ -1084,21 +1047,37 @@ body {
         // Check authentication and load user data
         async function initializeApp() {
             try {
+                console.log('🔄 initializeApp: Starting auth check...');
                 const response = await apiFetch('/api/user');
-                console.log('/api/user status', response.status);
+                console.log('✅ /api/user response status:', response.status);
+                
+                if (!response.ok) {
+                    console.error('❌ Response not ok:', response.status);
+                    window.location.href = '/login';
+                    return;
+                }
+                
                 const result = await response.json();
-                console.log('/api/user result', result);
+                console.log('✅ /api/user result:', result);
 
                 if (result.success && result.user) {
                     currentUser = result.user;
                     // Reset banner flags on successful login - they'll be set when banners are shown
                     sessionStorage.removeItem('ds_greeting_shown');
-                    sessionStorage.removeItem('ds_install_shown');
                     
+                    // Update user avatar
                     updateUserAvatar();
                     showGreetingCard(); // Show greeting card
-                    await loadWalletBalance();
-                    await loadRecentTransactions();
+                    // Load wallet balance and recent transactions in parallel
+                    await Promise.all([
+                        loadWalletBalance(),
+                        loadRecentTransactions()
+                    ]);
+                    
+                    // Load and display notification popup after login
+                    try {
+                        await showLoginNotification();
+                    } catch (e) { console.warn('showLoginNotification failed', e); }
 
                     // Only request notification permission after auth is established
                     try {
@@ -1106,11 +1085,66 @@ body {
                     } catch (e) { console.warn('requestPermission failed', e); }
                 } else {
                     // Redirect to login if not authenticated
+                    console.warn('❌ No user in response, redirecting to login');
                     window.location.href = '/login';
                 }
             } catch (error) {
                 console.error('Auth check failed:', error);
+                console.error('Error message:', error?.message || 'Unknown error');
+                console.error('Error stack:', error?.stack);
+                console.error('Full error:', error);
                 window.location.href = '/login';
+            }
+        }
+
+        // Load and display notification popup after login
+        async function showLoginNotification() {
+            // Only show once per login session
+            if (hasShownLoginNotification()) return;
+            
+            try {
+                const response = await apiFetch('/api/notifications');
+                const result = await response.json();
+                
+                if (result.success && result.notifications && result.notifications.length > 0) {
+                    // Get the latest notification
+                    const latestNotification = result.notifications[0];
+                    
+                    // Display notification in modal
+                    const notificationTitle = document.getElementById('notificationTitle');
+                    const notificationBody = document.getElementById('notificationBody');
+                    const notificationModalOverlay = document.getElementById('notificationModalOverlay');
+                    const closeNotificationBtn = document.getElementById('closeNotificationBtn');
+                    
+                    // Set the notification title
+                    notificationTitle.innerHTML = latestNotification.title || '';
+                    
+                    // Set the notification message
+                    notificationBody.innerHTML = `
+                        <p>${latestNotification.body || 'You have a new notification'}</p>
+                        ${latestNotification.imageUrl ? `<img src="${latestNotification.imageUrl}" style="width:100%;border-radius:8px;margin-top:12px;max-height:200px;object-fit:cover;">` : ''}
+                    `;
+                    
+                    // Show the modal
+                    notificationModalOverlay.style.display = 'flex';
+                    
+                    // Mark as shown
+                    markLoginNotificationShown();
+                    
+                    // Close button handler
+                    closeNotificationBtn.onclick = () => {
+                        notificationModalOverlay.style.display = 'none';
+                    };
+                    
+                    // Also close when clicking outside the modal
+                    notificationModalOverlay.onclick = (e) => {
+                        if (e.target === notificationModalOverlay) {
+                            notificationModalOverlay.style.display = 'none';
+                        }
+                    };
+                }
+            } catch (error) {
+                console.error('Failed to load notification for display:', error);
             }
         }
 
@@ -1139,10 +1173,13 @@ body {
 
         // Update user avatar with initials
         function updateUserAvatar() {
+            const avatarElement = document.getElementById('userAvatar');
+            if (!avatarElement) return;
+            
             if (currentUser && currentUser.displayName) {
                 const names = currentUser.displayName.split(' ');
                 const initials = names.map(name => name[0]).join('').toUpperCase();
-                document.getElementById('userAvatar').textContent = initials;
+                avatarElement.innerHTML = initials;
             }
         }
 
@@ -1169,22 +1206,12 @@ body {
         // Load recent transactions
         async function loadRecentTransactions() {
             try {
-                // Fetch both wallet transactions and orders
-                const [transRes, ordersRes] = await Promise.all([
-                    apiFetch('/api/wallet/transactions'),
-                    apiFetch('/api/orders')
-                ]);
+                // Fetch orders only
+                const ordersRes = await apiFetch('/api/orders');
 
-                const transResult = await transRes.json();
                 const ordersResult = await ordersRes.json();
                 
                 let allPurchases = [];
-
-                // Add wallet transactions (purchases)
-                if (transResult.success && transResult.transactions && transResult.transactions.length > 0) {
-                    const purchases = transResult.transactions.filter(t => t.type === 'purchase' && (t.status === 'success' || t.status === 'delivered'));
-                    allPurchases = allPurchases.concat(purchases);
-                }
 
                 // Add orders (latest purchases)
                 if (ordersResult.success && ordersResult.orders && ordersResult.orders.length > 0) {
@@ -1237,6 +1264,7 @@ body {
                 
                 const purchasesHTML = recentPurchases.map(purchase => {
                     const packageName = purchase.description || purchase.packageName || 'Data Package';
+                    const network = (purchase.network || 'Unknown').toUpperCase();
                     const amount = purchase.amount || 0;
                     const displayAmount = typeof amount === 'number' ? Math.abs(amount) : Math.abs(parseFloat(amount) || 0);
                     const purchaseTime = new Date(purchase.timestamp);
@@ -1250,6 +1278,13 @@ body {
                         minute: '2-digit'
                     });
                     
+                    // Check if purchase is less than 1 hour old
+                    const currentTime = new Date().getTime();
+                    const purchaseTimeMs = purchaseTime.getTime();
+                    const timeDiffMs = currentTime - purchaseTimeMs;
+                    const oneHourMs = 60 * 60 * 1000; // 1 hour in milliseconds
+                    const isRecentPurchase = timeDiffMs < oneHourMs;
+                    
                     let statusClass = 'status-success';
                     let statusText = 'Delivered';
 
@@ -1261,11 +1296,26 @@ body {
                             statusClass = 'status-pending';
                             statusText = 'Processing';
                         } else if (purchase.status === 'Delivered' || purchase.status === 'success') {
-                            statusClass = 'status-success';
-                            statusText = 'Delivered';
+                            // If purchase is less than 1 hour old, show Processing, otherwise Delivered
+                            if (isRecentPurchase) {
+                                statusClass = 'status-pending';
+                                statusText = 'Processing';
+                            } else {
+                                statusClass = 'status-success';
+                                statusText = 'Delivered';
+                            }
                         } else {
                             statusClass = 'status-pending';
                             statusText = purchase.status;
+                        }
+                    } else {
+                        // If no status provided, use time-based logic
+                        if (isRecentPurchase) {
+                            statusClass = 'status-pending';
+                            statusText = 'Processing';
+                        } else {
+                            statusClass = 'status-success';
+                            statusText = 'Delivered';
                         }
                     }
                     
@@ -1273,7 +1323,7 @@ body {
                         <div class="recent-purchase" onclick="window.location.href='/orders'">
                             <div class="purchase-info">
                                 <div class="purchase-details">
-                                    <h6>${packageName}</h6>
+                                    <h6>${packageName} - ${network}</h6>
                                     <p>${timeString} at ${timeOfDay}</p>
                                 </div>
                                 <div class="text-end">
@@ -1372,9 +1422,10 @@ body {
                 const result = await response.json();
                 
                 if (result.success) {
-                    // Reset flags so greeting and install banner show again on next login
+                    // Reset flags so greeting, notification and install banner show again on next login
                     sessionStorage.removeItem('ds_greeting_shown');
                     sessionStorage.removeItem('ds_install_shown');
+                    sessionStorage.removeItem('ds_login_notification_shown');
                     window.location.href = '/login';
                 }
             } catch (error) {
@@ -1382,6 +1433,7 @@ body {
                 // Reset flags even on error to allow fresh start on next login
                 sessionStorage.removeItem('ds_greeting_shown');
                 sessionStorage.removeItem('ds_install_shown');
+                sessionStorage.removeItem('ds_login_notification_shown');
                 window.location.href = '/login';
             }
         }
@@ -1425,6 +1477,22 @@ body {
                 <button id="dontShowBtn" class="btn-secondary">Don't show again</button>
                 <button id="closeModalBtn" class="btn-secondary">Close</button>
                 <button id="installWebAppBtn" class="btn-primary">Install Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification modal for login alerts -->
+    <div id="notificationModalOverlay" class="notification-modal-overlay" role="dialog" aria-modal="true">
+        <div class="notification-modal" id="notificationModal">
+            <h2>NOTIFICATION</h2>
+            <div class="notification-title" id="notificationTitle">
+                <!-- Notification title will be inserted here -->
+            </div>
+            <div class="notification-body" id="notificationBody">
+                <!-- Notification message will be inserted here -->
+            </div>
+            <div class="modal-actions">
+                <button id="closeNotificationBtn" class="btn-close">OK</button>
             </div>
         </div>
     </div>
@@ -1505,169 +1573,12 @@ body {
                     }
                 }
 
-                // When install button is clicked
-                document.addEventListener('DOMContentLoaded', () => {
-                    const installBtn = document.getElementById('installBtn');
-                    if (installBtn) {
-                        installBtn.addEventListener('click', async (e) => {
-                            e.preventDefault();
-                            if (deferredPrompt) {
-                                console.log('Showing install prompt');
-                                // Show the install prompt
-                                deferredPrompt.prompt();
-                                // Wait for the user to respond to the prompt
-                                const { outcome } = await deferredPrompt.userChoice;
-                                console.log(`User response to the install prompt: ${outcome}`);
-                                if (outcome === 'accepted') {
-                                    isPWAInstalled = true;
-                                }
-                                deferredPrompt = null;
-                            } else {
-                                console.warn('No deferred prompt available');
-                            }
-                            // Hide the banner
-                            const banner = document.getElementById('installBanner');
-                            if (banner) banner.style.display = 'none';
-                        });
-                    }
-
-                    // Dismiss banner
-                    const dismissBtn = document.getElementById('dismissInstall');
-                    if (dismissBtn) {
-                        dismissBtn.addEventListener('click', function(e){
-                            e.preventDefault();
-                            const banner = document.getElementById('installBanner');
-                            if (banner) banner.style.display = 'none';
-                        });
-                    }
-
-                    // Modal handlers
-                    const modalOverlay = document.getElementById('installModalOverlay');
-                    const installWebAppBtn = document.getElementById('installWebAppBtn');
-                    const closeModalBtn = document.getElementById('closeModalBtn');
-                    const dontShowBtn = document.getElementById('dontShowBtn');
-
-                    // Install from modal
-                    if (installWebAppBtn) {
-                        installWebAppBtn.addEventListener('click', async (e) => {
-                            e.preventDefault();
-                            if (deferredPrompt) {
-                                deferredPrompt.prompt();
-                                const { outcome } = await deferredPrompt.userChoice;
-                                console.log(`User response to the install prompt: ${outcome}`);
-                                if (outcome === 'accepted') {
-                                    isPWAInstalled = true;
-                                }
-                                deferredPrompt = null;
-                            }
-                            if (modalOverlay) modalOverlay.style.display = 'none';
-                        });
-                    }
-
-                    // Close modal
-                    if (closeModalBtn) {
-                        closeModalBtn.addEventListener('click', function(){
-                            if (modalOverlay) modalOverlay.style.display = 'none';
-                        });
-                    }
-
-                    // Don't show again
-                    if (dontShowBtn) {
-                        dontShowBtn.addEventListener('click', function(){
-                            if (modalOverlay) modalOverlay.style.display = 'none';
-                            const banner = document.getElementById('installBanner');
-                            if (banner) banner.style.display = 'none';
-                            localStorage.setItem('ds_install_dismissed','1');
-                        });
-                    }
-                });
-
-                // Handle app installed event
-                window.addEventListener('appinstalled', () => {
-                    console.log('DataSell web app installed successfully');
-                    const banner = document.getElementById('installBanner');
-                    if (banner) banner.style.display = 'none';
-                    localStorage.removeItem('ds_install_dismissed');
-                    isPWAInstalled = true;
-                });
-
-                // Show banner on page load if not dismissed (fallback for devices without beforeinstallprompt)
-                window.addEventListener('load', () => {
-                    // Check if already shown in this session
-                    if (sessionStorage.getItem('ds_install_shown') === 'true') {
-                        return;
-                    }
-                    
-                    const isDismissed = localStorage.getItem('ds_install_dismissed') === '1';
-                    const isOnAPKSupported = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                    
-                    if (!isDismissed && isOnAPKSupported && !isPWAInstalled) {
-                        // Only show after a delay to not interfere with initial page load
-                        setTimeout(() => {
-                            const banner = document.getElementById('installBanner');
-                            if (banner && !deferredPrompt) {
-                                // This is a fallback for older devices
-                                // Check again before showing (in case it was shown by beforeinstallprompt)
-                                if (sessionStorage.getItem('ds_install_shown') === 'true') {
-                                    return;
-                                }
-                                console.log('Showing fallback install banner');
-                                banner.style.display = 'flex';
-                                sessionStorage.setItem('ds_install_shown', 'true');
-                                
-                                // Auto-hide after 5 seconds
-                                setTimeout(() => {
-                                    try {
-                                        banner.classList.add('hide');
-                                        setTimeout(() => {
-                                            banner.style.display = 'none';
-                                            banner.classList.remove('hide');
-                                        }, 400);
-                                    } catch (e) {}
-                                }, 5000);
-                            }
-                        }, 2000);
-                    }
-                });
-
-                // Prevent banner from showing when tab becomes visible again
-                document.addEventListener('visibilitychange', () => {
-                    if (!document.hidden && sessionStorage.getItem('ds_install_shown') === 'true') {
-                        // Tab became visible - ensure banner stays hidden if already shown
-                        const banner = document.getElementById('installBanner');
-                        if (banner) {
-                            banner.style.display = 'none';
-                        }
-                    }
-                });
-
-                // Monitor and prevent any style changes to banner if already shown
-                if (sessionStorage.getItem('ds_install_shown') === 'true') {
-                    const banner = document.getElementById('installBanner');
-                    if (banner) {
-                        // Use MutationObserver to catch any attempts to show the banner
-                        const observer = new MutationObserver((mutations) => {
-                            mutations.forEach((mutation) => {
-                                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-                                    // Someone tried to change the style - revert it
-                                    if (banner.style.display !== 'none') {
-                                        console.log('Reverting banner display style change');
-                                        banner.style.display = 'none';
-                                        banner.style.visibility = 'hidden';
-                                    }
-                                }
-                            });
-                        });
-                        
-                        observer.observe(banner, { 
-                            attributes: true, 
-                            attributeFilter: ['style'],
-                            subtree: false
-                        });
-                    }
-                }
-
-            } catch (err) { console.error('Install banner error', err); }
+                // Browser native PWA installation prompt will be handled automatically
+                // The browser will show its native "Install App" or "Add to Home Screen" prompt
+                // when the PWA meets installation criteria
+            } catch (e) {
+                console.error('PWA installation script error:', e);
+            }
         })();
     </script>
 

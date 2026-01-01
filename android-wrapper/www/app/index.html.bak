@@ -800,19 +800,32 @@ body {
             if (purchases.length > 0) {
                 const lastPurchase = purchases[0];
                 // Extract package name from description (format: "1GB - MTN")
-                const packageName = lastPurchase.description || 'Data Package';
+                const packageName = lastPurchase.description || lastPurchase.packageName || 'Data Package';
+                const network = (lastPurchase.network || 'Unknown').toUpperCase();
                 const amount = Math.abs(lastPurchase.amount); // Remove negative sign for purchases
+                const displayPackage = packageName.includes('-') ? packageName : `${packageName} - ${network}`;
+                
+                // Check if purchase is less than 1 hour old
+                const purchaseTime = new Date(lastPurchase.timestamp);
+                const currentTime = new Date().getTime();
+                const purchaseTimeMs = purchaseTime.getTime();
+                const timeDiffMs = currentTime - purchaseTimeMs;
+                const oneHourMs = 60 * 60 * 1000; // 1 hour in milliseconds
+                const isRecentPurchase = timeDiffMs < oneHourMs;
+                
+                const statusClass = isRecentPurchase ? 'status-pending' : 'status-success';
+                const statusText = isRecentPurchase ? 'Processing' : 'Delivered';
                 
                 lastPurchaseContent.innerHTML = `
                     <div class="recent-purchase" onclick="window.location.href='/orders'">
                         <div class="purchase-info">
                             <div class="purchase-details">
-                                <h6>${packageName}</h6>
+                                <h6>${displayPackage}</h6>
                                 <p>${new Date(lastPurchase.timestamp).toLocaleDateString()}</p>
                             </div>
                             <div class="text-end">
                                 <div class="purchase-amount">₵${amount.toFixed(2)}</div>
-                                <span class="purchase-status status-success">Success</span>
+                                <span class="purchase-status ${statusClass}">${statusText}</span>
                             </div>
                         </div>
                     </div>
@@ -825,10 +838,13 @@ body {
                 recentPurchases.forEach(purchase => {
                     const purchaseElement = document.createElement('div');
                     purchaseElement.className = 'recent-purchase';
+                    const packageName = purchase.description || purchase.packageName || 'Data Package';
+                    const network = (purchase.network || 'Unknown').toUpperCase();
+                    const displayPackage = packageName.includes('-') ? packageName : `${packageName} - ${network}`;
                     purchaseElement.innerHTML = `
                         <div class="purchase-info">
                             <div class="purchase-details">
-                                <h6>${purchase.description || 'Data Package'}</h6>
+                                <h6>${displayPackage}</h6>
                                 <p>${new Date(purchase.timestamp).toLocaleDateString()}</p>
                             </div>
                             <div class="text-end">
