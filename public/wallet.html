@@ -1109,7 +1109,7 @@ async function initializeApp() {
             console.log('🔐 Verifying payment with reference:', reference);
             notyf.success('Verifying payment...');
 
-            const response = await fetch(`/api/verify-payment/${reference}`);
+            const response = await fetch(`/api/verify-payment/${reference}`, { credentials: 'include' });
             console.log('📡 Verify response status:', response.status);
             
             const result = await response.json();
