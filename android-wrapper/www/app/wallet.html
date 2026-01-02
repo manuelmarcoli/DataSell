@@ -807,6 +807,9 @@ body {
     // Initialize app
 async function initializeApp() {
     try {
+        // ✅ CHECK PAYSTACK CALLBACK FIRST (before auth check)
+        checkPaystackCallback();
+        
         // Check authentication
         const userResponse = await fetch('/api/user');
         const userResult = await userResponse.json();
@@ -817,9 +820,6 @@ async function initializeApp() {
             await loadWalletBalance();
             await loadTransactions();
             setupEventListeners();
-            
-            // ✅ ADD THIS: Check for Paystack callback
-            checkPaystackCallback();
         } else {
             window.location.href = '/login';
         }
@@ -1098,10 +1098,14 @@ async function initializeApp() {
     // Verify payment
     async function verifyPayment(reference) {
         try {
+            console.log('🔐 Verifying payment with reference:', reference);
             notyf.success('Verifying payment...');
 
             const response = await fetch(`/api/verify-payment/${reference}`);
+            console.log('📡 Verify response status:', response.status);
+            
             const result = await response.json();
+            console.log('✅ Verify response data:', result);
 
             if (result.success) {
                 notyf.success(`Payment successful! ₵${result.amount} added to your wallet.`);
@@ -1117,7 +1121,7 @@ async function initializeApp() {
                 throw new Error(result.error || 'Payment verification failed. Please contact support.');
             }
         } catch (error) {
-            console.error('Payment verification error:', error);
+            console.error('❌ Payment verification error:', error);
             notyf.error('Payment verification failed: ' + error.message);
         }
     }
@@ -1128,15 +1132,22 @@ function checkPaystackCallback() {
     const reference = urlParams.get('trxref') || urlParams.get('reference');
     const success = urlParams.get('success');
     
-    console.log('🔄 Checking Paystack callback:', { reference, success });
+    console.log('🔄 Checking Paystack callback:', { reference, success, fullUrl: window.location.href });
     
     if (reference && success === 'true') {
-        console.log('✅ Paystack callback detected, verifying payment...');
+        console.log('✅ Paystack callback detected, verifying payment with reference:', reference);
         verifyPayment(reference);
         
-        // Clean URL to remove Paystack parameters
-        const cleanUrl = window.location.pathname;
-        window.history.replaceState({}, document.title, cleanUrl);
+        // Clean URL to remove Paystack parameters (after a short delay)
+        setTimeout(() => {
+            const cleanUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, cleanUrl);
+            console.log('🧹 URL cleaned');
+        }, 500);
+    } else if (reference) {
+        console.warn('⚠️ Reference found but success != true:', { reference, success });
+    } else {
+        console.log('ℹ️ No Paystack callback parameters found');
     }
 }
 
