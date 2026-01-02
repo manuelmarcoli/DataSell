@@ -1047,6 +1047,13 @@ body {
         // Check authentication and load user data
         async function initializeApp() {
             try {
+                // Clean up Paystack callback parameters from URL
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.has('trxref') || urlParams.has('reference')) {
+                    console.log('🧹 Cleaning Paystack callback parameters from URL');
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+
                 console.log('🔄 initializeApp: Starting auth check...');
                 const response = await apiFetch('/api/user');
                 console.log('✅ /api/user response status:', response.status);

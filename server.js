@@ -228,7 +228,14 @@ class FirebaseSessionStore extends session.Store {
       if (data && data.expires > Date.now()) {
         // Session still valid
         console.log('✅ Session store: GET found valid session for', sessionId);
-        callback(null, JSON.parse(data.session));
+        try {
+          const parsedSession = data.session ? JSON.parse(data.session) : null;
+          callback(null, parsedSession);
+        } catch (parseError) {
+          console.error('❌ Error parsing session data:', parseError);
+          this.sessionsRef.child(sessionId).remove();
+          callback(null, null);
+        }
       } else if (data) {
         // Session expired, delete it
         console.log('⏰ Session store: GET found expired session for', sessionId, '- deleting');
@@ -1545,7 +1552,7 @@ app.post('/api/initialize-payment', requireAuth, async (req, res) => {
       {
         email,
         amount: paystackAmount,
-        callback_url: `${process.env.BASE_URL}/wallet?success=true`,
+        callback_url: `${process.env.BASE_URL}/payment-callback`,
         metadata: {
           userId: userId,
           purpose: 'wallet_funding',
@@ -1561,12 +1568,27 @@ app.post('/api/initialize-payment', requireAuth, async (req, res) => {
       }
     );
 
+    console.log('✅ Paystack initialization successful:', {
+      authorizationUrl: paystackResponse.data.data?.authorization_url,
+      accessCode: paystackResponse.data.data?.access_code,
+      reference: paystackResponse.data.data?.reference,
+      status: paystackResponse.data.status,
+      amount: paystackAmount,
+      originalAmount: amount
+    });
+
     res.json(paystackResponse.data);
   } catch (error) {
-    console.error('Paystack initialization error:', error);
+    console.error('❌ Paystack initialization error:', {
+      message: error.message,
+      paystackResponse: error.response?.data,
+      status: error.response?.status,
+      headers: error.response?.headers
+    });
     res.status(500).json({ 
       success: false, 
-      error: error.response?.data?.message || 'Payment initialization failed' 
+      error: error.response?.data?.message || 'Payment initialization failed',
+      details: error.response?.data
     });
   }
 });
@@ -1643,6 +1665,351 @@ app.get('/api/verify-payment/:reference', requireAuth, async (req, res) => {
       success: false, 
       error: 'Payment verification failed' 
     });
+  }
+});
+
+// Direct payment callback endpoint (server-side verification and redirect)
+app.get('/payment-callback', async (req, res) => {
+  try {
+    // Paystack sends either 'reference' or 'trxref' parameter
+    const reference = req.query.reference || req.query.trxref;
+    
+    if (!reference) {
+      console.log('❌ No reference found in callback');
+      return res.redirect('/');
+    }
+
+    console.log('💳 Payment callback received for reference:', reference);
+
+    // Verify payment with Paystack
+    const paystackResponse = await axios.get(
+      `${process.env.PAYSTACK_BASE_URL}/transaction/verify/${reference}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${process.env.PAYSTACK_SECRET_KEY}`
+        },
+        timeout: 15000
+      }
+    );
+
+    const result = paystackResponse.data;
+    
+    if (result.data.status === 'success') {
+      console.log('✅ Paystack payment verified as successful');
+      
+      // Get metadata
+      const metadata = result.data.metadata;
+      const userId = metadata.userId;
+      const originalAmount = metadata.originalAmount || (result.data.amount / 100);
+      const amount = parseFloat(originalAmount);
+      
+      // Credit wallet
+      const userRef = admin.database().ref('users/' + userId);
+      const userSnapshot = await userRef.once('value');
+      const currentBalance = userSnapshot.val().walletBalance || 0;
+      
+      await userRef.update({ 
+        walletBalance: currentBalance + amount 
+      });
+
+      console.log(`💰 Wallet credited: ${userId} received ₵${amount}`);
+
+      // Record payment
+      const paymentRef = admin.database().ref('payments').push();
+      await paymentRef.set({
+        userId,
+        amount: amount,
+        paystackAmount: result.data.amount / 100,
+        fee: (result.data.amount / 100) - amount,
+        reference,
+        status: 'success',
+        paystackData: result.data,
+        timestamp: new Date().toISOString()
+      });
+
+      // Send SMS notification
+      try {
+        const userData = userSnapshot.val() || {};
+        const username = userData.displayName || userData.username || userData.name || userData.email || 'Customer';
+        const phoneFallback = userData.phone || userData.phoneNumber || '';
+        const message = `hello ${username} your DataSell has been credited with ${amount} Thank you for choosing DataSell`;
+        sendSmsToUser(userId, phoneFallback, message);
+      } catch (smsErr) {
+        console.error('SMS notification error:', smsErr);
+      }
+
+      // Store payment success in session for confirmation page
+      req.session.paymentConfirmation = {
+        amount: amount,
+        userId: userId,
+        timestamp: new Date().toISOString()
+      };
+      
+      console.log('💾 Payment confirmation stored in session:', req.session.paymentConfirmation);
+      
+      req.session.save((err) => {
+        if (err) {
+          console.error('❌ Session save error:', err);
+          // Redirect with amount in URL as fallback
+          return res.redirect(`/payment-confirmation?amount=${amount}`);
+        }
+        console.log('✅ Session saved successfully, redirecting to confirmation page');
+        // Redirect to confirmation page
+        res.redirect('/payment-confirmation');
+      });
+    } else {
+      console.log('❌ Payment verification failed: status is not success');
+      res.redirect('/payment-confirmation?status=failed');
+    }
+  } catch (error) {
+    console.error('Payment callback error:', error);
+    res.redirect('/payment-confirmation?status=error');
+  }
+});
+
+// Payment confirmation page
+app.get('/payment-confirmation', (req, res) => {
+  const status = req.query.status || 'success';
+  const urlAmount = parseFloat(req.query.amount) || null;
+  const confirmation = req.session.paymentConfirmation;
+  
+  // Get amount from session or URL parameter
+  const amount = confirmation?.amount || urlAmount;
+  
+  if (status === 'success' && amount) {
+    res.send(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Payment Successful | DataSell</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <style>
+          body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+          }
+          .confirmation-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 60px 40px;
+            text-align: center;
+            max-width: 500px;
+            animation: slideUp 0.6s ease-out;
+          }
+          @keyframes slideUp {
+            from {
+              opacity: 0;
+              transform: translateY(30px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #10b981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            animation: scaleIn 0.5s ease-out;
+          }
+          @keyframes scaleIn {
+            from {
+              transform: scale(0);
+            }
+            to {
+              transform: scale(1);
+            }
+          }
+          .success-icon svg {
+            width: 50px;
+            height: 50px;
+            color: white;
+            stroke-width: 2;
+          }
+          h1 {
+            color: #1f2937;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 15px;
+          }
+          .amount {
+            font-size: 48px;
+            font-weight: 700;
+            color: #10b981;
+            margin: 20px 0;
+          }
+          .currency {
+            font-size: 28px;
+          }
+          p {
+            color: #6b7280;
+            font-size: 16px;
+            margin: 15px 0;
+          }
+          .btn-continue {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 15px 60px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 50px;
+            margin-top: 30px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+          }
+          .btn-continue:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            color: white;
+            text-decoration: none;
+          }
+          .timer {
+            color: #9ca3af;
+            font-size: 14px;
+            margin-top: 20px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="confirmation-card">
+          <div class="success-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <h1>Payment Successful!</h1>
+          <p>Your wallet has been credited with</p>
+          <div class="amount"><span class="currency">₵</span>${amount.toFixed(2)}</div>
+          <p>Your funds are now available to use immediately.</p>
+          <a href="/" class="btn btn-continue">Return to Homepage</a>
+          <div class="timer">Redirecting in <span id="countdown">5</span> seconds...</div>
+        </div>
+        
+        <script>
+          let count = 5;
+          const interval = setInterval(() => {
+            count--;
+            document.getElementById('countdown').textContent = count;
+            if (count === 0) {
+              clearInterval(interval);
+              window.location.href = '/';
+            }
+          }, 1000);
+        </script>
+      </body>
+      </html>
+    `);
+  } else {
+    // Failed or error state
+    res.send(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Payment Failed | DataSell</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <style>
+          body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+          }
+          .confirmation-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 60px 40px;
+            text-align: center;
+            max-width: 500px;
+            animation: slideUp 0.6s ease-out;
+          }
+          @keyframes slideUp {
+            from {
+              opacity: 0;
+              transform: translateY(30px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          .error-icon {
+            width: 80px;
+            height: 80px;
+            background: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+          }
+          .error-icon svg {
+            width: 50px;
+            height: 50px;
+            color: white;
+          }
+          h1 {
+            color: #1f2937;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 15px;
+          }
+          p {
+            color: #6b7280;
+            font-size: 16px;
+            margin: 15px 0;
+          }
+          .btn-continue {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 15px 60px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 50px;
+            margin-top: 30px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+          }
+          .btn-continue:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            color: white;
+            text-decoration: none;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="confirmation-card">
+          <div class="error-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </div>
+          <h1>Payment Failed</h1>
+          <p>We couldn't process your payment. Please try again.</p>
+          <a href="/wallet" class="btn btn-continue">Return to Wallet</a>
+        </div>
+      </body>
+      </html>
+    `);
   }
 });
 
