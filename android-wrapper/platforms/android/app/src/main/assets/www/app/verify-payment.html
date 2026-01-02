@@ -357,11 +357,14 @@ h3 {
         const urlParams = new URLSearchParams(window.location.search);
         const reference = urlParams.get('reference');
         const trxref = urlParams.get('trxref');
+        const type = urlParams.get('type') || 'wallet';
 
         // Use the reference from Paystack callback
         const paymentReference = reference || trxref;
 
-        if (paymentReference) {
+        if (paymentReference && type === 'wallet') {
+            verifyWalletFunding(paymentReference);
+        } else if (paymentReference) {
             processPaymentVerification(paymentReference);
         } else {
             document.getElementById('paymentStatus').innerHTML = `
@@ -369,10 +372,64 @@ h3 {
                     <i class="fas fa-exclamation-triangle"></i>
                     No payment reference found. Please try again.
                 </div>
-                <a href="/purchase" class="btn btn-primary mt-3">
-                    <i class="fas fa-arrow-left"></i> Back to Purchase
+                <a href="/" class="btn btn-primary mt-3">
+                    <i class="fas fa-arrow-left"></i> Go Home
                 </a>
             `;
+        }
+
+        async function verifyWalletFunding(reference) {
+            try {
+                document.getElementById('paymentStatus').innerHTML = `
+                    <div class="alert alert-info">
+                        <i class="fas fa-sync-alt fa-spin"></i>
+                        Verifying wallet funding reference: ${reference}
+                    </div>
+                `;
+
+                const response = await fetch(`/api/verify-payment/${reference}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('paymentStatus').innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            Wallet funded successfully! Amount: ₵${result.amount}
+                        </div>
+                        <div class="mt-3">
+                            <a href="/wallet" class="btn btn-success">
+                                <i class="fas fa-wallet"></i> View Wallet
+                            </a>
+                            <a href="/purchase" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Make a Purchase
+                            </a>
+                        </div>
+                    `;
+                    
+                    // Redirect to wallet after 3 seconds
+                    setTimeout(() => {
+                        window.location.href = '/wallet';
+                    }, 3000);
+                } else {
+                    throw new Error(result.error || 'Payment verification failed');
+                }
+            } catch (error) {
+                console.error('Wallet funding error:', error);
+                document.getElementById('paymentStatus').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Verification failed: ${error.message}
+                    </div>
+                    <div class="mt-3">
+                        <a href="/wallet" class="btn btn-primary">
+                            <i class="fas fa-wallet"></i> Go to Wallet
+                        </a>
+                        <a href="/" class="btn btn-secondary">
+                            <i class="fas fa-home"></i> Go Home
+                        </a>
+                    </div>
+                `;
+            }
         }
 
         async function processPaymentVerification(reference) {
@@ -394,8 +451,8 @@ h3 {
                             ${result.message || 'Payment successful! Processing your data...'}
                         </div>
                         <div class="mt-3">
-                            <a href="/orders" class="btn btn-success">
-                                <i class="fas fa-shopping-bag"></i> View Orders
+                            <a href="/" class="btn btn-success">
+                                <i class="fas fa-home"></i> Go to Home
                             </a>
                             <a href="/purchase" class="btn btn-primary">
                                 <i class="fas fa-plus"></i> Buy More Data
@@ -403,9 +460,9 @@ h3 {
                         </div>
                     `;
                     
-                    // Redirect to orders after 3 seconds
+                    // Redirect to home after 3 seconds
                     setTimeout(() => {
-                        window.location.href = '/orders';
+                        window.location.href = '/';
                     }, 3000);
                 } else {
                     throw new Error(result.error || 'Payment verification failed');

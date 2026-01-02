@@ -365,17 +365,74 @@ h3 {
         const urlParams = new URLSearchParams(window.location.search);
         const reference = urlParams.get('reference');
         const trxref = urlParams.get('trxref');
+        const type = urlParams.get('type') || 'wallet';
 
         // Use the reference from Paystack callback
         const paymentReference = reference || trxref;
 
-        if (paymentReference) {
+        if (paymentReference && type === 'wallet') {
+            verifyWalletFunding(paymentReference);
+        } else if (paymentReference) {
             processPaymentVerification(paymentReference);
         } else {
             notyf.error('No payment reference found. Please try again.');
             setTimeout(() => {
-                window.location.href = '/purchase';
+                window.location.href = '/';
             }, 2000);
+        }
+
+        async function verifyWalletFunding(reference) {
+            try {
+                // Show loading notification
+                notyf.open({
+                    type: 'info',
+                    message: `Verifying payment reference: ${reference}`,
+                    duration: 0
+                });
+
+                const response = await fetch(`/api/verify-payment/${reference}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    notyf.success(result.message || `Wallet funded successfully! ₵${result.amount} added to your account.`);
+                    
+                    // Update status for visual feedback
+                    document.getElementById('paymentStatus').innerHTML = `
+                        <div style="text-align: center; padding: 2rem;">
+                            <i class="fas fa-check-circle" style="font-size: 3rem; color: #4caf50; margin-bottom: 1rem; display: block;"></i>
+                            <p style="font-size: 1.1rem; color: #333; margin: 0;">Wallet Funding Successful!</p>
+                            <p style="font-size: 0.95rem; color: #666; margin-top: 0.5rem;">Amount: ₵${result.amount}</p>
+                            <p style="font-size: 0.95rem; color: #666; margin-top: 0.25rem;">New Balance: ₵${result.newBalance.toFixed(2)}</p>
+                        </div>
+                    `;
+                    
+                    // Redirect to wallet after 3 seconds
+                    setTimeout(() => {
+                        window.location.href = '/wallet';
+                    }, 3000);
+                } else {
+                    throw new Error(result.error || 'Payment verification failed');
+                }
+            } catch (error) {
+                console.error('Wallet funding verification error:', error);
+                notyf.error(`Verification failed: ${error.message}`);
+                
+                // Clear the status area and show retry options
+                document.getElementById('paymentStatus').innerHTML = `
+                    <div style="text-align: center; padding: 2rem;">
+                        <i class="fas fa-exclamation-circle" style="font-size: 3rem; color: #f44336; margin-bottom: 1rem; display: block;"></i>
+                        <p style="font-size: 1.1rem; color: #333; margin-bottom: 1.5rem;">Payment Verification Failed</p>
+                        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                            <a href="/wallet" class="btn btn-primary">
+                                <i class="fas fa-wallet"></i> Go to Wallet
+                            </a>
+                            <a href="/" class="btn btn-secondary">
+                                <i class="fas fa-home"></i> Go Home
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
         }
 
         async function processPaymentVerification(reference) {
@@ -403,7 +460,7 @@ h3 {
                     
                     // Redirect to orders after 2 seconds
                     setTimeout(() => {
-                        window.location.href = '/orders';
+                        window.location.href = '/';
                     }, 2000);
                 } else {
                     throw new Error(result.error || 'Payment verification failed');
