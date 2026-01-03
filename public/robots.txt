@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin-login
+Disallow: /admin
+Disallow: /config.js
+Disallow: /firebase-messaging-sw.js
+
+# Sitemaps
+Sitemap: https://www.datasell.store/sitemap.xml
+
+# Crawl delay (in seconds)
+Crawl-delay: 1
