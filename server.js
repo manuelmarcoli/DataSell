@@ -460,6 +460,15 @@ window.__FCM_VAPID_KEY = ${JSON.stringify(vapid)};
   res.send(configScript);
 });
 
+// Health check endpoint for monitoring services (UptimeRobot, Render, etc.)
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
 // Serve Firebase Messaging Service Worker dynamically with server-side config
 app.get('/firebase-messaging-sw.js', (req, res) => {
   res.set('Content-Type', 'application/javascript');
