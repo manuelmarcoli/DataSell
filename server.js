@@ -301,6 +301,28 @@ class FirebaseSessionStore extends session.Store {
 
 // Enhanced middleware setup
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Middleware to capture raw body for Paystack webhook signature verification
+app.use((req, res, next) => {
+  if (req.path === '/api/paystack/webhook') {
+    let rawBody = '';
+    req.on('data', chunk => {
+      rawBody += chunk.toString('utf8');
+    });
+    req.on('end', () => {
+      req.rawBody = rawBody;
+      try {
+        req.body = JSON.parse(rawBody);
+      } catch (e) {
+        req.body = {};
+      }
+      next();
+    });
+  } else {
+    next();
+  }
+});
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -2053,6 +2075,198 @@ function isProviderBalanceError(datamartData) {
   );
 }
 
+// ============================================
+// PAYSTACK WEBHOOK ENDPOINT - Automatic Payment Confirmation
+// ============================================
+// This endpoint receives automatic payment notifications from Paystack
+// Configure in Paystack Dashboard: Settings > Webhook URL
+// Set to: https://datasell.store/api/paystack/webhook
+app.post('/api/paystack/webhook', async (req, res) => {
+  try {
+    // Verify webhook signature from Paystack
+    const paystackSignature = req.headers['x-paystack-signature'];
+    
+    // Use rawBody if available, otherwise stringify the body
+    const bodyForSignature = req.rawBody || JSON.stringify(req.body);
+    
+    // Compute HMAC-SHA512 signature
+    const crypto = require('crypto');
+    const hash = crypto
+      .createHmac('sha512', process.env.PAYSTACK_SECRET_KEY)
+      .update(bodyForSignature)
+      .digest('hex');
+
+    // Verify signature matches
+    if (hash !== paystackSignature) {
+      console.warn('⚠️ Invalid webhook signature from Paystack');
+      console.warn(`Expected: ${paystackSignature}, Got: ${hash}`);
+      return res.status(401).json({ success: false, error: 'Unauthorized' });
+    }
+
+    const event = req.body.event;
+    const data = req.body.data;
+
+    console.log(`🔔 Webhook event received: ${event}`);
+    console.log(`📋 Webhook data:`, {
+      event: event,
+      reference: data?.reference,
+      status: data?.status,
+      amount: data?.amount,
+      metadata: data?.metadata
+    });
+
+    // Only process successful charge events
+    if (event === 'charge.success' && data?.status === 'success') {
+      const { reference, amount, metadata } = data;
+      const userId = metadata?.userId;
+      const originalAmount = metadata?.originalAmount || (amount / 100);
+      const amountInCedis = parseFloat(originalAmount);
+
+      // Validate required fields
+      if (!userId) {
+        console.error('❌ No userId in webhook metadata');
+        return res.status(400).json({ success: false, error: 'Missing userId' });
+      }
+
+      // Check if payment already processed to prevent duplicate credits
+      const paymentsRef = admin.database().ref('payments');
+      const existingPaymentSnapshot = await paymentsRef
+        .orderByChild('reference')
+        .equalTo(reference)
+        .once('value');
+
+      if (existingPaymentSnapshot.exists()) {
+        console.warn(`⚠️ Payment already processed: ${reference}`);
+        return res.status(200).json({ 
+          success: true, 
+          message: 'Payment already processed',
+          duplicate: true 
+        });
+      }
+
+      // Get user and credit wallet
+      const userRef = admin.database().ref('users/' + userId);
+      const userSnapshot = await userRef.once('value');
+      
+      if (!userSnapshot.exists()) {
+        console.error(`❌ User not found: ${userId}`);
+        return res.status(404).json({ success: false, error: 'User not found' });
+      }
+
+      const userData = userSnapshot.val();
+      const currentBalance = userData.walletBalance || 0;
+
+      // Credit the wallet
+      await userRef.update({
+        walletBalance: currentBalance + amountInCedis,
+        lastWalletUpdate: new Date().toISOString()
+      });
+
+      console.log(`✅ Wallet credited via webhook: ${userId} received ₵${amountInCedis}`);
+
+      // Record the payment
+      const paymentRef = admin.database().ref('payments').push();
+      await paymentRef.set({
+        userId,
+        amount: amountInCedis,
+        paystackAmount: amount / 100,
+        fee: (amount / 100) - amountInCedis,
+        reference,
+        status: 'success',
+        source: 'webhook',
+        paystackData: {
+          status: data.status,
+          authorization: data.authorization || {},
+          customer: data.customer || {},
+          created_at: data.created_at,
+          paid_at: data.paid_at
+        },
+        timestamp: new Date().toISOString()
+      });
+
+      // Send SMS notification asynchronously (don't wait for it)
+      try {
+        const username = userData.displayName || userData.username || userData.name || userData.email || 'Customer';
+        const phoneFallback = userData.phone || userData.phoneNumber || '';
+        const message = `Hello ${username}, your DataSell wallet has been credited with ₵${amountInCedis}. Thank you for your purchase!`;
+        sendSmsToUser(userId, phoneFallback, message);
+      } catch (smsErr) {
+        console.error('❌ Webhook SMS error:', smsErr);
+        // Don't fail the webhook response if SMS fails
+      }
+
+      // Send notification to user
+      try {
+        const notificationRef = admin.database().ref('notifications').push();
+        await notificationRef.set({
+          userId,
+          title: '💰 Wallet Funded',
+          message: `Your wallet has been credited with ₵${amountInCedis}`,
+          type: 'wallet_funded',
+          amount: amountInCedis,
+          reference,
+          read: false,
+          timestamp: new Date().toISOString()
+        });
+      } catch (notifErr) {
+        console.error('❌ Webhook notification error:', notifErr);
+        // Don't fail the webhook response if notification fails
+      }
+
+      // Log the successful webhook processing
+      const logsRef = admin.database().ref('webhook_logs').push();
+      await logsRef.set({
+        event: event,
+        reference: reference,
+        userId: userId,
+        status: 'processed',
+        amount: amountInCedis,
+        timestamp: new Date().toISOString()
+      });
+
+      console.log(`✅ Webhook processed successfully for reference: ${reference}`);
+      return res.status(200).json({ 
+        success: true, 
+        message: 'Wallet credited successfully',
+        amount: amountInCedis,
+        newBalance: currentBalance + amountInCedis
+      });
+    } else if (event === 'charge.success') {
+      console.warn(`⚠️ Charge success but status is not success: ${data.status}`);
+      return res.status(200).json({ success: true, message: 'Non-success charge event ignored' });
+    } else {
+      // Log other events for monitoring but don't process
+      console.log(`ℹ️ Non-payment event received: ${event}`);
+      return res.status(200).json({ success: true, message: 'Event received' });
+    }
+  } catch (error) {
+    console.error('❌ Webhook processing error:', {
+      message: error.message,
+      stack: error.stack
+    });
+
+    // Log failed webhook processing
+    try {
+      const logsRef = admin.database().ref('webhook_logs').push();
+      await logsRef.set({
+        event: 'error',
+        error: error.message,
+        status: 'failed',
+        timestamp: new Date().toISOString()
+      });
+    } catch (logErr) {
+      console.error('Failed to log webhook error:', logErr);
+    }
+
+    // Always return 200 to Paystack to prevent retries, but log the error
+    return res.status(200).json({ 
+      success: false, 
+      error: 'Webhook processing failed',
+      message: error.message
+    });
+  }
+});
+
 // Enhanced Get packages
 app.get('/api/packages/:network', requireAuth, async (req, res) => {
   try {
@@ -3382,6 +3596,200 @@ app.post('/api/admin/update-user-email', requireAuth, async (req, res) => {
   } catch (error) {
     console.error('Email update error:', error);
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============================================
+// DATAMART ORDER STATUS SYNC - Auto-sync every 5 minutes
+// ============================================
+// This function periodically checks Datamart for order status updates
+// and syncs them to Firebase to keep order status current
+
+async function syncDatamartOrderStatus() {
+  try {
+    console.log('🔄 Starting Datamart order status sync...');
+    
+    // Get all transactions with status 'success' or 'processing' that haven't been delivered
+    const transactionsRef = admin.database().ref('transactions');
+    const snapshot = await transactionsRef.once('value');
+    const allTransactions = snapshot.val() || {};
+    
+    let syncedCount = 0;
+    let errorCount = 0;
+    
+    for (const [transactionId, transaction] of Object.entries(allTransactions)) {
+      try {
+        // Only sync orders that:
+        // 1. Have a Datamart transaction ID
+        // 2. Status is NOT 'delivered' or 'failed' (already final)
+        // 3. Status is NOT 'refunded'
+        if (!transaction.datamartTransactionId || 
+            ['delivered', 'failed', 'refunded', 'cancelled'].includes(transaction.status?.toLowerCase())) {
+          continue;
+        }
+        
+        // Query Datamart API for this transaction's status
+        // Note: Datamart might not have a direct query endpoint, so we'll use the purchase reference
+        // For now, we'll store the status locally until Datamart provides a status endpoint
+        
+        console.log(`📋 Checking order status for: ${transaction.datamartTransactionId}`);
+        
+        // TODO: Once Datamart provides a status query endpoint, uncomment and use this:
+        /*
+        const datamartStatusResponse = await axios.get(
+          'https://api.datamartgh.shop/api/developer/transaction/status',
+          {
+            headers: {
+              'X-API-Key': process.env.DATAMART_API_KEY,
+            },
+            params: {
+              transactionId: transaction.datamartTransactionId
+            },
+            timeout: 10000
+          }
+        );
+        
+        const statusData = datamartStatusResponse.data;
+        if (statusData && statusData.data) {
+          const currentStatus = statusData.data.status;
+          
+          // Map Datamart status to DataSell status
+          const mappedStatus = mapDatamartStatusToDataSell(currentStatus);
+          
+          if (mappedStatus && mappedStatus !== transaction.status) {
+            await admin.database().ref(`transactions/${transactionId}`).update({
+              status: mappedStatus,
+              datamartStatus: currentStatus,
+              lastSyncedAt: new Date().toISOString()
+            });
+            
+            syncedCount++;
+            console.log(`✅ Updated status for ${transactionId}: ${transaction.status} → ${mappedStatus}`);
+            
+            // Notify user of status change
+            try {
+              const userRef = admin.database().ref(`users/${transaction.userId}`);
+              const userSnap = await userRef.once('value');
+              const userData = userSnap.val();
+              
+              const statusMessage = getStatusMessage(mappedStatus);
+              await sendSmsToUser(transaction.userId, transaction.phoneNumber, statusMessage);
+            } catch (smsErr) {
+              console.error(`❌ Failed to notify user ${transaction.userId}:`, smsErr);
+            }
+          }
+        }
+        */
+        
+      } catch (error) {
+        errorCount++;
+        console.error(`❌ Error syncing transaction ${transactionId}:`, error.message);
+      }
+    }
+    
+    console.log(`✅ Datamart sync completed - Updated: ${syncedCount}, Errors: ${errorCount}`);
+  } catch (error) {
+    console.error('❌ Datamart order status sync error:', error);
+  }
+}
+
+// Helper function to map Datamart status to DataSell status
+function mapDatamartStatusToDataSell(datamartStatus) {
+  const statusMap = {
+    'pending': 'processing',
+    'processing': 'processing',
+    'delivered': 'delivered',
+    'failed': 'failed',
+    'cancelled': 'cancelled',
+    'success': 'delivered'
+  };
+  
+  return statusMap[datamartStatus?.toLowerCase()] || datamartStatus;
+}
+
+// Helper function to get user-friendly status message
+function getStatusMessage(status) {
+  const messages = {
+    'processing': 'Your data order is being processed. You will receive your data shortly.',
+    'delivered': '✅ Your data has been delivered successfully!',
+    'failed': '❌ Unfortunately, your order failed. Please contact support.',
+    'cancelled': 'Your order has been cancelled.',
+    'refunded': 'Your order has been refunded to your wallet.'
+  };
+  
+  return messages[status?.toLowerCase()] || `Your order status: ${status}`;
+}
+
+// Start periodic sync (every 5 minutes)
+console.log('⏰ Setting up Datamart order status sync (every 5 minutes)...');
+setInterval(syncDatamartOrderStatus, 5 * 60 * 1000);
+
+// Also run once on startup (after 30 seconds)
+setTimeout(syncDatamartOrderStatus, 30000);
+
+// Endpoint to manually trigger sync (for testing/admin)
+app.post('/api/admin/sync-datamart-orders', requireAdmin, async (req, res) => {
+  try {
+    console.log('🔄 Manual Datamart order sync triggered by admin');
+    await syncDatamartOrderStatus();
+    res.json({ 
+      success: true, 
+      message: 'Datamart order sync completed' 
+    });
+  } catch (error) {
+    console.error('Error during manual sync:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Sync failed: ' + error.message 
+    });
+  }
+});
+
+// Endpoint to check order status manually
+app.get('/api/order-status/:transactionId', requireAuth, async (req, res) => {
+  try {
+    const { transactionId } = req.params;
+    const userId = req.session.user.uid;
+    
+    const transactionRef = admin.database().ref(`transactions/${transactionId}`);
+    const snapshot = await transactionRef.once('value');
+    const transaction = snapshot.val();
+    
+    if (!transaction) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Order not found' 
+      });
+    }
+    
+    // Verify user owns this transaction
+    if (transaction.userId !== userId) {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Unauthorized' 
+      });
+    }
+    
+    res.json({ 
+      success: true, 
+      transaction: {
+        id: transactionId,
+        status: transaction.status,
+        reference: transaction.reference,
+        network: transaction.network,
+        packageName: transaction.packageName,
+        amount: transaction.amount,
+        timestamp: transaction.timestamp,
+        phoneNumber: transaction.phoneNumber,
+        datamartTransactionId: transaction.datamartTransactionId
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching order status:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to fetch order status' 
+    });
   }
 });
 
